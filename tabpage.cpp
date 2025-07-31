@@ -1,0 +1,170 @@
+#include "tabpage.h"
+#include <qboxlayout.h>
+#include <qlabel.h>
+#include "json.hpp"
+#include <fstream>
+#include <string>
+#include <vector>
+#include "logger.h"
+#include <optional>
+#include <QPainter>
+#include <QPainterPath>
+
+namespace fs = std::filesystem;
+using json = nlohmann::json;
+
+std::string trim(const std::string& str) {
+    size_t first = 0;
+    while (first < str.size() && std::isspace(static_cast<unsigned char>(str[first]))) ++first;
+    if (first == str.size()) return "";
+    size_t last = str.size() - 1;
+    while (last > first && std::isspace(static_cast<unsigned char>(str[last]))) --last;
+    return str.substr(first, last - first + 1);
+}
+
+std::optional<fs::path> _getIconPath(std::string id) {
+    std::vector<std::string> icon_dirs = {
+        "/usr/share/icons/hicolor/48x48/apps/",
+        "/usr/share/icons/hicolor/scalable/apps/",
+        "/usr/share/pixmaps/"
+    };
+
+    std::vector<std::string> extensions = {".png", ".svg"};
+
+    for (const auto& dir : icon_dirs) {
+        for (const auto& ext : extensions) {
+            fs::path icon_path = fs::path(dir) / (id + ext);
+            if (fs::exists(icon_path)) return icon_path;
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<fs::path> getIconPath(std::string& id) {
+    std::optional<fs::path> result = _getIconPath(id);
+    Logger::print(QString("Found icon file: %1").arg((!result ? std::string("none") : result->string())));
+    return result;
+}
+
+json getOS() {
+    json result;
+    std::vector<std::string> keys;
+    std::ifstream file("/etc/os-release");
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (!(line.empty() || line.find_first_not_of(" \t\n\r") == std::string::npos)) {
+            size_t pos = line.find("=");
+
+            if (pos != std::string::npos) {
+                std::string key = line.substr(0, pos);
+                std::string value = line.substr(pos + 1);
+                if (value[0] == '"') value = value.substr(1);
+                if (value.back() == '"') value.pop_back();
+                Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
+                result[key] = value;
+                keys.push_back(key);
+            }
+        }
+    }
+
+    Logger::print(QString("Got OS info (keys: %1)").arg(keys.size()));
+    return result;
+}
+
+json getCPU() {
+    json result;
+    std::vector<std::string> keys;
+    std::ifstream file("/proc/cpuinfo");
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (!(line.empty() || line.find_first_not_of(" \t\n\r") == std::string::npos)) {
+            size_t pos = line.find(":");
+
+            if (pos != std::string::npos) {
+                std::string key = trim(line.substr(0, pos));
+                std::string value = trim(line.substr(pos + 1));
+
+                if (!result.contains(key)) {
+                    Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
+                    result[key] = value;
+                    keys.push_back(key);
+                }
+            }
+        }
+    }
+
+    Logger::print(QString("Got CPU info (keys: %1)").arg(keys.size()));
+    return result;
+}
+
+template<typename T>
+std::optional<T> atKeyOrNull(const json& j, const std::string& key) {
+    if (j.contains(key)) return j.at(key).get<T>();
+    return std::nullopt;
+}
+
+QWidget* processImage(std::optional<fs::path> path, int radius, int size) {
+    QWidget* icon = new QWidget();
+    QPixmap pixmap = path ? QPixmap(QString::fromStdString(path->string())) : QPixmap(":/images/default-linux-icon.png");
+    QPixmap scaled = pixmap.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QPixmap rounded(scaled.size());
+    rounded.fill(Qt::transparent);
+    QPainter painter(&rounded);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QPainterPath painterPath;
+    painterPath.addRoundedRect(rounded.rect(), radius, radius);
+    painter.setClipPath(painterPath);
+    painter.drawPixmap(0, 0, scaled);
+    QLabel* label = new QLabel(icon);
+    label->setFixedSize(rounded.size());
+    label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    label->setPixmap(rounded);
+    label->setAlignment(Qt::AlignCenter);
+    label->setFixedSize(rounded.size());
+    return icon;
+}
+
+LocalTabPage::LocalTabPage() {}
+
+QWidget* LocalTabPage::overview(QWidget* parent) {
+    QWidget *page = new QWidget();
+    QVBoxLayout *infoWidget = new QVBoxLayout();
+    QHBoxLayout *layout = new QHBoxLayout(page);
+
+    json osInfo = getOS();
+    json cpuInfo = getCPU();
+
+    std::optional<std::string> iconId = atKeyOrNull<std::string>(osInfo, "LOGO");
+    std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
+    Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
+
+    QLabel* title = new QLabel(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
+    QString cpuModel = QString::fromStdString(cpuInfo["model name"].get<std::string>());
+    QLabel* cpuName = new QLabel(QString("Processor: %1").arg(cpuModel));
+    QFont font = title->font();
+
+    font.setPointSize(24);
+    title->setFont(font);
+
+    infoWidget->addWidget(title);
+    infoWidget->addWidget(cpuName);
+    layout->addWidget(processImage(iconPath, 10, 148), 7);
+    layout->addLayout(infoWidget, 9);
+
+    return page;
+}
+
+QWidget* LocalTabPage::displays(QWidget* parent) {
+    QWidget *page = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout(page);
+    return page;
+}
+
+QWidget* LocalTabPage::storage(QWidget* parent) {
+    QWidget *page = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout(page);
+    return page;
+}
