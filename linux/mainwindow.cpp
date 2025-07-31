@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QTabBar *tabBar = new QTabBar();
     QHBoxLayout *centerLayout = new QHBoxLayout();
-    QTabWidget *tabWidget = new QTabWidget();
+    QTabWidget *tabWidget = new QTabWidget(tabBar);
 
     tabWidget->addTab(LocalTabPage::overview(this), "Overview");
     tabWidget->addTab(Displays::page(this), "Displays");

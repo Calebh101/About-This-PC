@@ -38,5 +38,6 @@ QWidget* Displays::page(QWidget* parent) {
     }
 
     Logger::print(QString("Generated page for display server: %1").arg(server));
+    page->setLayout(layout);
     return page;
 }
