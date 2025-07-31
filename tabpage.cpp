@@ -107,24 +107,26 @@ std::optional<T> atKeyOrNull(const json& j, const std::string& key) {
 }
 
 QWidget* processImage(std::optional<fs::path> path, int radius, int size) {
-    QWidget* icon = new QWidget();
-    QPixmap pixmap = path ? QPixmap(QString::fromStdString(path->string())) : QPixmap(":/images/default-linux-icon.png");
-    QPixmap scaled = pixmap.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    QPixmap rounded(scaled.size());
+    QWidget* container = new QWidget();
+    QString iconPath = path ? QString::fromStdString(path->string()) : ":/images/default-linux-icon.png";
+    QIcon icon(iconPath);
+    QLabel* label = new QLabel;
+    QPixmap pixmap = icon.pixmap(size, size);
+
+    QPixmap rounded(pixmap.size());
     rounded.fill(Qt::transparent);
     QPainter painter(&rounded);
     painter.setRenderHint(QPainter::Antialiasing);
-    QPainterPath painterPath;
-    painterPath.addRoundedRect(rounded.rect(), radius, radius);
-    painter.setClipPath(painterPath);
-    painter.drawPixmap(0, 0, scaled);
-    QLabel* label = new QLabel(icon);
-    label->setFixedSize(rounded.size());
-    label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    QPainterPath paintPath;
+    paintPath.addRoundedRect(pixmap.rect(), radius, radius);
+    painter.setClipPath(paintPath);
+    painter.drawPixmap(0, 0, pixmap);
+
     label->setPixmap(rounded);
-    label->setAlignment(Qt::AlignCenter);
-    label->setFixedSize(rounded.size());
-    return icon;
+    QVBoxLayout* layout = new QVBoxLayout(container);
+    layout->addWidget(label, 0, Qt::AlignCenter);
+    container->setLayout(layout);
+    return container;
 }
 
 LocalTabPage::LocalTabPage() {}
