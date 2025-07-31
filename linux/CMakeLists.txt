@@ -13,7 +13,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-        main.cpp
+
         mainwindow.cpp
         mainwindow.h
         logger.cpp
@@ -32,6 +32,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         images/default-linux-icon.png
         default-linux-icon.qrc
         application-icon.qrc
+        main.cpp
+        displays.h displays.cpp
+
+
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET AboutThisPC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

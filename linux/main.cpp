@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.setWindowTitle("About This PC");
-    w.resize(450, 300);
+    w.resize(550, 300);
     w.setMinimumSize(w.size());
-    w.setMaximumSize(800, 1200);
+    w.setMaximumSize(w.size());
     w.show();
 
     Logger::print("Starting main window...");

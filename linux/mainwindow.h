@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QResizeEvent>
 
 class MainWindow : public QMainWindow
 {

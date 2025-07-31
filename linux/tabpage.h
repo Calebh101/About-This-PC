@@ -8,8 +8,6 @@ private:
     LocalTabPage();
 public:
     static QWidget* overview(QWidget* parent);
-    static QWidget* displays(QWidget* parent);
-    static QWidget* storage(QWidget* parent);
 };
 
 #endif // TABPAGE_H

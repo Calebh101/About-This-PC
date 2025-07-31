@@ -11,6 +11,7 @@
 #include "QFile"
 #include "QErrorMessage"
 #include "QCoreApplication"
+#include "displays.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,8 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     QTabWidget *tabWidget = new QTabWidget();
 
     tabWidget->addTab(LocalTabPage::overview(this), "Overview");
-    tabWidget->addTab(LocalTabPage::displays(this), "Displays");
-    tabWidget->addTab(LocalTabPage::storage(this), "Storage");
+    tabWidget->addTab(Displays::page(this), "Displays");
 
     mainLayout->addWidget(tabWidget);
     mainLayout->addLayout(centerLayout);

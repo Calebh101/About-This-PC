@@ -131,11 +131,25 @@ QWidget* processImage(std::optional<fs::path> path, int radius, int size) {
 
 LocalTabPage::LocalTabPage() {}
 
+std::string getModel() {
+    std::ifstream file("/sys/devices/virtual/dmi/id/product_name");
+    std::string model;
+
+    if (file.is_open()) {
+        std::getline(file, model);
+        file.close();
+        return model;
+    } else {
+        return "Unknown model";
+    }
+}
+
 QWidget* LocalTabPage::overview(QWidget* parent) {
     QWidget *page = new QWidget();
     QVBoxLayout *infoWidget = new QVBoxLayout();
     QHBoxLayout *layout = new QHBoxLayout(page);
 
+    json results;
     json osInfo = getOS();
     json cpuInfo = getCPU();
 
@@ -145,28 +159,31 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
     QLabel* title = new QLabel(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
     QString cpuModel = QString::fromStdString(cpuInfo["model name"].get<std::string>());
-    QLabel* cpuName = new QLabel(QString("Processor: %1").arg(cpuModel));
+    results["Processor"] = cpuModel.toStdString();
     QFont font = title->font();
+
+    QLabel* modelLabel = new QLabel;
+    modelLabel->setTextFormat(Qt::RichText);
+    modelLabel->setText(QString("<span style='font-weight: bold;'>%1</span>").arg(getModel()));
 
     font.setPointSize(24);
     title->setFont(font);
 
+    infoWidget->setAlignment(Qt::AlignTop);
     infoWidget->addWidget(title);
-    infoWidget->addWidget(cpuName);
+    infoWidget->addWidget(modelLabel);
+
+    for (auto& [key, value] : results.items()) {
+        QLabel* label = new QLabel;
+        QString text = QString::fromStdString(value.dump());
+        if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
+        label->setTextFormat(Qt::RichText);
+        label->setText(QString("<span>%1</span>" ": " "<span style='font-weight: bold;'>%2</span>").arg(QString::fromStdString(key)).arg(text));
+        infoWidget->addWidget(label);
+    }
+
     layout->addWidget(processImage(iconPath, 10, 148), 7);
     layout->addLayout(infoWidget, 9);
 
-    return page;
-}
-
-QWidget* LocalTabPage::displays(QWidget* parent) {
-    QWidget *page = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout(page);
-    return page;
-}
-
-QWidget* LocalTabPage::storage(QWidget* parent) {
-    QWidget *page = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout(page);
     return page;
 }
