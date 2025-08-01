@@ -24,7 +24,7 @@ bool hasGnomePlugins() {
 
 int main(int argc, char *argv[])
 {
-    Logger::enableVerbose();
+    Logger::setVerbose(false);
     bool gnome = isGnome();
     Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(version)).arg(QT_VERSION_STR));
     Logger::print(QString("Is GNOME: %1").arg(gnome));
@@ -39,10 +39,18 @@ int main(int argc, char *argv[])
     }
 
     QApplication a(argc, argv);
-    MainWindow w;
+    bool classic = true;
+    QStringList args = QCoreApplication::arguments();
+    if (args.contains("--classic")) classic = true;
+    MainWindow w = new MainWindow(classic);
+
+    if (classic) {
+        w.resize(350, 400);
+    } else {
+        w.resize(550, 300);
+    }
 
     w.setWindowTitle("About This PC");
-    w.resize(550, 300);
     w.setMinimumSize(w.size());
     w.setMaximumSize(w.size());
     w.show();

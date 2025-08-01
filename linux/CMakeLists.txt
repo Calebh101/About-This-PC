@@ -34,6 +34,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         application-icon.qrc
         main.cpp
         displays.h displays.cpp
+        classicpage.h classicpage.cpp
+        global.h global.cpp
+        computers.qrc
 
 
 

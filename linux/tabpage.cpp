@@ -2,25 +2,16 @@
 #include <qboxlayout.h>
 #include <qlabel.h>
 #include "json.hpp"
-#include <fstream>
 #include <string>
 #include <vector>
 #include "logger.h"
 #include <optional>
 #include <QPainter>
 #include <QPainterPath>
+#include "global.h"
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
-
-std::string trim(const std::string& str) {
-    size_t first = 0;
-    while (first < str.size() && std::isspace(static_cast<unsigned char>(str[first]))) ++first;
-    if (first == str.size()) return "";
-    size_t last = str.size() - 1;
-    while (last > first && std::isspace(static_cast<unsigned char>(str[last]))) --last;
-    return str.substr(first, last - first + 1);
-}
 
 std::optional<fs::path> _getIconPath(std::string id) {
     std::vector<std::string> icon_dirs = {
@@ -45,65 +36,6 @@ std::optional<fs::path> getIconPath(std::string& id) {
     std::optional<fs::path> result = _getIconPath(id);
     Logger::print(QString("Found icon file: %1").arg((!result ? std::string("none") : result->string())));
     return result;
-}
-
-json getOS() {
-    json result;
-    std::vector<std::string> keys;
-    std::ifstream file("/etc/os-release");
-    std::string line;
-
-    while (std::getline(file, line)) {
-        if (!(line.empty() || line.find_first_not_of(" \t\n\r") == std::string::npos)) {
-            size_t pos = line.find("=");
-
-            if (pos != std::string::npos) {
-                std::string key = line.substr(0, pos);
-                std::string value = line.substr(pos + 1);
-                if (value[0] == '"') value = value.substr(1);
-                if (value.back() == '"') value.pop_back();
-                Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
-                result[key] = value;
-                keys.push_back(key);
-            }
-        }
-    }
-
-    Logger::print(QString("Got OS info (keys: %1)").arg(keys.size()));
-    return result;
-}
-
-json getCPU() {
-    json result;
-    std::vector<std::string> keys;
-    std::ifstream file("/proc/cpuinfo");
-    std::string line;
-
-    while (std::getline(file, line)) {
-        if (!(line.empty() || line.find_first_not_of(" \t\n\r") == std::string::npos)) {
-            size_t pos = line.find(":");
-
-            if (pos != std::string::npos) {
-                std::string key = trim(line.substr(0, pos));
-                std::string value = trim(line.substr(pos + 1));
-
-                if (!result.contains(key)) {
-                    Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
-                    result[key] = value;
-                    keys.push_back(key);
-                }
-            }
-        }
-    }
-
-    Logger::print(QString("Got CPU info (keys: %1)").arg(keys.size()));
-    return result;
-}
-
-template<typename T>
-std::optional<T> atKeyOrNull(const json& j, const std::string& key) {
-    if (j.contains(key)) return j.at(key).get<T>();
-    return std::nullopt;
 }
 
 QWidget* processImage(std::optional<fs::path> path, int radius, int size) {
@@ -131,29 +63,19 @@ QWidget* processImage(std::optional<fs::path> path, int radius, int size) {
 
 LocalTabPage::LocalTabPage() {}
 
-std::string getModel() {
-    std::ifstream file("/sys/devices/virtual/dmi/id/product_name");
-    std::string model;
-
-    if (file.is_open()) {
-        std::getline(file, model);
-        file.close();
-        return model;
-    } else {
-        return "Unknown model";
-    }
-}
-
 QWidget* LocalTabPage::overview(QWidget* parent) {
+    float fontSize = Global::fontSize;
+    int fontWeight = Global::fontWeight;
+
     QWidget *page = new QWidget();
     QVBoxLayout *infoWidget = new QVBoxLayout();
     QHBoxLayout *layout = new QHBoxLayout(page);
 
     json results;
-    json osInfo = getOS();
-    json cpuInfo = getCPU();
+    json osInfo = Global::getOS();
+    json cpuInfo = Global::getCPU();
 
-    std::optional<std::string> iconId = atKeyOrNull<std::string>(osInfo, "LOGO");
+    std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
     std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
     Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
 
@@ -164,9 +86,10 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
     QLabel* modelLabel = new QLabel;
     modelLabel->setTextFormat(Qt::RichText);
-    modelLabel->setText(QString("<span style='font-weight: bold;'>%1</span>").arg(getModel()));
+    modelLabel->setText(QString("<span style='font-weight: %3; font-size: %2pt;'>%1</span>").arg(Global::getModel()).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)));
 
-    font.setPointSize(24);
+    font.setPointSize(fontSize * 2);
+    font.setWeight(static_cast<QFont::Weight>(fontWeight * 1.5));
     title->setFont(font);
 
     infoWidget->setAlignment(Qt::AlignTop);
@@ -178,11 +101,11 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         QString text = QString::fromStdString(value.dump());
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
         label->setTextFormat(Qt::RichText);
-        label->setText(QString("<span>%1</span>" ": " "<span style='font-weight: bold;'>%2</span>").arg(QString::fromStdString(key)).arg(text));
+        label->setText(QString("<div style='font-size: %3pt;'><span style='font-weight: %5;'>%1: </span>" "<span style='font-weight: %4;'>%2</span>").arg(QString::fromStdString(key)).arg(text).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)).arg(std::to_string(fontWeight)));
         infoWidget->addWidget(label);
     }
 
-    layout->addWidget(processImage(iconPath, 10, 148), 7);
+    layout->addWidget(processImage(iconPath, 10, 148), 5);
     layout->addLayout(infoWidget, 9);
 
     return page;

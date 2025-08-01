@@ -1,0 +1,111 @@
+#include "mainwindow.h"
+#include "classicpage.h"
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QLabel>
+#include "global.h"
+#include "json.hpp"
+#include <QTableWidget>
+#include "logger.h"
+
+using json = nlohmann::json;
+
+QSpacerItem* vspacer() {
+    return new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+}
+
+QWidget* hspacer() {
+    QWidget *widget = new QWidget;
+    widget->setFixedWidth(10);
+    return widget;
+}
+
+ClassicPage::ClassicPage() {}
+
+QWidget* ClassicPage::page(MainWindow* parent) {
+    QWidget *central = new QWidget(parent);
+    QVBoxLayout *mainLayout = new QVBoxLayout(central);
+    QHBoxLayout *mainColumnLayout = new QHBoxLayout();
+    QVBoxLayout *leftLayout = new QVBoxLayout();
+    QVBoxLayout *rightLayout = new QVBoxLayout();
+    json results;
+
+    json chassis = Global::getChassis();
+    json cpuInfo = Global::getCPU();
+    json osInfo = Global::getOS();
+    json ramInfo = Global::getMemory();
+
+    std::vector<std::string> ramAttributes;
+    std::string productFamily = Global::getFamily();
+    std::string productName = Global::getModel();
+
+    float speed = cpuInfo["speed"].get<float>();
+    std::ostringstream oss;
+    oss << std::defaultfloat << std::setprecision(2) << speed;
+    std::string speedString = oss.str();
+
+    std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
+    results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
+
+    QLabel* familyLabel = new QLabel(QString::fromStdString(productFamily));
+    QFont familyFont = familyLabel->font();
+    familyFont.setPointSize(24);
+    familyLabel->setFont(familyFont);
+    familyLabel->setAlignment(Qt::AlignHCenter);
+    mainLayout->addWidget(familyLabel);
+
+    QLabel* productLabel = new QLabel(QString::fromStdString(productName));
+    QFont productFont = productLabel->font();
+    productFont.setPointSize(Global::fontSize);
+    productLabel->setFont(productFont);
+    productLabel->setAlignment(Qt::AlignHCenter);
+    mainLayout->addWidget(productLabel);
+
+    mainLayout->addItem(vspacer());
+    results["Startup Disk"] = Global::getStartupDisk();
+
+    if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
+    if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
+    if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
+    ramAttributes.push_back(ramInfo["totalString"]);
+
+    if (!ramAttributes.empty()) {
+        std::ostringstream oss;
+
+        for (size_t i = 0; i < ramAttributes.size(); ++i) {
+            if (i > 0) oss << ' ';
+            oss << ramAttributes[i];
+        }
+
+        results["Memory"] = oss.str();
+    }
+
+    for (auto& [key, value] : results.items()) {
+        QLabel* label1 = new QLabel;
+        QLabel* label2 = new QLabel;
+        QString text = QString::fromStdString(value.dump());
+        if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
+
+        label1->setTextFormat(Qt::RichText);
+        label2->setTextFormat(Qt::RichText);
+
+        label1->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3s;'>%1</span></div>").arg(QString::fromStdString(key)).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight)));
+        label2->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+
+        leftLayout->addWidget(label1);
+        rightLayout->addWidget(label2);
+    }
+
+    leftLayout->setAlignment(Qt::AlignRight);
+    rightLayout->setAlignment(Qt::AlignLeft);
+
+    mainColumnLayout->addLayout(leftLayout, 1);
+    mainColumnLayout->addWidget(hspacer());
+    mainColumnLayout->addLayout(rightLayout, 1);
+    mainLayout->addLayout(mainColumnLayout);
+
+    mainLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    central->setLayout(mainLayout);
+    parent->setCentralWidget(central);
+    return central;
+}

@@ -12,24 +12,28 @@
 #include "QErrorMessage"
 #include "QCoreApplication"
 #include "displays.h"
+#include "classicpage.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-{
-    QWidget *central = new QWidget(this);
-    QVBoxLayout *mainLayout = new QVBoxLayout(central);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
+MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
+    if (classic) {
+        Logger::print("Loading in classic mode...");
+        setCentralWidget(ClassicPage::page(this));
+    } else {
+        QWidget *central = new QWidget(this);
+        QVBoxLayout *mainLayout = new QVBoxLayout(central);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    QTabBar *tabBar = new QTabBar();
-    QHBoxLayout *centerLayout = new QHBoxLayout();
-    QTabWidget *tabWidget = new QTabWidget(tabBar);
+        QTabBar *tabBar = new QTabBar();
+        QHBoxLayout *centerLayout = new QHBoxLayout();
+        QTabWidget *tabWidget = new QTabWidget(tabBar);
 
-    tabWidget->addTab(LocalTabPage::overview(this), "Overview");
-    tabWidget->addTab(Displays::page(this), "Displays");
+        tabWidget->addTab(LocalTabPage::overview(this), "Overview");
+        tabWidget->addTab(Displays::page(this), "Displays");
 
-    mainLayout->addWidget(tabWidget);
-    mainLayout->addLayout(centerLayout);
-    setCentralWidget(central);
+        mainLayout->addWidget(tabWidget);
+        mainLayout->addLayout(centerLayout);
+        setCentralWidget(central);
+    }
 }
 
 MainWindow::~MainWindow() {}
