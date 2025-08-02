@@ -1,5 +1,7 @@
 # About This PC
 
+This is a small project I'm in the process of making, that is supposed to be like the `About This Mac` Apple utility, but for Linux and Windows, and some more OS-specific features.
+
 ### Notices
 
 This project utilizes Qt, which is licensed under the GNU Lesser General Public License (LGPL) version 3.
