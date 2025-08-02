@@ -13,6 +13,7 @@
 #include "QCoreApplication"
 #include "displays.h"
 #include "classicpage.h"
+#include "supportpage.h"
 
 MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
     if (classic) {
@@ -26,10 +27,14 @@ MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
         QTabBar *tabBar = new QTabBar();
         QHBoxLayout *centerLayout = new QHBoxLayout();
         QTabWidget *tabWidget = new QTabWidget(tabBar);
+        json supportUrls = Global::getSupportUrls();
 
         tabWidget->addTab(LocalTabPage::overview(this), "Overview");
         tabWidget->addTab(Displays::page(this), "Displays");
+        Logger::print(QString("Generating support page... (empty: %1)").arg(supportUrls.empty() ? "yes" : "no"));
+        if (!supportUrls.empty()) tabWidget->addTab(SupportPage::page(this, supportUrls), "Support");
 
+        Logger::print("Finalizing layout...");
         mainLayout->addWidget(tabWidget);
         mainLayout->addLayout(centerLayout);
         setCentralWidget(central);

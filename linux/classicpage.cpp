@@ -9,6 +9,7 @@
 #include "logger.h"
 
 using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
 
 QSpacerItem* vspacer() {
     return new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -28,16 +29,20 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     QHBoxLayout *mainColumnLayout = new QHBoxLayout();
     QVBoxLayout *leftLayout = new QVBoxLayout();
     QVBoxLayout *rightLayout = new QVBoxLayout();
-    json results;
+    ordered_json results;
 
     json chassis = Global::getChassis();
     json cpuInfo = Global::getCPU();
+    json gpuInfo = Global::getGPU();
     json osInfo = Global::getOS();
     json ramInfo = Global::getMemory();
+    json serialInfo = Global::getSerial();
 
     std::vector<std::string> ramAttributes;
     std::string productFamily = Global::getFamily();
     std::string productName = Global::getModel();
+    std::string startupDiskPath = Global::getStartupDisk();
+    json startupDiskInfo = Global::getDisk(startupDiskPath);
 
     float speed = cpuInfo["speed"].get<float>();
     std::ostringstream oss;
@@ -46,6 +51,31 @@ QWidget* ClassicPage::page(MainWindow* parent) {
 
     std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
     results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
+
+    ramAttributes.push_back(ramInfo["totalString"]);
+    if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
+    // if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
+    if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
+
+    if (gpuInfo["status"] == true) {
+        json gpu = gpuInfo["gpus"].front();
+        int vram = gpu["vram"].get<int>();
+        std::ostringstream oss;
+        oss << std::defaultfloat << std::setprecision(2) << (vram / 1000.0);
+        QString text = QString("%1 %2GB").arg(gpu["name"].get<std::string>()).arg(oss.str());
+        results["Graphics"] = text.toStdString();
+    }
+
+    if (!ramAttributes.empty()) {
+        std::ostringstream oss;
+
+        for (size_t i = 0; i < ramAttributes.size(); ++i) {
+            if (i > 0) oss << ' ';
+            oss << ramAttributes[i];
+        }
+
+        results["Memory"] = oss.str();
+    }
 
     QLabel* familyLabel = new QLabel(QString::fromStdString(productFamily));
     QFont familyFont = familyLabel->font();
@@ -62,23 +92,17 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     mainLayout->addWidget(productLabel);
 
     mainLayout->addItem(vspacer());
-    results["Startup Disk"] = Global::getStartupDisk();
+    if (serialInfo.contains("serial")) results["Serial"] = serialInfo["serial"];
 
-    if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
-    if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
-    if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
-    ramAttributes.push_back(ramInfo["totalString"]);
-
-    if (!ramAttributes.empty()) {
-        std::ostringstream oss;
-
-        for (size_t i = 0; i < ramAttributes.size(); ++i) {
-            if (i > 0) oss << ' ';
-            oss << ramAttributes[i];
-        }
-
-        results["Memory"] = oss.str();
+    if (startupDiskInfo["status"] == true) {
+        long long bytes = startupDiskInfo["bytes"].get<long long>();
+        int size = bytes / 1000.0 / 1000.0 / 1000.0;
+        results["Startup Disk"] = QString("%1 %2 GB").arg(startupDiskPath).arg(std::to_string(size)).toStdString();
+    } else {
+        results["Startup Disk"] = startupDiskPath;
     }
+
+    results["Kernel"] = osInfo["kernel"];
 
     for (auto& [key, value] : results.items()) {
         QLabel* label1 = new QLabel;

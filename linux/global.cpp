@@ -7,10 +7,81 @@
 #include <array>
 #include <vector>
 #include <sys/sysinfo.h>
+#include <vulkan/vulkan.h>
+#include <QDebug>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <linux/fs.h>
 
 Global::Global() {}
 const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
+
+json Global::getGPU() {
+    json results;
+    VkInstance instance;
+    VkApplicationInfo appInfo{};
+    VkInstanceCreateInfo createInfo{};
+
+    results["status"] = false;
+    results["gpus"] = std::vector<json>();
+
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "GPU Info";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "None";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+
+    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+        Logger::warn("Failed to create Vulkan instance");
+        return nullptr;
+    }
+
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    if (deviceCount == 0) {
+        Logger::warn("No GPUs found");
+        return results;
+    }
+
+    QVector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    for (const auto& device : devices) {
+        VkPhysicalDeviceProperties props;
+        vkGetPhysicalDeviceProperties(device, &props);
+
+        VkPhysicalDeviceMemoryProperties memProps;
+        vkGetPhysicalDeviceMemoryProperties(device, &memProps);
+
+        uint64_t totalVRAM = 0;
+        for (uint32_t i = 0; i < memProps.memoryHeapCount; ++i) {
+            if (memProps.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
+                totalVRAM += memProps.memoryHeaps[i].size;
+            }
+        }
+
+        std::string name = props.deviceName;
+        std::string type = (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ? "iGPU" : props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? "dGPU" : "GPU");
+        int vram = totalVRAM / (1024 * 1024);
+
+        json j;
+        j["name"] = name;
+        j["type"] = type;
+        j["vram"] = vram;
+        results["gpus"].push_back(j);
+    }
+
+    vkDestroyInstance(instance, nullptr);
+    results["status"] = true;
+    return results;
+}
 
 std::string Global::getModel() {
     std::ifstream file("/sys/devices/virtual/dmi/id/product_name");
@@ -41,6 +112,19 @@ std::string Global::getFamily() {
     }
 }
 
+std::string getKernel() {
+    std::ifstream file("/proc/sys/kernel/osrelease");
+    std::string version;
+
+    if (file.is_open()) {
+        std::getline(file, version);
+        file.close();
+        return version;
+    } else {
+        return "unknown";
+    }
+}
+
 json Global::getOS() {
     json result;
     std::vector<std::string> keys;
@@ -63,6 +147,8 @@ json Global::getOS() {
         }
     }
 
+    file.close();
+    result["kernel"] = getKernel();
     Logger::print(QString("Got OS info (keys: %1)").arg(keys.size()));
     return result;
 }
@@ -139,7 +225,7 @@ json Global::getMemory() {
 
     try {
         json dmi;
-        std::string decodeString = run("sudo dmidecode -S --type 17");
+        std::string decodeString = run("dmidecode --type 17");
         std::istringstream stream(decodeString);
         std::string line;
 
@@ -163,6 +249,43 @@ json Global::getMemory() {
     } catch (const std::exception& e) {
         Logger::warn(QString("Memory info error: %1").arg(e.what()));
     } catch (...) {}
+
+    return results;
+}
+
+json Global::getSerial() {
+    json results;
+    std::ifstream file("/sys/class/dmi/id/product_serial");
+    std::string serial;
+
+    if (file.is_open()) {
+        std::getline(file, serial);
+        file.close();
+        results["serial"] = serial;
+    }
+
+    Logger::print(QString("Found serial: %1").arg(results.contains("serial") ? (results["serial"].is_string() ? "string" : "unknown") : "none"));
+    file.close();
+    return results;
+}
+
+ordered_json Global::getSupportUrls(json osInfo) {
+    ordered_json urls;
+    ordered_json results;
+
+    urls["HOME_URL"] = "Homepage";
+    urls["DOCUMENTATION_URL"] = "Documentation";
+    urls["SUPPORT_URL"] = "Support";
+    urls["BUG_REPORT_URL"] = "Report Bugs";
+    urls["PRIVACY_POLICY_URL"] = "Privacy Policy";
+    if (osInfo.contains("VENDOR_NAME")) urls["VENDOR_URL"] = QString("%1 Info").arg(osInfo["VENDOR_NAME"]).toStdString();
+    urls["EXPERIMENT_URL"] = "Experiment Info";
+
+    for (auto& [key, value] : urls.items()) {
+        if (osInfo.contains(key)) {
+            results[std::string(value)] = osInfo.at(std::string(key));
+        }
+    }
 
     return results;
 }
@@ -272,6 +395,20 @@ std::string Global::getStartupDisk() {
 }
 
 json Global::getDisk(std::string path) {
-    std::string result = run("lsblk -J");
-    return json::parse(result);
+    json result;
+    result["status"] = false;
+
+    try {
+        QString command = QString("lsblk -b -n -o SIZE -d %1").arg(path);
+        Logger::print(QString("Running getDisk command of %1 for device %2").arg(command).arg(path));
+        std::string processResult = run(command.toStdString());
+        Logger::print(QString("getDisk(%1): %2").arg(path).arg(processResult));
+        long long size = std::stoll(processResult);
+        result["bytes"] = size;
+        result["status"] = true;
+    } catch (const char* e) {
+        Logger::warn(QString("getDisk(%1): %2").arg(path).arg(e));
+    }
+
+    return result;
 }

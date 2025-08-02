@@ -24,36 +24,26 @@ bool hasGnomePlugins() {
 
 int main(int argc, char *argv[])
 {
+    bool classic = false;
+    Logger::enableLogging();
     Logger::setVerbose(false);
-    bool gnome = isGnome();
-    Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(version)).arg(QT_VERSION_STR));
-    Logger::print(QString("Is GNOME: %1").arg(gnome));
-
-    if (gnome) {
-        if (!hasGnomePlugins()) {
-            qFatal("libqgtk3 was not found!");
-        } else {
-            qputenv("QT_QPA_PLATFORMTHEME", "gtk3");
-            Logger::print(QString("Enabling QT_QPA_PLATFORMTHEME of value %1").arg(std::getenv("QT_QPA_PLATFORMTHEME")));
-        }
-    }
+    Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(version), QT_VERSION_STR));
 
     QApplication a(argc, argv);
-    bool classic = true;
     QStringList args = QCoreApplication::arguments();
     if (args.contains("--classic")) classic = true;
-    MainWindow w = new MainWindow(classic);
+    std::unique_ptr<MainWindow> w = std::make_unique<MainWindow>(classic);
+    QSize size;
 
     if (classic) {
-        w.resize(350, 400);
+        size = QSize(350, 400);
     } else {
-        w.resize(550, 300);
+        size = QSize(550, 300);
     }
 
-    w.setWindowTitle("About This PC");
-    w.setMinimumSize(w.size());
-    w.setMaximumSize(w.size());
-    w.show();
+    w->setWindowTitle("About This PC");
+    w->setFixedSize(size);
+    w->show();
 
     Logger::print("Starting main window...");
     return a.exec();

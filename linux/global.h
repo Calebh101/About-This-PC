@@ -5,6 +5,7 @@
 #include <string>
 
 using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
 
 class Global
 {
@@ -19,6 +20,9 @@ public:
     static json getOS();
     static json getCPU();
     static json getMemory();
+    static json getSerial();
+    static json getGPU();
+    static ordered_json getSupportUrls(json osInfo = getOS());
     static std::string trim(const std::string& str);
     static json getChassis();
     static std::string run(std::string cmd);

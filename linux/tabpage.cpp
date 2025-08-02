@@ -32,13 +32,13 @@ std::optional<fs::path> _getIconPath(std::string id) {
     return std::nullopt;
 }
 
-std::optional<fs::path> getIconPath(std::string& id) {
+std::optional<fs::path> LocalTabPage::getIconPath(std::string& id) {
     std::optional<fs::path> result = _getIconPath(id);
     Logger::print(QString("Found icon file: %1").arg((!result ? std::string("none") : result->string())));
     return result;
 }
 
-QWidget* processImage(std::optional<fs::path> path, int radius, int size) {
+QWidget* LocalTabPage::processImage(std::optional<fs::path> path, int radius, int size) {
     QWidget* container = new QWidget();
     QString iconPath = path ? QString::fromStdString(path->string()) : ":/images/default-linux-icon.png";
     QIcon icon(iconPath);
@@ -70,20 +70,70 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     QWidget *page = new QWidget();
     QVBoxLayout *infoWidget = new QVBoxLayout();
     QHBoxLayout *layout = new QHBoxLayout(page);
+    ordered_json results;
 
-    json results;
-    json osInfo = Global::getOS();
+    json chassis = Global::getChassis();
     json cpuInfo = Global::getCPU();
+    json gpuInfo = Global::getGPU();
+    json osInfo = Global::getOS();
+    json ramInfo = Global::getMemory();
+    json serialInfo = Global::getSerial();
 
     std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
     std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
     Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
 
     QLabel* title = new QLabel(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
-    QString cpuModel = QString::fromStdString(cpuInfo["model name"].get<std::string>());
-    results["Processor"] = cpuModel.toStdString();
+    float speed = cpuInfo["speed"].get<float>();
+    std::ostringstream oss;
+    oss << std::defaultfloat << std::setprecision(2) << speed;
+    std::string speedString = oss.str();
+    std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
+    results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
     QFont font = title->font();
 
+    std::vector<std::string> ramAttributes;
+    std::string productFamily = Global::getFamily();
+    std::string productName = Global::getModel();
+    std::string startupDiskPath = Global::getStartupDisk();
+    json startupDiskInfo = Global::getDisk(startupDiskPath);
+
+    ramAttributes.push_back(ramInfo["totalString"]);
+    if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
+    // if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
+    if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
+
+    if (gpuInfo["status"] == true) {
+        json gpu = gpuInfo["gpus"].front();
+        int vram = gpu["vram"].get<int>();
+        std::ostringstream oss;
+        oss << std::defaultfloat << std::setprecision(2) << (vram / 1000.0);
+        QString text = QString("%1 %2GB").arg(gpu["name"].get<std::string>()).arg(oss.str());
+        results["Graphics"] = text.toStdString();
+    }
+
+    if (!ramAttributes.empty()) {
+        std::ostringstream oss;
+
+        for (size_t i = 0; i < ramAttributes.size(); ++i) {
+            if (i > 0) oss << ' ';
+            oss << ramAttributes[i];
+        }
+
+        results["Memory"] = oss.str();
+    }
+
+    if (serialInfo.contains("serial")) results["Serial"] = serialInfo["serial"];
+
+    if (startupDiskInfo["status"] == true) {
+        long long bytes = startupDiskInfo["bytes"].get<long long>();
+        int size = bytes / 1000.0 / 1000.0 / 1000.0;
+        results["Startup Disk"] = QString("%1 %2 GB").arg(startupDiskPath).arg(std::to_string(size)).toStdString();
+    } else {
+        results["Startup Disk"] = startupDiskPath;
+    }
+
+    results["Kernel"] = osInfo["kernel"];
     QLabel* modelLabel = new QLabel;
     modelLabel->setTextFormat(Qt::RichText);
     modelLabel->setText(QString("<span style='font-weight: %3; font-size: %2pt;'>%1</span>").arg(Global::getModel()).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)));

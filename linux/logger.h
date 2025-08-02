@@ -14,6 +14,7 @@ public:
     static void verbose(const QString& input);
     static void setVerbose(const bool status);
     static void enableVerbose();
+    static void enableLogging();
 };
 
 #endif
