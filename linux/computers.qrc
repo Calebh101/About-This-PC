@@ -1,3 +1,6 @@
 <RCC>
-    <qresource prefix="/images/computers"/>
+    <qresource prefix="/computers">
+        <file>images/computers/laptop.png</file>
+        <file>images/computers/monitor.png</file>
+    </qresource>
 </RCC>

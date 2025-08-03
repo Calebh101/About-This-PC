@@ -9,6 +9,10 @@
 #include <QPainter>
 #include <QPainterPath>
 #include "global.h"
+#include "cicon.h"
+#include "themelistener.h"
+#include <QPushButton>
+#include <QGraphicsOpacityEffect>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -32,15 +36,22 @@ std::optional<fs::path> _getIconPath(std::string id) {
     return std::nullopt;
 }
 
-std::optional<fs::path> LocalTabPage::getIconPath(std::string& id) {
+std::optional<fs::path> LocalTabPage::getIconPath(std::string id) {
     std::optional<fs::path> result = _getIconPath(id);
     Logger::print(QString("Found icon file: %1").arg((!result ? std::string("none") : result->string())));
     return result;
 }
 
+QStringList LocalTabPage::bottomText() {
+    QStringList results;
+    results.append(QString("About This PC %1 by Calebh101").arg(Global::version));
+    return results;
+}
+
 QWidget* LocalTabPage::processImage(std::optional<fs::path> path, int radius, int size) {
     QWidget* container = new QWidget();
-    QString iconPath = path ? QString::fromStdString(path->string()) : ":/images/default-linux-icon.png";
+    QString iconPath = path ? QString::fromStdString(path->string()) : ":default-linux-icon/images/default-linux-icon.png";
+    Logger::print(QString("Processing image of path %1").arg(iconPath));
     QIcon icon(iconPath);
     QLabel* label = new QLabel;
     QPixmap pixmap = icon.pixmap(size, size);
@@ -64,12 +75,16 @@ QWidget* LocalTabPage::processImage(std::optional<fs::path> path, int radius, in
 LocalTabPage::LocalTabPage() {}
 
 QWidget* LocalTabPage::overview(QWidget* parent) {
+    bool showPrivate = true;
     float fontSize = Global::fontSize;
     int fontWeight = Global::fontWeight;
 
     QWidget *page = new QWidget();
+    QVBoxLayout *vlayout = new QVBoxLayout();
     QVBoxLayout *infoWidget = new QVBoxLayout();
-    QHBoxLayout *layout = new QHBoxLayout(page);
+    QHBoxLayout *layout = new QHBoxLayout();
+    QHBoxLayout* bottomLayout = new QHBoxLayout();
+    QVBoxLayout* bottomTextLayout = new QVBoxLayout();
     ordered_json results;
 
     json chassis = Global::getChassis();
@@ -97,6 +112,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     std::string productName = Global::getModel();
     std::string startupDiskPath = Global::getStartupDisk();
     json startupDiskInfo = Global::getDisk(startupDiskPath);
+    QLabel* serialValueLabel = nullptr;
 
     ramAttributes.push_back(ramInfo["totalString"]);
     if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
@@ -147,16 +163,74 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     infoWidget->addWidget(modelLabel);
 
     for (auto& [key, value] : results.items()) {
-        QLabel* label = new QLabel;
+        QHBoxLayout* layout = new QHBoxLayout;
+        QLabel* label1 = new QLabel;
+        QLabel* label2 = new QLabel;
         QString text = QString::fromStdString(value.dump());
+
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
-        label->setTextFormat(Qt::RichText);
-        label->setText(QString("<div style='font-size: %3pt;'><span style='font-weight: %5;'>%1: </span>" "<span style='font-weight: %4;'>%2</span>").arg(QString::fromStdString(key)).arg(text).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)).arg(std::to_string(fontWeight)));
-        infoWidget->addWidget(label);
+        if (key == "Serial") serialValueLabel = label2;
+
+        label1->setTextFormat(Qt::RichText);
+        label2->setTextFormat(Qt::RichText);
+        label1->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        label2->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+        label1->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3s;'>%1</span></div>").arg(QString::fromStdString(key)).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight)));
+        label2->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+
+        layout->addWidget(label1);
+        layout->addWidget(label2);
+        layout->addStretch();
+        infoWidget->addLayout(layout);
     }
+
+    QPushButton* eyeButton = new QPushButton();
+    QStringList bottomText = LocalTabPage::bottomText();
+
+    eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+    eyeButton->setIconSize(QSize(16, 16));
+    eyeButton->setFixedSize(eyeButton->sizeHint());
+
+    QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
+        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+    });
+
+    QObject::connect(eyeButton, &QPushButton::clicked, parent, [=]() mutable {
+        Logger::print("eyeButton pressed");
+        showPrivate = !showPrivate;
+
+        if (serialValueLabel != nullptr) {
+            QString text = showPrivate ? QString::fromStdString(results["Serial"].get<std::string>()) : "";
+            serialValueLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+        }
+
+        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        page->update();
+    });
 
     layout->addWidget(processImage(iconPath, 10, 148), 5);
     layout->addLayout(infoWidget, 9);
+    vlayout->addLayout(layout, 1);
 
+    for (int i = 0; i < bottomText.length(); i++) {
+        QString line = bottomText[i];
+        QLabel* label = new QLabel;
+        QFont font = label->font();
+        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(label);
+
+        font.setPointSize(8);
+        effect->setOpacity(0.75);
+        label->setAlignment(Qt::AlignCenter);
+        label->setText(line);
+        label->setFont(font);
+        bottomTextLayout->addWidget(label);
+    }
+
+    bottomLayout->addSpacing(eyeButton->width());
+    bottomLayout->addLayout(bottomTextLayout);
+    bottomLayout->addWidget(eyeButton);
+    vlayout->addLayout(bottomLayout);
+    page->setLayout(vlayout);
     return page;
 }

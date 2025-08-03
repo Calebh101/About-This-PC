@@ -6,8 +6,7 @@
 #include <QPainterPath>
 #include "QErrorMessage"
 #include <QFile>
-
-const std::string version = "0.0.0A";
+#include "global.h"
 
 bool isGnome() {
     const char* desktop = std::getenv("XDG_CURRENT_DESKTOP");
@@ -25,9 +24,10 @@ bool hasGnomePlugins() {
 int main(int argc, char *argv[])
 {
     bool classic = false;
+    qputenv("QT_FONT_DPI", "96");
     Logger::enableLogging();
     Logger::setVerbose(false);
-    Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(version), QT_VERSION_STR));
+    Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(Global::version), QT_VERSION_STR));
 
     QApplication a(argc, argv);
     QStringList args = QCoreApplication::arguments();
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     QSize size;
 
     if (classic) {
-        size = QSize(350, 400);
+        size = QSize(350, 500);
     } else {
         size = QSize(550, 300);
     }

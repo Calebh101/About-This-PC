@@ -9,6 +9,7 @@ class ClassicPage
 public:
     ClassicPage();
     static QWidget* page(MainWindow* parent);
+    static QWidget* hspacer();
 };
 
 #endif // CLASSICPAGE_H

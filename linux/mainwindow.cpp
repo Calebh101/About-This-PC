@@ -31,10 +31,10 @@ MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
 
         tabWidget->addTab(LocalTabPage::overview(this), "Overview");
         tabWidget->addTab(Displays::page(this), "Displays");
-        Logger::print(QString("Generating support page... (empty: %1)").arg(supportUrls.empty() ? "yes" : "no"));
         if (!supportUrls.empty()) tabWidget->addTab(SupportPage::page(this, supportUrls), "Support");
 
         Logger::print("Finalizing layout...");
+        tabWidget->setStyleSheet("QTabWidget::tab-bar { alignment: center; }");
         mainLayout->addWidget(tabWidget);
         mainLayout->addLayout(centerLayout);
         setCentralWidget(central);

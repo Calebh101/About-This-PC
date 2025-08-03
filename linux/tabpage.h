@@ -12,7 +12,8 @@ private:
 public:
     static QWidget* overview(QWidget* parent);
     static QWidget* processImage(std::optional<fs::path> path, int radius, int size);
-    static std::optional<fs::path> getIconPath(std::string& id);
+    static std::optional<fs::path> getIconPath(std::string id);
+    static QStringList bottomText();
 };
 
 #endif // TABPAGE_H

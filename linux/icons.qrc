@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="eye-light.svg">images/icons/eye-solid-full-light.svg</file>
+        <file alias="eye-slash-light.svg">images/icons/eye-slash-solid-full-light.svg</file>
+        <file alias="eye-slash-dark.svg">images/icons/eye-slash-solid-full-dark.svg</file>
+        <file alias="eye-dark.svg">images/icons/eye-solid-full-dark.svg</file>
+    </qresource>
+</RCC>

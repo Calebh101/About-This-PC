@@ -16,7 +16,7 @@ QWidget* Displays::page(QWidget* parent) {
     QVBoxLayout *layout = new QVBoxLayout(page);
     std::string server = getDisplayServer();
 
-    if (server == "X11") {
+    if (server == "x11") {
         //
     } else {
         QLabel* titleLabel = new QLabel;

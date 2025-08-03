@@ -15,6 +15,8 @@
 #include <linux/fs.h>
 
 Global::Global() {}
+
+const std::string Global::version = "0.0.0A";
 const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
 
@@ -287,6 +289,8 @@ ordered_json Global::getSupportUrls(json osInfo) {
         }
     }
 
+    results["GitHub"] = "https://github.com/Calebh101/About-This-PC";
+    results["GitHub Issues"] = "https://github.com/Calebh101/About-This-PC/issues";
     return results;
 }
 
@@ -297,6 +301,14 @@ std::string Global::trim(const std::string& str) {
     size_t last = str.size() - 1;
     while (last > first && std::isspace(static_cast<unsigned char>(str[last]))) --last;
     return str.substr(first, last - first + 1);
+}
+
+std::string Global::getComputerIconPath(std::string path) {
+    return QString(":computers/images/computers/%1.png").arg(path).toStdString();
+}
+
+std::string Global::getAppIconPath() {
+    return QString(":application-icon/images/application-icon.png").toStdString();
 }
 
 json Global::getChassis() {
@@ -321,7 +333,7 @@ json Global::getChassis() {
             case 25:
             case 29:
                 result["name"] = "Desktop";
-                icon = "desktop";
+                icon = "monitor";
                 break;
 
             case 5:
@@ -333,7 +345,7 @@ json Global::getChassis() {
             case 34:
             case 35:
                 result["name"] = "Mini PC";
-                icon = "mini";
+                icon = "monitor";
                 break;
 
             case 8:
@@ -355,17 +367,17 @@ json Global::getChassis() {
             case 11:
             case 30:
                 result["name"] = "Handheld";
-                icon = "handheld";
+                icon = "laptop";
                 break;
 
             case 13:
                 result["name"] = "All-in-One";
-                icon = "aio";
+                icon = "monitor";
                 break;
 
             default: // 0, 1, 12, 18 - 22, 33
                 result["name"] = "Computer";
-                icon = "desktop";
+                icon = "monitor";
                 break;
         }
     } else {
@@ -374,7 +386,7 @@ json Global::getChassis() {
         icon = "desktop";
     }
 
-    result["icon"] = QString(":/images/computers/%1.png").arg(icon).toStdString();
+    result["icon"] = getComputerIconPath(icon);
     return result;
 }
 

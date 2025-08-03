@@ -10,8 +10,18 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Svg)
 find_package(Vulkan REQUIRED)
+find_package(X11 REQUIRED)
+
+find_path(XRANDR_INCLUDE_DIR X11/extensions/Xrandr.h)
+find_library(XRANDR_LIBRARY Xrandr)
+
+if (NOT XRANDR_INCLUDE_DIR OR NOT XRANDR_LIBRARY)
+    message(FATAL_ERROR "XRandR not found")
+endif()
+
+include_directories(${X11_INCLUDE_DIR} ${XRANDR_INCLUDE_DIR})
 
 set(PROJECT_SOURCES
 
@@ -39,9 +49,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         global.h global.cpp
         computers.qrc
         supportpage.h supportpage.cpp
-
-
-
+        icons.qrc
+        cicon.h cicon.cpp
+        themelistener.h themelistener.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET AboutThisPC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

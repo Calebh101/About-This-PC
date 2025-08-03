@@ -35,12 +35,10 @@ void Logger::print(const QString& input) {
 }
 
 void Logger::warn(const QString& input) {
-    if (!useLogging) return;
     std::cout << "WRN " + currentDate() + " > \e[0m\e[33m " + input.toStdString() + "\e[0m" << std::endl;
 }
 
 void Logger::error(const QString& input) {
-    if (!useLogging) return;
     std::cout << "ERR " + currentDate() + " > \e[0m\e[31m " + input.toStdString() + "\e[0m" << std::endl;
 }
 
