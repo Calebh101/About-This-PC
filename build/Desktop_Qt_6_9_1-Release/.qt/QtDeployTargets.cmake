@@ -1,2 +1,0 @@
-set(__QT_DEPLOY_TARGET_AboutThisPC_FILE /home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/AboutThisPC)
-set(__QT_DEPLOY_TARGET_AboutThisPC_TYPE EXECUTABLE)
