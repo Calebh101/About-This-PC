@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
     Logger::print(QString("Loading helper at %1...").arg(outPath));
 
     if (helper.open(QIODevice::ReadOnly)) {
+        if (QFile::exists(outPath)) QFile::remove(outPath);
         QFile outFile(outPath);
 
         if (outFile.open(QIODevice::WriteOnly)) {
@@ -62,6 +63,7 @@ int main(int argc, char *argv[])
 
         std::string output = Global::run(command.toStdString());
         Global::setHelperData(output);
+        QFile::remove(outPath);
     } else {
         Logger::warn(QString("Unable to load helper data! File %1 could not be opened. Recovering...").arg(outPath));
     }

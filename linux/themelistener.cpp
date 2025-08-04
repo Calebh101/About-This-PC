@@ -14,7 +14,7 @@ ThemeListener* ThemeListener::instance() {
 bool ThemeListener::eventFilter(QObject* obj, QEvent* event) {
     if (event->type() == QEvent::PaletteChange) {
         emit themeChanged();
-        Logger::print("Signal: theme changed");
+        Logger::verbose("Signal: theme changed");
     }
 
     return QObject::eventFilter(obj, event);
