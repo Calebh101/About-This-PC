@@ -7,6 +7,8 @@
 #include "QErrorMessage"
 #include <QFile>
 #include "global.h"
+#include <QDir>
+#include <QProcess>
 
 bool isGnome() {
     const char* desktop = std::getenv("XDG_CURRENT_DESKTOP");
@@ -24,14 +26,46 @@ bool hasGnomePlugins() {
 int main(int argc, char *argv[])
 {
     bool classic = false;
-    qputenv("QT_FONT_DPI", "96");
-    Logger::enableLogging();
-    Logger::setVerbose(false);
-    Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(Global::version), QT_VERSION_STR));
-
+    qputenv("QT_FONT_DPI", "96"); // Fixed size, since sudo likes to be weird with text size
     QApplication a(argc, argv);
     QStringList args = QCoreApplication::arguments();
+    Logger::setVerbose(false);
     if (args.contains("--classic")) classic = true;
+
+#ifdef QT_DEBUG
+    Logger::enableLogging();
+#endif
+
+    if (args.contains("--verbose"))  {
+        Logger::enableLogging();
+        Logger::enableVerbose();
+    }
+
+    Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(Global::version), QT_VERSION_STR));
+
+    QFile helper(":/binaries/helper");
+    QString outPath = QDir::temp().filePath("AboutThisPC-linux-helper");
+    Logger::print(QString("Loading helper at %1...").arg(outPath));
+
+    if (helper.open(QIODevice::ReadOnly)) {
+        QFile outFile(outPath);
+
+        if (outFile.open(QIODevice::WriteOnly)) {
+            outFile.write(helper.readAll());
+            outFile.close();
+            QFile::setPermissions(outPath, QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser);
+        }
+
+        helper.close();
+        QString command = QString("pkexec %1").arg(outPath);
+        Logger::print(QString("Running helper with command: %1").arg(command));
+
+        std::string output = Global::run(command.toStdString());
+        Global::setHelperData(output);
+    } else {
+        Logger::warn(QString("Unable to load helper data! File %1 could not be opened. Recovering...").arg(outPath));
+    }
+
     std::unique_ptr<MainWindow> w = std::make_unique<MainWindow>(classic);
     QSize size;
 
@@ -39,6 +73,10 @@ int main(int argc, char *argv[])
         size = QSize(350, 500);
     } else {
         size = QSize(550, 300);
+    }
+
+    if (!Global::checkHelperData()) {
+        Logger::warn("Unable to load helper data! Recovering...");
     }
 
     w->setWindowTitle("About This PC");

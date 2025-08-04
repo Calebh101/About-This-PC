@@ -52,6 +52,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         icons.qrc
         cicon.h cicon.cpp
         themelistener.h themelistener.cpp
+        storage.h storage.cpp
+        binaries.qrc
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET AboutThisPC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -71,13 +73,13 @@ else()
     endif()
 endif()
 
-target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Vulkan::Vulkan)
+target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Vulkan::Vulkan ${X11_LIBRARIES} ${XRANDR_LIBRARY})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.AboutThisPC)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.calebh101.AboutThisPC)
 endif()
 set_target_properties(AboutThisPC PROPERTIES
     ${BUNDLE_ID_OPTION}

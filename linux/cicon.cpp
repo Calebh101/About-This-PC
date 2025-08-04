@@ -1,12 +1,10 @@
 #include "cicon.h"
 #include <QIcon>
-#include "logger.h"
 #include <QPalette>
 #include <QApplication>
 
 bool isDark() {
     bool status = (qApp->palette().color(QPalette::Window).value() < 128);
-    Logger::print(QString("isDark: %1").arg(status ? "dark" : "light"));
     return status;
 }
 
@@ -16,7 +14,6 @@ std::string getPath(std::string path) {
 }
 
 QIcon* path(std::string file) {
-    Logger::print(QString("Loading icon file: %1").arg(file));
     QIcon* icon = new QIcon(QString::fromStdString(file));
     return icon;
 }
@@ -33,3 +30,5 @@ QIcon* CIcon::build() {
 
 CIcon* CIcon::eye() {return new CIcon("eye");}
 CIcon* CIcon::eyeClosed() {return new CIcon("eye-slash");}
+CIcon* CIcon::lock() {return new CIcon("lock");}
+CIcon* CIcon::lockOpen() {return new CIcon("lock-open");}

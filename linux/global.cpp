@@ -13,12 +13,46 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/fs.h>
+#include <dirent.h>
+#include <QLocale>
 
 Global::Global() {}
 
 const std::string Global::version = "0.0.0A";
 const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
+
+json helperData;
+
+void Global::setHelperData(std::string data) {
+    try {
+        helperData = json::parse(data);
+    } catch (const std::exception& e) {
+        Logger::warn(QString("Unable to parse helper data: %1 (%2)").arg(data).arg(e.what()));
+    } catch (...) {
+        Logger::warn(QString("Unable to parse helper data: %1").arg(data));
+    }
+}
+
+json Global::getHelperData(std::string key) {
+    if (key.empty()) {
+        Logger::print("Getting helper data at no key...");
+        return helperData;
+    } else if (helperData.contains(key)) {
+        Logger::print(QString("Getting helper data at key %1...").arg(key));
+        return helperData[key];
+    } else {
+        Logger::print(QString("Getting helper data at (invalid) key %1...").arg(key));
+        json j;
+        return j;
+    }
+}
+
+bool Global::checkHelperData(std::string key) {
+    if (helperData.empty()) return false;
+    if (!key.empty() && !helperData.contains(key)) return false;
+    return true;
+}
 
 json Global::getGPU() {
     json results;
@@ -212,65 +246,6 @@ json Global::getCPU() {
     return j;
 }
 
-json Global::getMemory() {
-    json results;
-    struct sysinfo info;
-
-    if(sysinfo(&info) == 0) {
-        double factor = 1000;
-        double gb = static_cast<double>(info.totalram) * info.mem_unit / (factor * factor * 1024);
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << gb;
-        results["totalString"] = QString("%1 GiB").arg(oss.str()).toStdString();
-        results["total"] = gb;
-    }
-
-    try {
-        json dmi;
-        std::string decodeString = run("dmidecode --type 17");
-        std::istringstream stream(decodeString);
-        std::string line;
-
-        while (std::getline(stream, line)) {
-            if (!(line.empty() || line.find_first_not_of(" \t\n\r") == std::string::npos)) {
-                size_t pos = line.find(":");
-
-                if (pos != std::string::npos) {
-                    std::string key = trim(line.substr(0, pos));
-                    std::string value = trim(line.substr(pos + 1));
-
-                    Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
-                    dmi[key] = value;
-                }
-            }
-        }
-
-        if (dmi.contains("Form Factor")) results["form"] = dmi["Form Factor"];
-        if (dmi.contains("Type")) results["type"] = dmi["Type"];
-        if (dmi.contains("Speed")) results["speed"] = dmi["Speed"];
-    } catch (const std::exception& e) {
-        Logger::warn(QString("Memory info error: %1").arg(e.what()));
-    } catch (...) {}
-
-    return results;
-}
-
-json Global::getSerial() {
-    json results;
-    std::ifstream file("/sys/class/dmi/id/product_serial");
-    std::string serial;
-
-    if (file.is_open()) {
-        std::getline(file, serial);
-        file.close();
-        results["serial"] = serial;
-    }
-
-    Logger::print(QString("Found serial: %1").arg(results.contains("serial") ? (results["serial"].is_string() ? "string" : "unknown") : "none"));
-    file.close();
-    return results;
-}
-
 ordered_json Global::getSupportUrls(json osInfo) {
     ordered_json urls;
     ordered_json results;
@@ -406,21 +381,97 @@ std::string Global::getStartupDisk() {
     return run(command);
 }
 
+json Global::getAllDisks() {
+    json result;
+    std::vector<json> drives;
+    result["status"] = false;
+    std::string path = "/sys/block";
+    std::string startupDisk = getStartupDisk();
+    DIR* dir = opendir(path.c_str());
+    struct dirent* entry;
+
+    if (!dir) {
+        Logger::warn(QString("Unable to open directory: %1").arg(path));
+        return result;
+    }
+
+    while ((entry = readdir(dir)) != nullptr) {
+        std::string name = entry->d_name;
+        std::string path = "/dev/" + name;
+
+        if (name == "." || name == ".." || name.starts_with("loop")) continue;
+        json disk;
+
+        disk["name"] = name;
+        disk["path"] = path;
+        disk["data"] = getDisk(path);
+        disk["startup"] = path == startupDisk;
+        drives.push_back(disk);
+    }
+
+    result["status"] = true;
+    result["drives"] = drives;
+    Logger::print(QString("Returning %1 drive(s)...").arg(drives.size()));
+    return result;
+}
+
 json Global::getDisk(std::string path) {
     json result;
     result["status"] = false;
 
     try {
-        QString command = QString("lsblk -b -n -o SIZE -d %1").arg(path);
+        QString command = QString("lsblk -b -n -o SIZE,HOTPLUG -d %1").arg(path);
         Logger::print(QString("Running getDisk command of %1 for device %2").arg(command).arg(path));
         std::string processResult = run(command.toStdString());
-        Logger::print(QString("getDisk(%1): %2").arg(path).arg(processResult));
-        long long size = std::stoll(processResult);
+        std::istringstream iss1(processResult);
+        if (processResult.empty()) throw std::runtime_error("processResult was empty");
+        long long size;
+        int hotplug;
+        iss1 >> size >> hotplug;
         result["bytes"] = size;
-        result["status"] = true;
-    } catch (const char* e) {
-        Logger::warn(QString("getDisk(%1): %2").arg(path).arg(e));
+        result["external"] = (hotplug > 0 ? true : false);
+
+        QString usedCommand = QString("df -B1 --output=source,used | grep %1").arg(path);
+        std::string usedOutput = run(usedCommand.toStdString());
+        if (usedOutput.empty()) throw std::runtime_error("usedOutput was empty");
+        std::istringstream iss2(usedOutput);
+        std::string device;
+        std::string usedString;
+        iss2 >> device >> usedString;
+        Logger::print(QString("Used output for %1: %2 (command: %3)").arg(path).arg(QString::fromStdString(usedString)).arg(usedCommand));
+        long long used = std::stoll(usedString);
+        result["used"] = used;
+    } catch (const std::exception& e) {
+        Logger::warn(QString("getDisk(%1): %2").arg(path).arg(e.what()));
+        return result;
     }
 
+    result["status"] = true;
     return result;
+}
+
+QString Global::mmToString(double mm) {
+    QLocale locale;
+
+    if (locale.measurementSystem() == QLocale::MetricSystem) {
+        return QString("%1cm").arg(std::round(mm / 10));
+    } else {
+        return QString("%1\"").arg(std::round(mm / 25.4));
+    }
+}
+
+std::string Global::toSentenceCase(std::string input) {
+    if (!input.empty() && std::islower(input[0])) input[0] = std::toupper(input[0]);
+    return input;
+}
+
+std::string Global::trimDecimal(double value, int decimal) {
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(decimal) << value;
+    std::string result = stream.str();
+    return result;
+}
+
+bool Global::isElevated() {
+    return geteuid() == 0;
 }

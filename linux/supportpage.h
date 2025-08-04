@@ -8,7 +8,7 @@ class SupportPage
 {
 public:
     SupportPage();
-    static QWidget* page(QWidget* parent, json urls = Global::getSupportUrls());
+    static QWidget* page(QWidget* parent, ordered_json urls = Global::getSupportUrls());
 };
 
 #endif // SUPPORTPAGE_H

@@ -47,6 +47,11 @@ void Logger::success(const QString& input) {
     std::cout << "SCS " + currentDate() + " > \e[0m\e[32m " + input.toStdString() + "\e[0m" << std::endl;
 }
 
+void Logger::raw(const QString& input) {
+    if (!useLogging) return;
+    std::cout << input.toStdString() << std::endl;
+}
+
 void Logger::verbose(const QString& input) {
     if (!useLogging) return;
     if (!useVerbose) return;

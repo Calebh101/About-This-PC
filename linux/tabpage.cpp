@@ -1,4 +1,5 @@
 #include "tabpage.h"
+#include <qapplication.h>
 #include <qboxlayout.h>
 #include <qlabel.h>
 #include "json.hpp"
@@ -13,6 +14,9 @@
 #include "themelistener.h"
 #include <QPushButton>
 #include <QGraphicsOpacityEffect>
+#include <QProcess>
+#include <QInputDialog>
+#include <QLineEdit>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -48,7 +52,7 @@ QStringList LocalTabPage::bottomText() {
     return results;
 }
 
-QWidget* LocalTabPage::processImage(std::optional<fs::path> path, int radius, int size) {
+QWidget* LocalTabPage::processImage(std::optional<fs::path> path, int size, int radius) {
     QWidget* container = new QWidget();
     QString iconPath = path ? QString::fromStdString(path->string()) : ":default-linux-icon/images/default-linux-icon.png";
     Logger::print(QString("Processing image of path %1").arg(iconPath));
@@ -76,6 +80,8 @@ LocalTabPage::LocalTabPage() {}
 
 QWidget* LocalTabPage::overview(QWidget* parent) {
     bool showPrivate = true;
+    bool showLockButton = false;
+    bool isElevated = Global::isElevated();
     float fontSize = Global::fontSize;
     int fontWeight = Global::fontWeight;
 
@@ -91,21 +97,21 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     json cpuInfo = Global::getCPU();
     json gpuInfo = Global::getGPU();
     json osInfo = Global::getOS();
-    json ramInfo = Global::getMemory();
-    json serialInfo = Global::getSerial();
+    json ramInfo = Global::getHelperData("memory");
+    json serialInfo = Global::getHelperData("serial");
 
     std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
     std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
     Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
 
     QLabel* title = new QLabel(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
+    QFont font = title->font();
     float speed = cpuInfo["speed"].get<float>();
     std::ostringstream oss;
     oss << std::defaultfloat << std::setprecision(2) << speed;
     std::string speedString = oss.str();
     std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
     results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
-    QFont font = title->font();
 
     std::vector<std::string> ramAttributes;
     std::string productFamily = Global::getFamily();
@@ -113,10 +119,11 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     std::string startupDiskPath = Global::getStartupDisk();
     json startupDiskInfo = Global::getDisk(startupDiskPath);
     QLabel* serialValueLabel = nullptr;
+    QStringList subtitleItems;
 
-    ramAttributes.push_back(ramInfo["totalString"]);
+    if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
     if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
-    // if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
+    if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
     if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
 
     if (gpuInfo["status"] == true) {
@@ -158,8 +165,34 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     font.setWeight(static_cast<QFont::Weight>(fontWeight * 1.5));
     title->setFont(font);
 
+    std::string releaseType = osInfo.contains("RELEASE_TYPE") ? osInfo["RELEASE_TYPE"] : "stable";
+    std::string releaseTypeString = releaseType;
+    Logger::print(QString("Found release type of %1").arg(releaseType));
+
+    if (releaseType == "stable") releaseTypeString = "Stable";
+    if (releaseType == "lts") releaseTypeString = "LTS";
+    if (releaseType == "experiment") releaseTypeString = "Experimental";
+    if (releaseType == "development") releaseTypeString = "Development";
+
+    if (osInfo.contains("VERSION_ID")) subtitleItems.push_back(QString::fromStdString(osInfo["VERSION_ID"]));
+    if (osInfo.contains("VERSION_CODENAME")) subtitleItems.push_back(QString::fromStdString(Global::toSentenceCase(osInfo["VERSION_CODENAME"])));
+    if (osInfo.contains("BUILD_ID")) subtitleItems.push_back(QString("(%1)").arg(osInfo["BUILD_ID"]));
+    if (releaseType != "stable") subtitleItems.push_back(QString::fromStdString(releaseTypeString)); // Sometimes OSes just don't include this even if it is LTS or Experimental, so we shouldn't force a default; so instead we omit the property.
+
     infoWidget->setAlignment(Qt::AlignTop);
     infoWidget->addWidget(title);
+
+    if (!subtitleItems.empty()) {
+        QLabel* label = new QLabel;
+
+        font.setPointSize(fontSize * 1.25);
+
+        label->setText(subtitleItems.join(" "));
+        label->setFont(font);
+        infoWidget->addWidget(label);
+    }
+
+    infoWidget->addSpacing(10);
     infoWidget->addWidget(modelLabel);
 
     for (auto& [key, value] : results.items()) {
@@ -186,14 +219,21 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     }
 
     QPushButton* eyeButton = new QPushButton();
+    QPushButton* lockButton = new QPushButton();
     QStringList bottomText = LocalTabPage::bottomText();
 
     eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
     eyeButton->setIconSize(QSize(16, 16));
     eyeButton->setFixedSize(eyeButton->sizeHint());
 
+    lockButton->setIcon(isElevated ? *CIcon::lockOpen()->build() : *CIcon::lock()->build());
+    lockButton->setIconSize(QSize(16, 16));
+    lockButton->setFixedSize(lockButton->sizeHint());
+    if (isElevated) lockButton->setEnabled(false);
+
     QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
         eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        lockButton->setIcon(isElevated ? *CIcon::lockOpen()->build() : *CIcon::lock()->build());
     });
 
     QObject::connect(eyeButton, &QPushButton::clicked, parent, [=]() mutable {
@@ -209,7 +249,14 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         page->update();
     });
 
-    layout->addWidget(processImage(iconPath, 10, 148), 5);
+    QObject::connect(lockButton, &QPushButton::clicked, parent, [=]() mutable {
+        Logger::print("lockButton pressed");
+        if (isElevated) return;
+
+        // Couldn't get this to work properly, so I had to make a helper script instead
+    });
+
+    layout->addWidget(processImage(iconPath, 148, 10), 5);
     layout->addLayout(infoWidget, 9);
     vlayout->addLayout(layout, 1);
 
@@ -228,8 +275,10 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     }
 
     bottomLayout->addSpacing(eyeButton->width());
+    if (showLockButton) bottomLayout->addSpacing(lockButton->width());
     bottomLayout->addLayout(bottomTextLayout);
     bottomLayout->addWidget(eyeButton);
+    if (showLockButton) bottomLayout->addWidget(lockButton);
     vlayout->addLayout(bottomLayout);
     page->setLayout(vlayout);
     return page;

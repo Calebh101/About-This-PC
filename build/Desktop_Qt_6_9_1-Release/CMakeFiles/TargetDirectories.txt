@@ -1,0 +1,9 @@
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/AboutThisPC.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/edit_cache.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/rebuild_cache.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/list_install_components.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/install.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/install/local.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/install/strip.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/AboutThisPC_autogen_timestamp_deps.dir
+/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/AboutThisPC_autogen.dir

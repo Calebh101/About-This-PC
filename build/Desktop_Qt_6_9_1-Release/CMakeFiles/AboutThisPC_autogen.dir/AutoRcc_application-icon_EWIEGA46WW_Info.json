@@ -1,0 +1,20 @@
+{
+	"BUILD_DIR" : "/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/AboutThisPC_autogen",
+	"CMAKE_BINARY_DIR" : "/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/caleb/projects/cpp/AboutThisPC/linux",
+	"CMAKE_SOURCE_DIR" : "/home/caleb/projects/cpp/AboutThisPC/linux",
+	"GENERATOR" : "Ninja",
+	"INCLUDE_DIR" : "/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/AboutThisPC_autogen/include",
+	"INPUTS" : [],
+	"LOCK_FILE" : "/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/AboutThisPC_autogen.dir/AutoRcc_application-icon_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "application_icon" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_application-icon.cpp",
+	"RCC_EXECUTABLE" : "/home/caleb/Qt/6.9.1/gcc_64/libexec/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/caleb/projects/cpp/AboutThisPC/build/Desktop_Qt_6_9_1-Release/CMakeFiles/AboutThisPC_autogen.dir/AutoRcc_application-icon_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/caleb/projects/cpp/AboutThisPC/linux/application-icon.qrc",
+	"VERBOSITY" : 0
+}

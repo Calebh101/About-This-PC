@@ -3,6 +3,7 @@
 
 #include "json.hpp"
 #include <string>
+#include <QString>
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
@@ -20,9 +21,10 @@ public:
     static std::string getFamily();
     static json getOS();
     static json getCPU();
-    static json getMemory();
-    static json getSerial();
     static json getGPU();
+    static json getHelperData(std::string key = "");
+    static void setHelperData(std::string data);
+    static bool checkHelperData(std::string key = "");
     static ordered_json getSupportUrls(json osInfo = getOS());
     static std::string trim(const std::string& str);
     static json getChassis();
@@ -31,6 +33,11 @@ public:
     static json getDisk(std::string path);
     static std::string getComputerIconPath(std::string path);
     static std::string getAppIconPath();
+    static json getAllDisks();
+    static bool isElevated();
+    static QString mmToString(double mm);
+    static std::string toSentenceCase(std::string input);
+    static std::string trimDecimal(double value, int decimal = 1);
 
     template<typename T>
     static std::optional<T> atKeyOrNull(const json& j, const std::string& key) {

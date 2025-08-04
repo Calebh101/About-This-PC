@@ -10,7 +10,7 @@
 
 SupportPage::SupportPage() {}
 
-QWidget* SupportPage::page(QWidget* parent, json urls) {
+QWidget* SupportPage::page(QWidget* parent, ordered_json urls) {
     QWidget* page = new QWidget(parent);
     QVBoxLayout* layout = new QVBoxLayout(page);
     QGridLayout* grid = new QGridLayout();

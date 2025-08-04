@@ -14,6 +14,7 @@
 #include "displays.h"
 #include "classicpage.h"
 #include "supportpage.h"
+#include "storage.h"
 
 MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
     if (classic) {
@@ -27,10 +28,11 @@ MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
         QTabBar *tabBar = new QTabBar();
         QHBoxLayout *centerLayout = new QHBoxLayout();
         QTabWidget *tabWidget = new QTabWidget(tabBar);
-        json supportUrls = Global::getSupportUrls();
+        ordered_json supportUrls = Global::getSupportUrls();
 
         tabWidget->addTab(LocalTabPage::overview(this), "Overview");
         tabWidget->addTab(Displays::page(this), "Displays");
+        tabWidget->addTab(Storage::page(this), "Storage");
         if (!supportUrls.empty()) tabWidget->addTab(SupportPage::page(this, supportUrls), "Support");
 
         Logger::print("Finalizing layout...");

@@ -11,6 +11,8 @@ public:
 
     static CIcon* eye();
     static CIcon* eyeClosed();
+    static CIcon* lock();
+    static CIcon* lockOpen();
 private:
     QIcon* icon;
     std::string file;

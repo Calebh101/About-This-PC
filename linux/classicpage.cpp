@@ -42,8 +42,8 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     json cpuInfo = Global::getCPU();
     json gpuInfo = Global::getGPU();
     json osInfo = Global::getOS();
-    json ramInfo = Global::getMemory();
-    json serialInfo = Global::getSerial();
+    json ramInfo = Global::getHelperData("memory");
+    json serialInfo = Global::getHelperData("serial");
 
     std::vector<std::string> ramAttributes;
     std::string productFamily = Global::getFamily();
@@ -59,9 +59,9 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
     results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
 
-    ramAttributes.push_back(ramInfo["totalString"]);
+    if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
     if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
-    // if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
+    if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
     if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
 
     if (gpuInfo["status"] == true) {
@@ -84,7 +84,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
         results["Memory"] = oss.str();
     }
 
-    mainLayout->addWidget(LocalTabPage::processImage(chassis["icon"], 0, 184));
+    mainLayout->addWidget(LocalTabPage::processImage(chassis["icon"], 184));
     mainLayout->addItem(vspacer());
 
     QLabel* familyLabel = new QLabel(QString::fromStdString(productFamily));
