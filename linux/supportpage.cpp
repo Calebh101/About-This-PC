@@ -15,7 +15,7 @@ QWidget* SupportPage::page(QWidget* parent, ordered_json urls) {
     QVBoxLayout* layout = new QVBoxLayout(page);
     QGridLayout* grid = new QGridLayout();
 
-    QLabel* titleLabel = new QLabel;
+    QLabel* titleLabel = new QLabel(parent);
     QFont titleFont;
     titleFont.setPointSize(16);
     titleFont.setBold(true);

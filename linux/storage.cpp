@@ -16,7 +16,7 @@ QWidget* Storage::page(QWidget* parent) {
 
     if (data["status"] == false || data["drives"].empty()) {
         QVBoxLayout* layout = new QVBoxLayout;
-        QLabel* titleLabel = new QLabel;
+        QLabel* titleLabel = new QLabel(parent);
         QFont titleFont;
         titleFont.setPointSize(16);
         titleFont.setBold(true);
@@ -24,7 +24,7 @@ QWidget* Storage::page(QWidget* parent) {
         titleLabel->setText("Whoops!");
         titleLabel->setAlignment(Qt::AlignCenter);
 
-        QLabel* messageLabel = new QLabel;
+        QLabel* messageLabel = new QLabel(parent);
         messageLabel->setTextFormat(Qt::RichText);
         messageLabel->setText(QString("We couldn't %1 your drives.").arg(data["status"] == false ? "load" : "find"));
         messageLabel->setAlignment(Qt::AlignCenter);
@@ -64,14 +64,14 @@ QWidget* Storage::page(QWidget* parent) {
         bar->setRange(0, 100);
         bar->setValue(percentUsed);
 
-        QLabel* title = new QLabel();
+        QLabel* title = new QLabel(parent);
         QFont titleFont;
         title->setAlignment(Qt::AlignCenter);
         title->setText(drive["startup"] ? QString("%1 - Startup Disk").arg(name) : name);
         titleFont.setPointSize(12);
         title->setFont(titleFont);
 
-        QLabel* subtitle = new QLabel();
+        QLabel* subtitle = new QLabel(parent);
         QFont subtitleFont;
         subtitle->setAlignment(Qt::AlignCenter);
         subtitle->setText(QString("%1 GiB / %2 GiB (%3%) - %4").arg(Global::trimDecimal(usedG)).arg(Global::trimDecimal(totalG)).arg(std::to_string(percentUsed)).arg(data["external"] ? "External" : "Internal"));

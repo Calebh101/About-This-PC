@@ -52,12 +52,12 @@ QStringList LocalTabPage::bottomText() {
     return results;
 }
 
-QWidget* LocalTabPage::processImage(std::optional<fs::path> path, int size, int radius) {
+QWidget* LocalTabPage::processImage(std::optional<fs::path> path, QWidget* parent, int size, int radius) {
     QWidget* container = new QWidget();
     QString iconPath = path ? QString::fromStdString(path->string()) : ":default-linux-icon/images/default-linux-icon.png";
     Logger::print(QString("Processing image of path %1").arg(iconPath));
     QIcon icon(iconPath);
-    QLabel* label = new QLabel;
+    QLabel* label = new QLabel(parent);
     QPixmap pixmap = icon.pixmap(size, size);
 
     QPixmap rounded(pixmap.size());
@@ -104,7 +104,8 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
     Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
 
-    QLabel* title = new QLabel(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
+    QLabel* title = new QLabel(parent);
+    title->setText(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
     QFont font = title->font();
     float speed = cpuInfo["speed"].get<float>();
     std::ostringstream oss;
@@ -157,7 +158,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     }
 
     results["Kernel"] = osInfo["kernel"];
-    QLabel* modelLabel = new QLabel;
+    QLabel* modelLabel = new QLabel(parent);
     modelLabel->setTextFormat(Qt::RichText);
     modelLabel->setText(QString("<span style='font-weight: %3; font-size: %2pt;'>%1</span>").arg(Global::getModel()).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)));
 
@@ -183,7 +184,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     infoWidget->addWidget(title);
 
     if (!subtitleItems.empty()) {
-        QLabel* label = new QLabel;
+        QLabel* label = new QLabel(parent);
 
         font.setPointSize(fontSize * 1.25);
 
@@ -197,8 +198,8 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
     for (auto& [key, value] : results.items()) {
         QHBoxLayout* layout = new QHBoxLayout;
-        QLabel* label1 = new QLabel;
-        QLabel* label2 = new QLabel;
+        QLabel* label1 = new QLabel(parent);
+        QLabel* label2 = new QLabel(parent);
         QString text = QString::fromStdString(value.dump());
 
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
@@ -256,13 +257,13 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         // Couldn't get this to work properly, so I had to make a helper script instead
     });
 
-    layout->addWidget(processImage(iconPath, 148, 10), 5);
+    layout->addWidget(processImage(iconPath, parent, 148, 10), 5);
     layout->addLayout(infoWidget, 9);
     vlayout->addLayout(layout, 1);
 
     for (int i = 0; i < bottomText.length(); i++) {
         QString line = bottomText[i];
-        QLabel* label = new QLabel;
+        QLabel* label = new QLabel(parent);
         QFont font = label->font();
         QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(label);
 

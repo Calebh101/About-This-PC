@@ -96,7 +96,7 @@ QWidget* Displays::page(QWidget* parent) {
             int length = displays.size();
 
             if (displays.empty()) {
-                QLabel* titleLabel = new QLabel;
+                QLabel* titleLabel = new QLabel((parent));
                 QFont titleFont;
                 titleFont.setPointSize(16);
                 titleFont.setBold(true);
@@ -104,7 +104,7 @@ QWidget* Displays::page(QWidget* parent) {
                 titleLabel->setText("Whoops!");
                 titleLabel->setAlignment(Qt::AlignCenter);
 
-                QLabel* messageLabel = new QLabel;
+                QLabel* messageLabel = new QLabel(parent);
                 messageLabel->setTextFormat(Qt::RichText);
                 messageLabel->setText(QString("We couldn't find any displays."));
                 messageLabel->setAlignment(Qt::AlignCenter);
@@ -125,27 +125,30 @@ QWidget* Displays::page(QWidget* parent) {
 
                     std::string iconPath = Global::getComputerIconPath(internal ? "laptop" : "monitor");
                     double imageSize = 192 / static_cast<double>(length);
-                    QWidget* image = LocalTabPage::processImage(iconPath, imageSize);
+                    QWidget* image = LocalTabPage::processImage(iconPath, parent, imageSize);
                     layout->addWidget(image);
 
-                    QLabel* titleLabel = new QLabel(QString("%1").arg(name));
+                    QLabel* titleLabel = new QLabel(parent);
                     QFont titleFont;
+                    titleLabel->setText(QString("%1").arg(name));
                     titleFont.setPointSize(12);
                     titleLabel->setFont(titleFont);
                     titleLabel->setAlignment(Qt::AlignCenter);
                     layout->addWidget(titleLabel);
 
                     if (crtc) {
-                        QLabel* label = new QLabel(QString("%1x%2").arg(display["width"]).arg(display["height"]));
+                        QLabel* label = new QLabel(parent);
                         QFont font;
+                        label->setText(QString("%1x%2").arg(display["width"]).arg(display["height"]));
                         font.setPointSize(8);
                         label->setFont(font);
                         label->setAlignment(Qt::AlignCenter);
                         layout->addWidget(label);
                     }
 
-                    QLabel* message1 = new QLabel(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"])).arg(display["refresh"]) : QString("%1Hz").arg(display["refresh"]));
+                    QLabel* message1 = new QLabel(parent);
                     QFont font1;
+                    message1->setText(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"])).arg(display["refresh"]) : QString("%1Hz").arg(display["refresh"]));
                     font1.setPointSize(8);
                     message1->setFont(font1);
                     message1->setAlignment(Qt::AlignCenter);
@@ -157,7 +160,7 @@ QWidget* Displays::page(QWidget* parent) {
                 layout->addLayout(displayLayout);
             }
         } else {
-            QLabel* titleLabel = new QLabel;
+            QLabel* titleLabel = new QLabel(parent);
             QFont titleFont;
             titleFont.setPointSize(16);
             titleFont.setBold(true);
@@ -165,7 +168,7 @@ QWidget* Displays::page(QWidget* parent) {
             titleLabel->setText("Whoops!");
             titleLabel->setAlignment(Qt::AlignCenter);
 
-            QLabel* messageLabel = new QLabel;
+            QLabel* messageLabel = new QLabel(parent);
             messageLabel->setTextFormat(Qt::RichText);
             messageLabel->setText(QString("We encountered an issue loading your displays.").arg(server));
             messageLabel->setAlignment(Qt::AlignCenter);
@@ -174,7 +177,7 @@ QWidget* Displays::page(QWidget* parent) {
             layout->addWidget(messageLabel);
         }
     } else {
-        QLabel* titleLabel = new QLabel;
+        QLabel* titleLabel = new QLabel(parent);
         QFont titleFont;
         titleFont.setPointSize(16);
         titleFont.setBold(true);
@@ -182,7 +185,7 @@ QWidget* Displays::page(QWidget* parent) {
         titleLabel->setText("Whoops!");
         titleLabel->setAlignment(Qt::AlignCenter);
 
-        QLabel* messageLabel = new QLabel;
+        QLabel* messageLabel = new QLabel(parent);
         messageLabel->setTextFormat(Qt::RichText);
         messageLabel->setText(QString("The <span style='font-weight: bold;'>%1</span> display server is currently not supported.").arg(server));
         messageLabel->setAlignment(Qt::AlignCenter);

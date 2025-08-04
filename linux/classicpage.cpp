@@ -84,17 +84,19 @@ QWidget* ClassicPage::page(MainWindow* parent) {
         results["Memory"] = oss.str();
     }
 
-    mainLayout->addWidget(LocalTabPage::processImage(chassis["icon"], 184));
+    mainLayout->addWidget(LocalTabPage::processImage(chassis["icon"], parent, 184));
     mainLayout->addItem(vspacer());
 
-    QLabel* familyLabel = new QLabel(QString::fromStdString(productFamily));
+    QLabel* familyLabel = new QLabel(parent);
     QFont familyFont = familyLabel->font();
+    familyLabel->setText(QString::fromStdString(productFamily));
     familyFont.setPointSize(24);
     familyLabel->setFont(familyFont);
     familyLabel->setAlignment(Qt::AlignHCenter);
     mainLayout->addWidget(familyLabel);
 
-    QLabel* productLabel = new QLabel(QString::fromStdString(productName));
+    QLabel* productLabel = new QLabel(parent);
+    productLabel->setText(QString::fromStdString(productName));
     QFont productFont = productLabel->font();
     QLabel* serialValueLabel = nullptr;
 
@@ -116,8 +118,8 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     results["Kernel"] = osInfo["kernel"];
 
     for (auto& [key, value] : results.items()) {
-        QLabel* label1 = new QLabel;
-        QLabel* label2 = new QLabel;
+        QLabel* label1 = new QLabel(parent);
+        QLabel* label2 = new QLabel(parent);
         QString text = QString::fromStdString(value.dump());
 
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
@@ -156,7 +158,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
 
     for (int i = 0; i < bottomText.length(); i++) {
         QString line = bottomText[i];
-        QLabel* label = new QLabel;
+        QLabel* label = new QLabel(parent);
         QFont font = label->font();
         QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(label);
 

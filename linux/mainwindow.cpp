@@ -16,9 +16,19 @@
 #include "supportpage.h"
 #include "storage.h"
 
+void processParent(QWidget* parent) {
+    QList<QLabel*> labels = parent->findChildren<QLabel*>();
+
+    for (int i = 0; i < labels.size(); i++) {
+        QLabel* label = labels[i];
+        label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    }
+}
+
 MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
     if (classic) {
         Logger::print("Loading in classic mode...");
+        processParent(this);
         setCentralWidget(ClassicPage::page(this));
     } else {
         QWidget *central = new QWidget(this);
@@ -39,6 +49,7 @@ MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
         tabWidget->setStyleSheet("QTabWidget::tab-bar { alignment: center; }");
         mainLayout->addWidget(tabWidget);
         mainLayout->addLayout(centerLayout);
+        processParent(this);
         setCentralWidget(central);
     }
 }
