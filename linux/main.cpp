@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     if (classic) {
         size = QSize(350, 500);
     } else {
-        size = QSize(550, 300);
+        size = QSize(600, 350);
     }
 
     if (!Global::checkHelperData()) {

@@ -103,6 +103,15 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
     std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
     Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
+    std::vector<json> localIPs = Global::getLocalIPs();
+    QStringList localIPString;
+    QString localIPName;
+
+    for (int i = 0; i < localIPs.size(); i++) {
+        json item = localIPs[i];
+        QString text = QString("%1:%2").arg(item["interface"].get<std::string>()).arg(item["ip"].get<std::string>());
+        localIPString.push_back(text);
+    }
 
     QLabel* title = new QLabel(parent);
     title->setText(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
@@ -120,6 +129,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     std::string startupDiskPath = Global::getStartupDisk();
     json startupDiskInfo = Global::getDisk(startupDiskPath);
     QLabel* serialValueLabel = nullptr;
+    QLabel* localIPLabel = nullptr;
     QStringList subtitleItems;
 
     if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
@@ -147,7 +157,9 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         results["Memory"] = oss.str();
     }
 
-    if (serialInfo.contains("serial")) results["Serial"] = serialInfo["serial"];
+    if (serialInfo.contains("serial")) {
+        results["Serial"] = serialInfo["serial"];
+    }
 
     if (startupDiskInfo["status"] == true) {
         long long bytes = startupDiskInfo["bytes"].get<long long>();
@@ -155,6 +167,12 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         results["Startup Disk"] = QString("%1 %2 GB").arg(startupDiskPath).arg(std::to_string(size)).toStdString();
     } else {
         results["Startup Disk"] = startupDiskPath;
+    }
+
+    if (!localIPString.empty()) {
+        bool multiple = localIPString.size() > 1;
+        localIPName = QString("Local %1").arg(multiple ? "IPs" : "IP");
+        results[localIPName.toStdString()] = localIPString.join(", ").toStdString();
     }
 
     results["Kernel"] = osInfo["kernel"];
@@ -204,6 +222,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
         if (key == "Serial") serialValueLabel = label2;
+        if (key == localIPName.toStdString()) localIPLabel = label2;
 
         label1->setTextFormat(Qt::RichText);
         label2->setTextFormat(Qt::RichText);
@@ -244,6 +263,11 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         if (serialValueLabel != nullptr) {
             QString text = showPrivate ? QString::fromStdString(results["Serial"].get<std::string>()) : "";
             serialValueLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+        }
+
+        if (localIPLabel != nullptr) {
+            QString text = showPrivate ? QString::fromStdString(results[localIPName.toStdString()].get<std::string>()) : "";
+            localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
         }
 
         eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());

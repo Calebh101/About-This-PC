@@ -38,6 +38,7 @@ public:
     static QString mmToString(double mm);
     static std::string toSentenceCase(std::string input);
     static std::string trimDecimal(double value, int decimal = 1);
+    static std::vector<json> getLocalIPs();
 
     template<typename T>
     static std::optional<T> atKeyOrNull(const json& j, const std::string& key) {

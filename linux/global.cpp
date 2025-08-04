@@ -15,6 +15,10 @@
 #include <linux/fs.h>
 #include <dirent.h>
 #include <QLocale>
+#include <ifaddrs.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/types.h>
 
 Global::Global() {}
 
@@ -472,6 +476,37 @@ std::string Global::trimDecimal(double value, int decimal) {
     return result;
 }
 
+std::vector<json> Global::getLocalIPs() {
+    struct ifaddrs *ifaddr;
+    struct ifaddrs *ifa;
+    std::vector<json> result;
+    char ip[INET_ADDRSTRLEN];
+    if (getifaddrs(&ifaddr) == -1) return result;;
+
+    for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr) continue;
+
+        if (ifa->ifa_addr->sa_family == AF_INET) {
+            void *addr = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            inet_ntop(AF_INET, addr, ip, sizeof(ip));
+
+            if (strcmp(ifa->ifa_name, "lo") != 0) {
+                std::string interface = ifa->ifa_name;
+                std::string address = ip;
+                json j;
+
+                j["interface"] = interface;
+                j["ip"] = address;
+                result.push_back(j);
+            }
+        }
+    }
+
+    Logger::print(QString("Found %1 IPs").arg(result.size()));
+    return result;
+}
+
 bool Global::isElevated() {
     return geteuid() == 0;
+    char ip[INET_ADDRSTRLEN];
 }
