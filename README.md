@@ -42,11 +42,10 @@ There are some other links on Apple's (older) About This Mac app, like Software 
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 
 # Notes
+
 - About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information.
 
-# Notices
-
-- This project utilizes Qt, which is licensed under the GNU Lesser General Public License (LGPL) version 3.
+- About This PC for Linux utilizes Qt, which is licensed under the GNU Lesser General Public License (LGPL) version 3.
 You can obtain a copy of the LGPL here: https://www.gnu.org/licenses/lgpl-3.0.html
 Qt is a separate project and is not licensed under this project's license.
 
