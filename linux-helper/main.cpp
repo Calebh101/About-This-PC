@@ -18,6 +18,19 @@
 
 using json = nlohmann::json;
 
+QString version = "0.0.0B";
+QStringList args;
+
+void print(QString input) {
+    if (args.contains("--debug")) {
+        std::cout << QString("> %1").arg(input).toStdString() << std::endl;
+    }
+}
+
+bool isElevated() {
+    return geteuid() == 0;
+}
+
 std::string run(std::string cmd) {
     std::array<char, 128> buffer;
     std::string result;
@@ -93,13 +106,59 @@ json getMemory() {
     return results;
 }
 
+std::vector<json> getWifi() {
+    std::vector<json> result;
+    std::string command = "lshw -C network 2>/dev/null | awk '/Wireless interface/,/^$/' | grep -E 'bus info|product' | paste - - | tr '\t' '\n'";
+    std::string output = run(command);
+    std::istringstream stream(output);
+    std::string line;
+    json currentOut;
+
+    while (std::getline(stream, line)) {
+        if (!(line.empty() || line.find_first_not_of(" \t\n\r") == std::string::npos)) {
+            size_t pos = line.find(":");
+
+            if (pos != std::string::npos) {
+                std::string key = trim(line.substr(0, pos));
+                std::string value = trim(line.substr(pos + 1));
+
+                if (currentOut.contains(key)) {
+                    result.push_back(currentOut);
+                    currentOut.clear();
+                }
+
+                currentOut[key] = value;
+            }
+        }
+    }
+
+    if (!currentOut.empty()) result.push_back(currentOut);
+    return result;
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     json results;
 
+    bool showWifiInfo = false; // Disabled for now, as model strings can be really long
+    args = a.arguments();
+    print(QString("linux-helper %1").arg(version));
+
+    if (args.contains("--version")) {
+        std::cout << version.toStdString() << std::endl;
+        return 0;
+    }
+
+    if (!isElevated()) {
+        std::cerr << "Program needs to be run with elevated permissions." << std::endl;
+        return 2;
+    }
+
+    results["helper"]["version"] = version.toStdString();
     results["serial"] = getSerial();
-    results["memory"] = getMemory();
+    if (showWifiInfo) results["memory"] = getMemory();
+    results["network"]["wifi"] = getWifi();
 
     std::cout << results.dump() << std::endl;
     return 0;

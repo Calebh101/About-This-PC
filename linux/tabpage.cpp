@@ -87,6 +87,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
     json osInfo = Global::getOS(); // Load operating system (distro) info
     json ramInfo = Global::getHelperData("memory"); // Load memory info (from helper data)
     json serialInfo = Global::getHelperData("serial"); // Load serial info (from helper data)
+    json networkInfo = Global::getHelperData("network"); // Load network info (from helper data)
     std::vector<json> localIPs = Global::getLocalIPs(); // Load local IP info
 
     QStringList localIPString;
@@ -136,6 +137,22 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
         results["Memory"] = oss.str();
     }
 
+    if (networkInfo.contains("wifi")) {
+        std::vector<json> wifis = networkInfo["wifi"];
+        QStringList string;
+
+        for (int i = 0; i < wifis.size(); i++) {
+            json wifi = wifis[i];
+            if (!wifi.contains("product") || !wifi.contains("bus info")) continue;
+            string.push_back(QString("%1 (%2)").arg(wifi["product"].get<std::string>()).arg(wifi["bus info"].get<std::string>()));
+        }
+
+        if (!string.empty()) {
+            Logger::print(QString("Found %1 WiFi cards").arg(string.size()));
+            results["WiFi"] = string.join(", ").toStdString();
+        }
+    }
+
     if (serialInfo.contains("serial")) {
         results["Serial"] = serialInfo["serial"];
     }
@@ -156,7 +173,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
 
     results["Kernel"] = osInfo["kernel"];
 
-    json j;
+    ordered_json j;
     j["results"] = results;
     j["localIPName"] = localIPName.toStdString();
     return j;

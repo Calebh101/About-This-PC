@@ -508,5 +508,4 @@ std::vector<json> Global::getLocalIPs() {
 
 bool Global::isElevated() {
     return geteuid() == 0;
-    char ip[INET_ADDRSTRLEN];
 }
