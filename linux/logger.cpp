@@ -29,8 +29,8 @@ void _verbose(const std::string input) {
     std::cout << "\e[2mVBS " + currentDate() + " > \e[0m\e[2m " + input + "\e[0m" << std::endl;
 }
 
-void Logger::print(const QString& input) {
-    if (!useLogging) return;
+void Logger::print(const QString& input, bool override) {
+    if (!useLogging && !override) return;
     std::cout << "LOG " + currentDate() + " > \e[0m " + input.toStdString() + "\e[0m" << std::endl;
 }
 
@@ -42,19 +42,13 @@ void Logger::error(const QString& input) {
     std::cout << "ERR " + currentDate() + " > \e[0m\e[31m " + input.toStdString() + "\e[0m" << std::endl;
 }
 
-void Logger::success(const QString& input) {
-    if (!useLogging) return;
+void Logger::success(const QString& input, bool override) {
+    if (!useLogging && !override) return;
     std::cout << "SCS " + currentDate() + " > \e[0m\e[32m " + input.toStdString() + "\e[0m" << std::endl;
 }
 
-void Logger::raw(const QString& input) {
-    if (!useLogging) return;
-    std::cout << input.toStdString() << std::endl;
-}
-
-void Logger::verbose(const QString& input) {
-    if (!useLogging) return;
-    if (!useVerbose) return;
+void Logger::verbose(const QString& input, bool override) {
+    if ((!useLogging || !useVerbose) && !override) return;
     _verbose(input.toStdString());
 }
 

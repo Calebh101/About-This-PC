@@ -36,62 +36,16 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     QHBoxLayout *mainColumnLayout = new QHBoxLayout();
     QVBoxLayout *leftLayout = new QVBoxLayout();
     QVBoxLayout *rightLayout = new QVBoxLayout();
-    ordered_json results;
 
-    json chassis = Global::getChassis();
-    json cpuInfo = Global::getCPU();
-    json gpuInfo = Global::getGPU();
     json osInfo = Global::getOS();
-    json ramInfo = Global::getHelperData("memory");
-    json serialInfo = Global::getHelperData("serial");
+    json chassis = Global::getChassis();
+    json details = LocalTabPage::getDetails(parent);
+    ordered_json results = details["results"];
+    std::string localIPName = details["localIPName"];
 
-    std::vector<std::string> ramAttributes;
     std::string productFamily = Global::getFamily();
     std::string productName = Global::getModel();
-    std::string startupDiskPath = Global::getStartupDisk();
-    json startupDiskInfo = Global::getDisk(startupDiskPath);
-    std::vector<json> localIPs = Global::getLocalIPs();
     QStringList localIPString;
-    QString localIPName;
-
-    for (int i = 0; i < localIPs.size(); i++) {
-        json item = localIPs[i];
-        QString text = QString("%1:%2").arg(item["interface"].get<std::string>()).arg(item["ip"].get<std::string>());
-        localIPString.push_back(text);
-    }
-
-    float speed = cpuInfo["speed"].get<float>();
-    std::ostringstream oss;
-    oss << std::defaultfloat << std::setprecision(2) << speed;
-    std::string speedString = oss.str();
-
-    std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
-    results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
-
-    if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
-    if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
-    if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
-    if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
-
-    if (gpuInfo["status"] == true) {
-        json gpu = gpuInfo["gpus"].front();
-        int vram = gpu["vram"].get<int>();
-        std::ostringstream oss;
-        oss << std::defaultfloat << std::setprecision(2) << (vram / 1000.0);
-        QString text = QString("%1 %2GB").arg(gpu["name"].get<std::string>()).arg(oss.str());
-        results["Graphics"] = text.toStdString();
-    }
-
-    if (!ramAttributes.empty()) {
-        std::ostringstream oss;
-
-        for (size_t i = 0; i < ramAttributes.size(); ++i) {
-            if (i > 0) oss << ' ';
-            oss << ramAttributes[i];
-        }
-
-        results["Memory"] = oss.str();
-    }
 
     mainLayout->addWidget(LocalTabPage::processImage(chassis["icon"], parent, 184));
     mainLayout->addItem(vspacer());
@@ -115,23 +69,6 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     productLabel->setAlignment(Qt::AlignHCenter);
     mainLayout->addWidget(productLabel);
     mainLayout->addItem(vspacer());
-    if (serialInfo.contains("serial")) results["Serial"] = (showPrivate ? serialInfo["serial"] : "");
-
-    if (startupDiskInfo["status"] == true) {
-        long long bytes = startupDiskInfo["bytes"].get<long long>();
-        int size = bytes / 1000.0 / 1000.0 / 1000.0;
-        results["Startup Disk"] = QString("%1 %2 GB").arg(startupDiskPath).arg(std::to_string(size)).toStdString();
-    } else {
-        results["Startup Disk"] = startupDiskPath;
-    }
-
-    if (!localIPString.empty()) {
-        bool multiple = localIPString.size() > 1;
-        localIPName = QString("Local %1").arg(multiple ? "IPs" : "IP");
-        results[localIPName.toStdString()] = localIPString.join(", ").toStdString();
-    }
-
-    results["Kernel"] = osInfo["kernel"];
 
     for (auto& [key, value] : results.items()) {
         QLabel* label1 = new QLabel(parent);
@@ -140,7 +77,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
 
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
         if (key == "Serial") serialValueLabel = label2;
-        if (key == localIPName.toStdString()) localIPLabel = label2;
+        if (key == localIPName) localIPLabel = label2;
 
         label1->setTextFormat(Qt::RichText);
         label2->setTextFormat(Qt::RichText);
@@ -211,7 +148,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
         }
 
         if (localIPLabel != nullptr) {
-            QString text = showPrivate ? QString::fromStdString(results[localIPName.toStdString()].get<std::string>()) : "";
+            QString text = showPrivate ? QString::fromStdString(results[localIPName].get<std::string>()) : "";
             localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
         }
 

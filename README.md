@@ -8,7 +8,7 @@ About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux 
 
 In the **Overview** page, you'll see your Linux distro's "pretty name" (from the `os-release` standard), along with the version, codename, and other identifiers (based on what's given by your distro) beneath it.
 
-You can also see details like your laptop model, processor, graphics, startup disk, local IP(s), and your kernel version. You can also see memory and serial if run with elevated permissions.
+You can also see details like your laptop model, processor, graphics, etcetera. Memory and serial require elevated permissions.
 
 The icon on the side uses a name taken from the `os-release` standard again, and (if found) will search in some directories to try to find the icon file. If none are found, it'll default to an image of Tux.
 

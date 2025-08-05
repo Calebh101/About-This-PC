@@ -48,7 +48,7 @@ std::optional<fs::path> LocalTabPage::getIconPath(std::string id) {
 
 QStringList LocalTabPage::bottomText() {
     QStringList results;
-    results.append(QString("About This PC %1 by Calebh101").arg(Global::version));
+    results.append(QString("About This PC %1").arg(Global::version));
     return results;
 }
 
@@ -78,32 +78,17 @@ QWidget* LocalTabPage::processImage(std::optional<fs::path> path, QWidget* paren
 
 LocalTabPage::LocalTabPage() {}
 
-QWidget* LocalTabPage::overview(QWidget* parent) {
-    bool showPrivate = true;
-    bool showLockButton = false;
-    bool isElevated = Global::isElevated();
-    float fontSize = Global::fontSize;
-    int fontWeight = Global::fontWeight;
-
-    QWidget *page = new QWidget();
-    QVBoxLayout *vlayout = new QVBoxLayout();
-    QVBoxLayout *infoWidget = new QVBoxLayout();
-    QHBoxLayout *layout = new QHBoxLayout();
-    QHBoxLayout* bottomLayout = new QHBoxLayout();
-    QVBoxLayout* bottomTextLayout = new QVBoxLayout();
+ordered_json LocalTabPage::getDetails(QWidget* parent) {
     ordered_json results;
 
-    json chassis = Global::getChassis();
-    json cpuInfo = Global::getCPU();
-    json gpuInfo = Global::getGPU();
-    json osInfo = Global::getOS();
-    json ramInfo = Global::getHelperData("memory");
-    json serialInfo = Global::getHelperData("serial");
+    json chassis = Global::getChassis(); // Load chassis (model)
+    json cpuInfo = Global::getCPU(); // Load CPU info
+    json gpuInfo = Global::getGPU(); // Load GPU info
+    json osInfo = Global::getOS(); // Load operating system (distro) info
+    json ramInfo = Global::getHelperData("memory"); // Load memory info (from helper data)
+    json serialInfo = Global::getHelperData("serial"); // Load serial info (from helper data)
+    std::vector<json> localIPs = Global::getLocalIPs(); // Load local IP info
 
-    std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
-    std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
-    Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
-    std::vector<json> localIPs = Global::getLocalIPs();
     QStringList localIPString;
     QString localIPName;
 
@@ -113,9 +98,6 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         localIPString.push_back(text);
     }
 
-    QLabel* title = new QLabel(parent);
-    title->setText(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
-    QFont font = title->font();
     float speed = cpuInfo["speed"].get<float>();
     std::ostringstream oss;
     oss << std::defaultfloat << std::setprecision(2) << speed;
@@ -128,9 +110,6 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     std::string productName = Global::getModel();
     std::string startupDiskPath = Global::getStartupDisk();
     json startupDiskInfo = Global::getDisk(startupDiskPath);
-    QLabel* serialValueLabel = nullptr;
-    QLabel* localIPLabel = nullptr;
-    QStringList subtitleItems;
 
     if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
     if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
@@ -176,6 +155,42 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     }
 
     results["Kernel"] = osInfo["kernel"];
+
+    json j;
+    j["results"] = results;
+    j["localIPName"] = localIPName.toStdString();
+    return j;
+}
+
+QWidget* LocalTabPage::overview(QWidget* parent) {
+    bool showPrivate = true;
+    bool showLockButton = false;
+    bool isElevated = Global::isElevated();
+    float fontSize = Global::fontSize;
+    int fontWeight = Global::fontWeight;
+
+    QWidget *page = new QWidget();
+    QVBoxLayout *vlayout = new QVBoxLayout();
+    QVBoxLayout *infoWidget = new QVBoxLayout();
+    QHBoxLayout *layout = new QHBoxLayout();
+    QHBoxLayout* bottomLayout = new QHBoxLayout();
+    QVBoxLayout* bottomTextLayout = new QVBoxLayout();
+    QLabel* serialValueLabel = nullptr;
+    QLabel* localIPLabel = nullptr;
+    QStringList subtitleItems;
+    json details = getDetails(parent);
+    ordered_json results = details["results"];
+    std::string localIPName = details["localIPName"];
+
+    json osInfo = Global::getOS();
+    std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
+    std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
+    Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
+
+    QLabel* title = new QLabel(parent);
+    title->setText(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
+    QFont font = title->font();
+
     QLabel* modelLabel = new QLabel(parent);
     modelLabel->setTextFormat(Qt::RichText);
     modelLabel->setText(QString("<span style='font-weight: %3; font-size: %2pt;'>%1</span>").arg(Global::getModel()).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)));
@@ -183,6 +198,11 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     font.setPointSize(fontSize * 2);
     font.setWeight(static_cast<QFont::Weight>(fontWeight * 1.5));
     title->setFont(font);
+
+    infoWidget->setAlignment(Qt::AlignTop);
+    infoWidget->addWidget(title);
+    infoWidget->addSpacing(10);
+    infoWidget->addWidget(modelLabel);
 
     std::string releaseType = osInfo.contains("RELEASE_TYPE") ? osInfo["RELEASE_TYPE"] : "stable";
     std::string releaseTypeString = releaseType;
@@ -198,22 +218,6 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     if (osInfo.contains("BUILD_ID")) subtitleItems.push_back(QString("(%1)").arg(osInfo["BUILD_ID"]));
     if (releaseType != "stable") subtitleItems.push_back(QString::fromStdString(releaseTypeString)); // Sometimes OSes just don't include this even if it is LTS or Experimental, so we shouldn't force a default; so instead we omit the property.
 
-    infoWidget->setAlignment(Qt::AlignTop);
-    infoWidget->addWidget(title);
-
-    if (!subtitleItems.empty()) {
-        QLabel* label = new QLabel(parent);
-
-        font.setPointSize(fontSize * 1.25);
-
-        label->setText(subtitleItems.join(" "));
-        label->setFont(font);
-        infoWidget->addWidget(label);
-    }
-
-    infoWidget->addSpacing(10);
-    infoWidget->addWidget(modelLabel);
-
     for (auto& [key, value] : results.items()) {
         QHBoxLayout* layout = new QHBoxLayout;
         QLabel* label1 = new QLabel(parent);
@@ -222,7 +226,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
         if (value.is_string()) text = QString::fromStdString(value.get<std::string>());
         if (key == "Serial") serialValueLabel = label2;
-        if (key == localIPName.toStdString()) localIPLabel = label2;
+        if (key == localIPName) localIPLabel = label2;
 
         label1->setTextFormat(Qt::RichText);
         label2->setTextFormat(Qt::RichText);
@@ -266,7 +270,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         }
 
         if (localIPLabel != nullptr) {
-            QString text = showPrivate ? QString::fromStdString(results[localIPName.toStdString()].get<std::string>()) : "";
+            QString text = showPrivate ? QString::fromStdString(results[localIPName].get<std::string>()) : "";
             localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
         }
 
