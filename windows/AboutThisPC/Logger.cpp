@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <regex>
 
 Logger::Logger() {}
 bool useVerbose = false;
@@ -27,26 +28,37 @@ std::string currentDate() {
 }
 
 void _verbose(const std::string input) {
-    if (!useLogging) return;
-    std::cout << "\e[2mVBS " + currentDate() + " > \e[0m\e[2m " + input + "\e[0m" << std::endl;
+    _output("VBS", input, 2, true);
+}
+
+void _output(const std::string prefix, const std::string input, const int effect = 0, const bool allEffect = false) {
+    std::string effectString = "\e[" + std::to_string(effect) + "m";
+    std::string output = (allEffect ? effectString : "") + prefix + " " + currentDate() + " > \e[0m" + effectString + " " + input + "\e[0m\n";
+    std::regex effectPattern("\\e\[-?\d+m");
+
+    if (IsDebuggerPresent()) {
+        OutputDebugStringA(std::regex_replace(output, effectPattern, "").c_str());
+    } else {
+        std::cout << output << std::endl;
+    }
 }
 
 void Logger::print(const std::string& input, bool override) {
     if (!useLogging && !override) return;
-    std::cout << "LOG " + currentDate() + " > \e[0m " + input + "\e[0m" << std::endl;
+    _output("LOG", input);
 }
 
 void Logger::warn(const std::string& input) {
-    std::cout << "WRN " + currentDate() + " > \e[0m\e[33m " + input + "\e[0m" << std::endl;
+    _output("WRN", input, 33);
 }
 
 void Logger::error(const std::string& input) {
-    std::cout << "ERR " + currentDate() + " > \e[0m\e[31m " + input + "\e[0m" << std::endl;
+    _output("ERR", input, 31);
 }
 
 void Logger::success(const std::string& input, bool override) {
     if (!useLogging && !override) return;
-    std::cout << "SCS " + currentDate() + " > \e[0m\e[32m " + input + "\e[0m" << std::endl;
+    _output("SCS", input, 32);
 }
 
 void Logger::verbose(const std::string& input, bool override) {
