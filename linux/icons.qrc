@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="eye-light">images/icons/eye-solid-full-light.svg</file>
+        <file alias="eye-slash-light">images/icons/eye-slash-solid-full-light.svg</file>
+        <file alias="eye-slash-dark">images/icons/eye-slash-solid-full-dark.svg</file>
+        <file alias="eye-dark">images/icons/eye-solid-full-dark.svg</file>
+        <file alias="lock-open-dark">images/icons/lock-open-solid-full-dark.svg</file>
+        <file alias="lock-open-light">images/icons/lock-open-solid-full-light.svg</file>
+        <file alias="lockk-dark">images/icons/lock-solid-full-dark.svg</file>
+        <file alias="lock-light">images/icons/lock-solid-full-light.svg</file>
+    </qresource>
+</RCC>

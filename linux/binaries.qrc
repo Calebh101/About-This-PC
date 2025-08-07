@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/binaries">
+        <file alias="helper">binaries/linux-helper</file>
+    </qresource>
+</RCC>
