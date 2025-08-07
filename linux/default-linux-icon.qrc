@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/images">
-        <file>images/default-linux-icon.png</file>
-    </qresource>
-</RCC>
