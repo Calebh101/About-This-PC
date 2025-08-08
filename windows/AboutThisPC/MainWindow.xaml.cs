@@ -1,8 +1,9 @@
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using System;
 using Windows.Graphics;
 using WinRT.Interop;
-using Microsoft.UI.Windowing;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -43,7 +44,23 @@ namespace AboutThisPC
                 presenter.IsMaximizable = false;
             }
 
+            Logger.Verbose("Window size detected: " + width + "x" + height);
             appWindow?.Resize(new SizeInt32(width, height));
+            this.ExtendsContentIntoTitleBar = true;
+
+            if (appWindow != null)
+            {
+                appWindow.TitleBar.BackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+                appWindow.TitleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+            }
+
+            if (classic)
+            {
+                MainFrame.Navigate(typeof(ClassicPage));
+            } else
+            {
+                MainFrame.Navigate(typeof(MainPage));
+            }
         }
     }
 }

@@ -341,7 +341,6 @@ json Global::getChassis() {
                 result["name"] = "Notebook";
                 icon = "laptop";
                 break;
-                break;
 
             case 11:
             case 30:

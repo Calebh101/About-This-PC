@@ -26,7 +26,27 @@ namespace AboutThisPC
     /// </summary>
     public partial class App : Application
     {
+        public string Version = "0.0.0A";
         private Window? _window;
+
+        public enum Windows
+        {
+            ten = 10,
+            eleven = 11,
+        }
+
+        public static string GetDriveLetter()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.System)[..1];
+        }
+
+        public static Windows GetWindows()
+        {
+            var build = Environment.OSVersion.Version.Build;
+            if (build > 22000) return Windows.eleven;
+            else if (build > 10240) return Windows.ten;
+            else throw new Exception("Invalid Windows build number: " + build);
+        }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -34,6 +54,7 @@ namespace AboutThisPC
         /// </summary>
         public App()
         {
+            Logger.Print("Starting AboutThisPC version " + Version + "...", true);
             InitializeComponent();
         }
 
@@ -43,8 +64,8 @@ namespace AboutThisPC
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            bool classic = true;
             string arguments = args.Arguments;
-            bool classic = false;
 
             if (!string.IsNullOrEmpty(arguments))
             {
@@ -53,6 +74,11 @@ namespace AboutThisPC
                     classic = true;
                 }
             }
+
+#if DEBUG
+            Logger.EnableLogging();
+            Logger.EnableVerbose();
+#endif
 
             _window = new MainWindow(classic);
             _window.Activate();
