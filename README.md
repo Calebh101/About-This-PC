@@ -4,7 +4,9 @@ This is a small project I'm in the process of making, that is supposed to be lik
 
 # Linux
 
-About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux distros (compared to Windows, which only has 10 and 11), so bear with me while I improve it over time.
+About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux distros (compared to Windows, which modern Windows only has 10 and 11), so bear with me while I improve it over time. I've hopefully prepared enough for this though.
+
+About This PC for Linux is written entirely in C++ for at least a semi-native look.
 
 In the **Overview** page, you'll see your Linux distro's "pretty name" (from the `os-release` standard), along with the version, codename, and other identifiers (based on what's given by your distro) beneath it.
 
