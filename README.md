@@ -43,6 +43,17 @@ There are some other links on Apple's (older) About This Mac app, like Software 
 - `--classic`: Load the "classic" page.
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 
+# Windows
+
+About This PC for Windows is written in mostly C# (due to the amount of support it has with WinUI) and some XML for the UI. The UI isn't as dynamic as the Linux version, but I get Hot Reload so that's all that matters. The Windows version uses a lot of WMI to get info like the processor, graphics, and pretty much everything. (It also doesn't need elevated permissions, so I didn't have that weird issue I had on the Linux version.)
+
+I used WinUI for this as it was the best option for a native look in my opinion, and it's also pretty straightforward to make UI elements in.
+
+## Boot Arguments
+
+- `--classic`: Load the "classic" page.
+- `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
+
 # Notes
 
 - About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information.
