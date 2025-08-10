@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -11,6 +6,12 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -26,7 +27,7 @@ namespace AboutThisPC
     /// </summary>
     public partial class App : Application
     {
-        public string Version = "0.0.0A";
+        static public string Version = "0.0.0A";
         private Window? _window;
 
         public enum Windows
@@ -48,6 +49,29 @@ namespace AboutThisPC
             else throw new Exception("Invalid Windows build number: " + build);
         }
 
+        public static string GetWindows(Windows windows)
+        {
+            switch (windows)
+            {
+                case Windows.ten: return "10";
+                case Windows.eleven: return "11";
+                default: return "12";
+            }
+        }
+
+        public static string GetWindowsFeatureRelease()
+        {
+            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            if (key != null)
+            {
+                var releaseId = key.GetValue("ReleaseId") as string;
+                var displayVersion = key.GetValue("DisplayVersion") as string;
+
+                return displayVersion ?? releaseId ?? "Unknown";
+            }
+            return "Unknown";
+        }
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -64,7 +88,7 @@ namespace AboutThisPC
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            bool classic = true;
+            bool classic = false;
             string arguments = args.Arguments;
 
             if (!string.IsNullOrEmpty(arguments))

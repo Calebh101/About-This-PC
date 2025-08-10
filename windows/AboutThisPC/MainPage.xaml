@@ -6,9 +6,15 @@
     xmlns:local="using:AboutThisPC"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid>
-
-    </Grid>
+    <controls:NavigationView PaneDisplayMode="Top" IsBackButtonVisible="Collapsed" IsSettingsVisible="False">
+        <controls:NavigationView.MenuItems>
+            <controls:NavigationViewItem Content="Overview" IsSelected="True" />
+            <controls:NavigationViewItem Content="Displays" />
+            <controls:NavigationViewItem Content="Storage" />
+            <controls:NavigationViewItem Content="Support" />
+        </controls:NavigationView.MenuItems>
+    </controls:NavigationView>
 </Page>

@@ -8,6 +8,7 @@ using System.Management;
 using System.Net;
 using System.Net.Sockets;
 using System.Resources;
+using System.Runtime.InteropServices;
 using Windows.ApplicationModel;
 
 namespace AboutThisPC
@@ -22,7 +23,7 @@ namespace AboutThisPC
             var startupDisk = GetStartupDisk();
             var localIp = GetLocalIP();
             var graphics = GetGPU();
-            var memory = getMemory();
+            var memory = GetMemory();
 
             if (processor != null) results["Processor"] = processor;
             results["Graphics"] = graphics.Name + " " + Math.Round(graphics.Bytes / (1000.0 * 1000.0), 0).ToString() + "MB";
@@ -30,28 +31,44 @@ namespace AboutThisPC
             if (serial != null) results["Serial"] = serial;
             results["Startup Disk"] = startupDisk.Name + " (" + startupDisk.Letter + ":) " + Math.Round(startupDisk.Bytes / (1000.0 * 1000.0 * 1000.0), 0).ToString() + "GB";
             if (localIp.Any()) results["Local IP"] = string.Join(", ", localIp);
-            results["Windows"] = Environment.OSVersion.Version.ToString();
+            results["Windows"] = GetWindowsString();
             return results;
         }
 
-        public static Dictionary<string, string> getSupportURLs()
+        public static string GetWindowsString()
         {
-            var results = new Dictionary<string, string>();
-            results["Support"] = "https://support.microsoft.com/";
-            results["Community"] = "https://answers.microsoft.com";
+            return "Windows " + App.GetWindows(App.GetWindows()) + " " + App.GetWindowsFeatureRelease();
+        }
 
-            results["Windows Help"] = "https://support.microsoft.com/windows";
-            results["Windows Update Troubleshooter"] = "https://support.microsoft.com/help/4027322/windows-update-troubleshooter";
-            results["Windows Activation"] = "https://support.microsoft.com/help/12440/windows-10-activation";
-            results["Windows Security"] = "https://support.microsoft.com/windows/windows-security-help-2a0a2485-024a-44e6-90d6-1d26186e7759";
-            results["Windows Recovery"] = "https://support.microsoft.com/windows/recovery-options-in-windows-10-f4b99a99-42c1-d704-86b7-52293d29f42b";
-            results["Windows Installation Media"] = "https://www.microsoft.com/software-download/windows10";
-            results["Windows 11 Download"] = "https://www.microsoft.com/software-download/windows11";
+        public static (string Family, string Model) GetComputerDetails()
+        {
+            var chassis = GetChassis();
+            var obj = SearchFor("SELECT Manufacturer,Model FROM Win32_ComputerSystem");
+            if (obj == null) return ("Unknown " + chassis.Name, "Unknown");
+            var manufacturer = (string)obj["Manufacturer"];
+            var model = (string)obj["Model"];
+            return ((manufacturer ?? "Unknown") + " " + chassis.Name,  model);
+        }
 
-            // My own plugs hehe
-            results["GitHub"] = "https://github.com/Calebh101/About-This-PC";
-            results["GitHub Issues"] = "https://github.com/Calebh101/About-This-PC/issues";
-            return results;
+        public static Dictionary<string, string> GetSupportURLs()
+        {
+            return new Dictionary<string, string>
+            {
+                ["Support"] = "https://support.microsoft.com/",
+                ["Community"] = "https://answers.microsoft.com",
+
+                ["Windows Help"] = "https://support.microsoft.com/windows",
+                ["Windows Update Troubleshooter"] = "https://support.microsoft.com/help/4027322/windows-update-troubleshooter",
+                ["Windows Activation"] = "https://support.microsoft.com/help/12440/windows-10-activation",
+                ["Windows Security"] = "https://support.microsoft.com/windows/windows-security-help-2a0a2485-024a-44e6-90d6-1d26186e7759",
+                ["Windows Recovery"] = "https://support.microsoft.com/windows/recovery-options-in-windows-10-f4b99a99-42c1-d704-86b7-52293d29f42b",
+                ["Windows Installation Media"] = "https://www.microsoft.com/software-download/windows10",
+                ["Windows 11 Download"] = "https://www.microsoft.com/software-download/windows11",
+
+                // My own plugs hehe
+                ["GitHub"] = "https://github.com/Calebh101/About-This-PC",
+                ["GitHub Issues"] = "https://github.com/Calebh101/About-This-PC/issues"
+            };
         }
 
         public static List<ManagementObject> SearchForAll(string query)
@@ -106,7 +123,7 @@ namespace AboutThisPC
             if (data == null) return null;
             string model = data["Name"]?.ToString() ?? "Unknown";
             uint speed = (uint)(data["MaxClockSpeed"] ?? 0);
-            return Math.Round(speed / 1000.0, 1).ToString() + "GHz " + model;
+            return GetArchitecture() + " " + Math.Round(speed / 1000.0, 1).ToString() + "GHz " + model;
         }
 
         private static (string Letter, string Name, double Bytes) GetStartupDisk()
@@ -133,7 +150,7 @@ namespace AboutThisPC
 
         private static (string Name, ulong Bytes) GetGPU()
         {
-            ManagementObject? item = SearchFor("SELECT Name, AdapterRAM FROM Win32_VideoController");
+            ManagementObject? item = SearchFor("SELECT Name,AdapterRAM FROM Win32_VideoController");
             if (item == null) return ("Unknown", 0);
 
             string name = item?["Name"]?.ToString() ?? "Unknown";
@@ -142,7 +159,7 @@ namespace AboutThisPC
             return (name, bytes);
         }
 
-        private static (ulong Bytes, string Generation, string Speed, string FormFactor) getMemory()
+        private static (ulong Bytes, string Generation, string Speed, string FormFactor) GetMemory()
         {
             ManagementObject? item = SearchFor("SELECT * FROM Win32_PhysicalMemory");
             if (item == null) return (0, "Unknown", "Unknown", "Unknown");
@@ -195,33 +212,26 @@ namespace AboutThisPC
             return ulong.TryParse(input.ToString(), out output);
         }
 
-        public static (string Name, string? Icon) getChassis()
+        public static (string Name, string? Icon) GetChassis()
         {
             ManagementObject? item = SearchFor("SELECT ChassisTypes FROM Win32_SystemEnclosure");
             if (item == null) return ("Unknown", null);
 
             ushort[] types = (ushort[])item["ChassisTypes"];
             if (types.Length == 0) return ("Unknown", null);
-            var details = getChassisDetails(types.Select(x => (int)x).ToList());
+            var details = GetChassisDetails(types.Select(x => (int)x).ToList());
 
-            var rm = new ResourceManager("AboutThisPC.Resources", typeof(App).Assembly);
-            string found = "ERR";
+            string iconName = details.Icon + ".png";
+            string icon = $"ms-appx:///Assets/computers/{iconName}";
 
-            try
-            {
-                found = rm.GetString(details.Icon)!;
-            } catch (Exception e)
-            {
-                Logger.Warn("Error getting resource " + details.Icon + ": " + e.Message);
-            }
-
-            return (string.Join("/", details.Names), $"ms-appx:///{found.Split(';')[0].Replace('\\', '/')}");
+            Logger.Print("Found icon resource: " + icon);
+            return (string.Join("/", details.Names), icon);
         }
 
-        public static (List<string> Names, List<int> Numbers, string Icon) getChassisDetails(List<int> input)
+        public static (List<string> Names, List<int> Numbers, string Icon) GetChassisDetails(List<int> input)
         {
-            List<Dictionary<string, dynamic>> output = new List<Dictionary<string, dynamic>>();
-            List<string> icons = new List<string>();
+            List<Dictionary<string, dynamic>> output = [];
+            List<string> icons = [];
 
             foreach (var type in input)
             {
@@ -297,6 +307,25 @@ namespace AboutThisPC
 
             string iconChosen = icons.GroupBy(s => s).OrderByDescending(g => g.Count()).ThenBy(g => g.Key).First().Key;
             return (output.Select(x => (string)x["name"].ToString()).ToList<string>(), output.Select(x => (int)x["number"]).ToList<int>(), iconChosen);
+        }
+
+        static string GetArchitecture()
+        {
+            string arch = RuntimeInformation.OSArchitecture.ToString();
+
+            if (arch == "X64") return "x64";
+            if (arch == "X86") return "x86";
+            if (arch == "Arm64") return "ARM64";
+            if (arch == "Arm") return "ARM";
+
+            return "Unknown";
+        }
+
+        public static List<string> GetBottomText()
+        {
+            return [
+                "About This PC " + App.Version + " by Calebh101",
+            ];
         }
     }
 }

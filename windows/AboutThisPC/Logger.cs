@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace AboutThisPC
 {
@@ -14,7 +15,8 @@ namespace AboutThisPC
 
             if (Debugger.IsAttached)
             {
-                System.Diagnostics.Debug.WriteLine(output);
+                string pattern = "\\\\e\\[\\d+m";
+                System.Diagnostics.Debug.WriteLine(Regex.Replace(output, pattern, ""));
             } else
             {
                 Console.WriteLine(output);

@@ -17,6 +17,7 @@ namespace AboutThisPC
     {
         public MainWindow(bool classic)
         {
+            bool redoTitlebar = true; // Make content expand into it
             InitializeComponent();
 
             int width;
@@ -46,9 +47,9 @@ namespace AboutThisPC
 
             Logger.Verbose("Window size detected: " + width + "x" + height);
             appWindow?.Resize(new SizeInt32(width, height));
-            this.ExtendsContentIntoTitleBar = true;
+            if (redoTitlebar) this.ExtendsContentIntoTitleBar = true;
 
-            if (appWindow != null)
+            if (redoTitlebar && appWindow != null)
             {
                 appWindow.TitleBar.BackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
                 appWindow.TitleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
@@ -56,9 +57,11 @@ namespace AboutThisPC
 
             if (classic)
             {
+                MainWindowGrid.Margin = new Thickness(0, 32, 0, 0);
                 MainFrame.Navigate(typeof(ClassicPage));
             } else
             {
+                MainWindowGrid.Margin = new Thickness(0, 0, 0, 0);
                 MainFrame.Navigate(typeof(MainPage));
             }
         }
