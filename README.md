@@ -4,7 +4,9 @@ This is a small project I'm in the process of making, that is supposed to be lik
 
 # Linux
 
-About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux distros (compared to Windows, which only has 10 and 11), so bear with me while I improve it over time.
+About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux distros (compared to Windows, which modern Windows only has 10 and 11), so bear with me while I improve it over time. I've hopefully prepared enough for this though.
+
+About This PC for Linux is written entirely in C++ for at least a semi-native look.
 
 In the **Overview** page, you'll see your Linux distro's "pretty name" (from the `os-release` standard), along with the version, codename, and other identifiers (based on what's given by your distro) beneath it.
 
@@ -35,6 +37,17 @@ This next page is not in a tab bar like the others, but is instead different fro
 ## Where are the links in the Overview page?
 
 There are some other links on Apple's (older) About This Mac app, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
+
+## Boot Arguments
+
+- `--classic`: Load the "classic" page.
+- `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
+
+# Windows
+
+About This PC for Windows is written in mostly C# (due to the amount of support it has with WinUI) and some XML for the UI. The UI isn't as dynamic as the Linux version, but I get Hot Reload so that's all that matters. The Windows version uses a lot of WMI to get info like the processor, graphics, and pretty much everything. (It also doesn't need elevated permissions, so I didn't have that weird issue I had on the Linux version.)
+
+I used WinUI for this as it was the best option for a native look in my opinion, and it's also pretty straightforward to make UI elements in.
 
 ## Boot Arguments
 
