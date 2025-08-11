@@ -27,7 +27,7 @@ namespace AboutThisPC
             var presenter = appWindow.Presenter as OverlappedPresenter;
 
             if (classic) dimensions = new App.Dimensions(350, 500);
-            else /* - */ dimensions = new App.Dimensions(600, 350);
+            else /* - */ dimensions = new App.Dimensions(600, 375);
 
             if (presenter != null)
             {

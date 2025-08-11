@@ -97,8 +97,20 @@ namespace AboutThisPC
             EyeIconLine.Visibility = isEye ? Visibility.Visible : Visibility.Collapsed;
             TextBlock? serialBlock = widgets["Results(serial)"];
             serialBlock.Text = isEye ? (widgetValues.Find((x) => x.Id == "serial")!.Value) : "";
-            TextBlock? ipBlock = widgets["Results(local_iP)"];
+            TextBlock? ipBlock = widgets["Results(local_ip)"];
             ipBlock.Text = isEye ? (widgetValues.Find((x) => x.Id == "local_ip")!.Value) : "";
+        }
+
+        private async void MoreInfoButtonClick(object sender, RoutedEventArgs e)
+        {
+            Uri uri = new Uri("ms-settings:about");
+            await Windows.System.Launcher.LaunchUriAsync(uri);
+        }
+
+        private async void SoftwareUpdateButtonClick(object sender, RoutedEventArgs e)
+        {
+            Uri uri = new Uri("ms-settings:windowsupdate");
+            await Windows.System.Launcher.LaunchUriAsync(uri);
         }
     }
 }

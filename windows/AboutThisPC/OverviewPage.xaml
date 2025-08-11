@@ -14,6 +14,8 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="6" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="6" />
         </Grid.RowDefinitions>
         
         <Grid Grid.Row="0">
@@ -35,7 +37,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <TextBlock x:Name="OSVersion" Grid.Row="0" FontSize="42" FontWeight="Normal" />
+                <TextBlock x:Name="OSVersion" Grid.Row="0" FontSize="32" FontWeight="Normal" />
                 <TextBlock x:Name="OSVersionSub" Grid.Row="1" FontSize="14" FontWeight="Normal" />
                 <StackPanel Grid.Row="2" />
                 <TextBlock x:Name="ComputerModelSub" Grid.Row="3" FontSize="11" />
@@ -44,7 +46,23 @@
         </Grid>
 
         <StackPanel Grid.Row="1" />
-        <StackPanel Grid.Row="2" x:Name="OverviewStackPanelBottomFooter" Orientation="Horizontal" HorizontalAlignment="Center">
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+            <Button Content="More Info" Padding="8" Click="MoreInfoButtonClick" />
+            <Button Content="Software Update" Padding="8" Click="SoftwareUpdateButtonClick" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                <Button Click="EyeButtonClick" x:Name="EyeButton" Padding="9.25">
+                    <Grid Width="16" Height="16">
+                        <FontIcon x:Name="EyeIconGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;" FontSize="16" />
+                        <Line X1="0" Y2="0" Y1="16" X2="16" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" StrokeThickness="2" x:Name="EyeIconLine" />
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" />
+
+        <StackPanel Grid.Row="4" x:Name="OverviewStackPanelBottomFooter" Orientation="Horizontal" HorizontalAlignment="Center">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -54,16 +72,9 @@
 
                 <StackPanel Grid.Column="0" x:Name="OverviewStackPanelBottomText" Orientation="Vertical" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" x:Name="OverviewStackPanelColumnSpacer6" Orientation="Vertical" />
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
-                    <Button Click="EyeButtonClick" x:Name="EyeButton">
-                        <Grid Width="16" Height="16">
-                            <FontIcon x:Name="EyeIconGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;" FontSize="16" />
-                            <Line X1="0" Y2="0" Y1="16" X2="16" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" StrokeThickness="2" x:Name="EyeIconLine" />
-                        </Grid>
-                    </Button>
-                </StackPanel>
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="3" />
+    
+        <StackPanel Grid.Row="5" />
     </Grid>
 </Page>
