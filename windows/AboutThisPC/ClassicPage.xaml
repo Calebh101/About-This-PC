@@ -48,7 +48,7 @@
             <Button Click="EyeButtonClick" x:Name="EyeButton">
                 <Grid Width="24" Height="24">
                     <FontIcon x:Name="EyeIconGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;" FontSize="24" />
-                    <Line X1="4" Y1="20" X2="20" Y2="4" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" StrokeThickness="2" x:Name="EyeIconLine" />
+                    <Line X1="0" Y2="0" Y1="20" X2="20" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" StrokeThickness="2" x:Name="EyeIconLine" />
                 </Grid>
             </Button>
         </StackPanel>

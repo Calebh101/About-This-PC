@@ -1,8 +1,12 @@
-﻿using Microsoft.UI.Xaml.Media.Imaging;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Win32;
+using SharpDX.DXGI;
 using System;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Net;
@@ -15,9 +19,9 @@ namespace AboutThisPC
 {
     internal class Generator
     {
-        public static Dictionary<string, string> getValues()
+        public static List<App.Result> GetValues(bool overview = false)
         {
-            var results = new Dictionary<string, string>();
+            var results = new List<App.Result>();
             string? serial = SearchFor("SerialNumber", "SELECT SerialNumber FROM Win32_BIOS");
             string? processor = GetCPU();
             var startupDisk = GetStartupDisk();
@@ -25,13 +29,13 @@ namespace AboutThisPC
             var graphics = GetGPU();
             var memory = GetMemory();
 
-            if (processor != null) results["Processor"] = processor;
-            results["Graphics"] = graphics.Name + " " + Math.Round(graphics.Bytes / (1000.0 * 1000.0), 0).ToString() + "MB";
-            results["Memory"] = Math.Round(memory.Bytes / (1024.0 * 1024.0 * 1024.0), 0).ToString() + "GiB " + memory.Generation + " " + memory.FormFactor + " " + memory.Speed + " MT/s";
-            if (serial != null) results["Serial"] = serial;
-            results["Startup Disk"] = startupDisk.Name + " (" + startupDisk.Letter + ":) " + Math.Round(startupDisk.Bytes / (1000.0 * 1000.0 * 1000.0), 0).ToString() + "GB";
-            if (localIp.Any()) results["Local IP"] = string.Join(", ", localIp);
-            results["Windows"] = GetWindowsString();
+            if (processor != null) results.Add(new App.Result("processor", "Processor", processor));
+            results.Add(new App.Result("graphics", "Graphics", graphics.Name + " " + Math.Round(graphics.Bytes / (1024.0 * 1024.0), 0).ToString() + "MiB"));
+            results.Add(new App.Result("memory", "Memory", Math.Round(memory.Bytes / (1024.0 * 1024.0 * 1024.0), 0).ToString() + "GiB " + memory.Generation + " " + memory.FormFactor + " " + memory.Speed + " MT/s"));
+            if (serial != null) results.Add(new App.Result("serial", "Serial", serial));
+            results.Add(new App.Result("startup_disk", "Startup Disk", startupDisk.Name + " (" + startupDisk.Letter + ":) " + Math.Round(startupDisk.Bytes / (1000.0 * 1000.0 * 1000.0), 0).ToString() + "GB"));
+            results.Add(new App.Result("local_ip", "Local IP" + (localIp.Count > 1 ? "s" : ""), string.Join(", ", localIp)));
+            if (!overview) results.Add(new App.Result("windows", "Windows", GetWindowsString()));
             return results;
         }
 
@@ -156,6 +160,26 @@ namespace AboutThisPC
             string name = item?["Name"]?.ToString() ?? "Unknown";
             ulong bytes;
             ToUlong(item?["AdapterRAM"] ?? 0, out bytes);
+
+            using (var factory = new Factory1())
+            {
+                var adapter = factory.Adapters1.FirstOrDefault();
+                if (adapter != null)
+                {
+                    var description = adapter.Description;
+                    var vram = description.DedicatedVideoMemory;
+
+                    if (description.Description != null) name = description.Description;
+                    else Logger.Warn("Found no GPU adapter description! Falling back to default GPU property...");
+
+                    if (vram != null && vram > 0) ToUlong(vram, out bytes);
+                    else Logger.Warn("Found no GPU adapter VRAM! (Found " + vram + " bytes) Falling back to default GPU property...");
+                } else
+                {
+                    Logger.Warn("Found no GPU adapters! Falling back to default GPU properties...");
+                }
+            }
+
             return (name, bytes);
         }
 
@@ -222,10 +246,15 @@ namespace AboutThisPC
             var details = GetChassisDetails(types.Select(x => (int)x).ToList());
 
             string iconName = details.Icon + ".png";
-            string icon = $"ms-appx:///Assets/computers/{iconName}";
+            string icon = GetIconPath("computers/" + iconName);
 
             Logger.Print("Found icon resource: " + icon);
             return (string.Join("/", details.Names), icon);
+        }
+
+        public static string GetIconPath(string path)
+        {
+            return $"ms-appx:///Assets/{path}";
         }
 
         public static (List<string> Names, List<int> Numbers, string Icon) GetChassisDetails(List<int> input)
@@ -326,6 +355,14 @@ namespace AboutThisPC
             return [
                 "About This PC " + App.Version + " by Calebh101",
             ];
+        }
+
+        public static (string Pretty, string Build, string FeatureRelease) GetWindows()
+        {
+            string pretty = "Windows " + App.GetWindows(App.GetWindows());
+            string build = Environment.OSVersion.Version.Build.ToString();
+            pretty = SearchFor("Caption", "SELECT Caption FROM Win32_OperatingSystem")?.Replace("Microsoft", "").Trim() ?? pretty;
+            return (pretty, build, App.GetWindowsFeatureRelease());
         }
     }
 }

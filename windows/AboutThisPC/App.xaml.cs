@@ -49,6 +49,12 @@ namespace AboutThisPC
             else throw new Exception("Invalid Windows build number: " + build);
         }
 
+        /// <summary>
+        /// Usage: App.GetWindows(App.GetWindows())
+        /// Yes, I know it's cursed
+        /// </summary>
+        /// <param name="windows">[Windows] object to switch</param>
+        /// <returns>String identifier (like "10" or "XP")</returns>
         public static string GetWindows(Windows windows)
         {
             switch (windows)
@@ -70,6 +76,25 @@ namespace AboutThisPC
                 return displayVersion ?? releaseId ?? "Unknown";
             }
             return "Unknown";
+        }
+
+        public static string GetWindowsIconPath()
+        {
+            Windows windows = GetWindows();
+
+            string generate(string input)
+            {
+                string path = Generator.GetIconPath("Windows/windows" + input + ".png");
+                Logger.Verbose("Found Windows icon path: " + path);
+                return path;
+            }
+
+            switch (windows)
+            {
+                case Windows.ten: return generate("10");
+                case Windows.eleven: return generate("11");
+                default: return generate("11");
+            }
         }
 
         /// <summary>
@@ -106,6 +131,21 @@ namespace AboutThisPC
 
             _window = new MainWindow(classic);
             _window.Activate();
+        }
+
+        public class Dimensions(double Width, double Height)
+        {
+            public (double Width, double Height) Build()
+            {
+                return (Width, Height);
+            }
+        }
+
+        public class Result(string id, string title, string value = "Unknown")
+        {
+            public string Id { get; set; } = id.Replace(" ", "_").Replace("\n", "_").ToLowerInvariant();
+            public string Title { get; set; } = title;
+            public string Value { get; set; } = value;
         }
     }
 }

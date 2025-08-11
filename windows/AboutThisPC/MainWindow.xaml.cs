@@ -17,27 +17,17 @@ namespace AboutThisPC
     {
         public MainWindow(bool classic)
         {
-            bool redoTitlebar = true; // Make content expand into it
+            bool redoTitlebar = true; // Make content expand into the title bar
+            App.Dimensions dimensions;
             InitializeComponent();
-
-            int width;
-            int height;
 
             var hWnd = WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var appWindow = AppWindow.GetFromWindowId(windowId);
             var presenter = appWindow.Presenter as OverlappedPresenter;
 
-            if (classic)
-            {
-                width = 350;
-                height = 500;
-            }
-            else
-            {
-                width = 600;
-                height = 300;
-            }
+            if (classic) dimensions = new App.Dimensions(350, 500);
+            else /* - */ dimensions = new App.Dimensions(600, 350);
 
             if (presenter != null)
             {
@@ -45,8 +35,9 @@ namespace AboutThisPC
                 presenter.IsMaximizable = false;
             }
 
+            var (width, height) = dimensions.Build();
             Logger.Verbose("Window size detected: " + width + "x" + height);
-            appWindow?.Resize(new SizeInt32(width, height));
+            appWindow?.Resize(new SizeInt32((int)width, (int)height));
             if (redoTitlebar) this.ExtendsContentIntoTitleBar = true;
 
             if (redoTitlebar && appWindow != null)

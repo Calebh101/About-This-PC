@@ -26,6 +26,31 @@ namespace AboutThisPC
         public MainPage()
         {
             InitializeComponent();
+            Navigate("OverviewPage");
+        }
+
+        public void NavigationChanged(object sender, NavigationViewSelectionChangedEventArgs e)
+        {
+            if (e.SelectedItem is NavigationViewItem item && item.Tag is string page) Navigate(page);
+        }
+
+        private void Navigate(string page)
+        {
+            Type? type = page switch
+            {
+                "OverviewPage" => typeof(OverviewPage),
+                _ => null,
+            };
+
+            if (type != null)
+            {
+                Logger.Verbose("Navigating to page: " + page + " (" + type + ")");
+                MainContentFrame.Navigate(type);
+            }
+            else
+            {
+                Logger.Warn("Tried to navigate to invalid page: " + page + " (" + type + ")");
+            }
         }
     }
 }

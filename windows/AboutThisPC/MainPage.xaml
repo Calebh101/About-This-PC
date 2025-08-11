@@ -11,10 +11,8 @@
 
     <controls:NavigationView PaneDisplayMode="Top" IsBackButtonVisible="Collapsed" IsSettingsVisible="False">
         <controls:NavigationView.MenuItems>
-            <controls:NavigationViewItem Content="Overview" IsSelected="True" />
-            <controls:NavigationViewItem Content="Displays" />
-            <controls:NavigationViewItem Content="Storage" />
-            <controls:NavigationViewItem Content="Support" />
+            <controls:NavigationViewItem Content="Overview" Tag="OverviewPage" IsSelected="True" />
         </controls:NavigationView.MenuItems>
+        <Frame x:Name="MainContentFrame" Padding="10" />
     </controls:NavigationView>
 </Page>
