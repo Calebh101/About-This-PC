@@ -15,8 +15,6 @@
 #include <QLocalSocket>
 #include <QLocalServer>
 
-std::vector<MainWindow*> windows;
-
 int main(int argc, char *argv[])
 {
     QString id = "AboutThisPCLinuxApplication";
@@ -140,18 +138,18 @@ int main(int argc, char *argv[])
         w->setWindowTitle("About This PC");
         w->setFixedSize(MainWindow::getWindowSize(classic));
         w->show();
-        windows.push_back(w);
+        MainWindow::addWindow(w);
     }
 
     trayEntry->setToolTip("About This PC");
     trayEntry->setIcon(QIcon(":/appicon/toolbar"));
 
     QAction open("About This PC", &a);
-    QObject::connect(&open, &QAction::triggered, [&]() {windows.push_back(MainWindow::openNewWindow(false));});
+    QObject::connect(&open, &QAction::triggered, [&]() {MainWindow::openNewWindow(false);});
     trayMenu->addAction(&open);
 
     QAction openClassic("About This PC (Classic)", &a);
-    QObject::connect(&openClassic, &QAction::triggered, [&]() {windows.push_back(MainWindow::openNewWindow(true));});
+    QObject::connect(&openClassic, &QAction::triggered, [&]() {MainWindow::openNewWindow(true);});
     trayMenu->addAction(&openClassic);
 
     trayMenu->addSeparator();
@@ -175,16 +173,11 @@ int main(int argc, char *argv[])
     });
 
     QObject::connect(&closeWindow, &QAction::triggered, &a, [&]() {
-        if (!windows.empty()) {
-            windows.back()->close();
-        }
+        MainWindow::removeMostRecentWindow();
     });
 
     QObject::connect(&closeAll, &QAction::triggered, &a, [&]() {
-        for (int i = 0; i < windows.size(); i++) {
-            MainWindow* w = windows[i];
-            w->close();
-        }
+        MainWindow::closeAllWindows();
     });
 
     trayMenu->addAction(&restart);

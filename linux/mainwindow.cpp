@@ -16,6 +16,34 @@
 #include "supportpage.h"
 #include "storage.h"
 
+std::vector<MainWindow*> windows;
+
+MainWindow* MainWindow::openNewWindow(bool classic) {
+    MainWindow* w = new MainWindow(classic);
+    w->setAttribute(Qt::WA_DeleteOnClose);
+    w->setFixedSize(getWindowSize(classic));
+    w->show();
+    addWindow(w);
+    return w;
+}
+
+void MainWindow::addWindow(MainWindow* w) {
+    windows.push_back(w);
+}
+
+void MainWindow::removeMostRecentWindow() {
+    if (!windows.empty()) {
+        windows.back()->close();
+    }
+}
+
+void MainWindow::closeAllWindows() {
+    for (int i = 0; i < windows.size(); i++) {
+        MainWindow* w = windows[i];
+        w->close();
+    }
+}
+
 void processParent(QWidget* parent) {
     QList<QLabel*> labels = parent->findChildren<QLabel*>();
 
@@ -52,14 +80,6 @@ MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
         processParent(this);
         setCentralWidget(central);
     }
-}
-
-MainWindow* MainWindow::openNewWindow(bool classic) {
-    MainWindow* w = new MainWindow(classic);
-    w->setAttribute(Qt::WA_DeleteOnClose);
-    w->setFixedSize(getWindowSize(classic));
-    w->show();
-    return w;
 }
 
 QSize MainWindow::getWindowSize(bool classic) {
