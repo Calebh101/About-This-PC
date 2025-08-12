@@ -126,12 +126,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
 
     QObject::connect(moreInfoButton, &QPushButton::clicked, [=]() {
         Logger::print("moreInfoButton pressed");
-        QStringList args = QCoreApplication::arguments();
-        args.removeFirst();
-        args.removeAll("--classic");
-        QString program = QCoreApplication::applicationFilePath();
-        QProcess::startDetached(program, args);
-        QCoreApplication::quit();
+        MainWindow::openNewWindow(false);
     });
 
     QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
