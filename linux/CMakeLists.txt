@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg Network)
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
 
@@ -54,6 +54,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         themelistener.h themelistener.cpp
         storage.h storage.cpp
         binaries.qrc
+        data.h data.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET AboutThisPC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -73,7 +74,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Vulkan::Vulkan ${X11_LIBRARIES} ${XRANDR_LIBRARY})
+target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Vulkan::Vulkan ${X11_LIBRARIES} ${XRANDR_LIBRARY})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

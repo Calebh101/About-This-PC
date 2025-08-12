@@ -18,7 +18,7 @@
 
 using json = nlohmann::json;
 
-QString version = "0.0.0B";
+QString version = "0.0.0C";
 QStringList args;
 
 void print(QString input) {
@@ -157,8 +157,8 @@ int main(int argc, char *argv[])
 
     results["helper"]["version"] = version.toStdString();
     results["serial"] = getSerial();
-    if (showWifiInfo) results["memory"] = getMemory();
-    results["network"]["wifi"] = getWifi();
+    results["memory"] = getMemory();
+    if (showWifiInfo) results["network"]["wifi"] = getWifi();
 
     std::cout << results.dump() << std::endl;
     return 0;

@@ -54,4 +54,20 @@ MainWindow::MainWindow(bool classic, QWidget *parent) : QMainWindow(parent) {
     }
 }
 
+MainWindow* MainWindow::openNewWindow(bool classic) {
+    MainWindow* w = new MainWindow(classic);
+    w->setAttribute(Qt::WA_DeleteOnClose);
+    w->setFixedSize(getWindowSize(classic));
+    w->show();
+    return w;
+}
+
+QSize MainWindow::getWindowSize(bool classic) {
+    if (classic) {
+        return QSize(350, 500); // Vertical
+    } else {
+        return QSize(600, 300); // Horizontal
+    }
+}
+
 MainWindow::~MainWindow() {}

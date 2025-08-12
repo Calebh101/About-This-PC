@@ -15,7 +15,7 @@ You can also see details like your laptop model, processor, graphics, etcetera. 
 The icon on the side uses a name taken from the `os-release` standard again, and (if found) will search in some directories to try to find the icon file. If none are found, it'll default to an image of Tux.
 
 The eye button in the bottom corner allows you to show/hide your serial and local IP(s) for screenshots.
-
+z
 ![Overview Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-page1.png)
 
 The next page is the Displays page, which, well, shows you your displays. It lists the name, resolution, size, and refresh rate. Then, depending if the display is detected as internal, will show either a laptop icon or a monitor depending on what it finds.
@@ -34,14 +34,27 @@ This next page is not in a tab bar like the others, but is instead different fro
 
 ![Classic Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-classic.png)
 
-## Where are the links in the Overview page?
+## The System Tray
 
-There are some other links on Apple's (older) About This Mac app, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
+About This PC for Linux comes with built-in system tray support, that starts when the app is first opened.
+
+- `About This PC`: Opens the main page.
+- `About This PC (Classic)`: Opens the "classic" page.
+- `Close`: Closes the most recent About This PC window.
+- `Close All`: Closes all About This PC windows.
+- `Quit`: Quits the service and all open windows.
+- `Restart`: Quits the service and all open windows, then reruns itself.
+
+## Where are the buttons in the Overview page?
+
+There are some other buttons on Apple's About This Mac apps, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
 
 ## Boot Arguments
 
+- `--version`: Print the version of the app and exit.
 - `--classic`: Load the "classic" page.
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
+- `--no-window`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup. The program won't request `pkexec` when run with this argument, and if the helper fails then it will act like `pkexec` was rejected.
 
 # Windows
 
@@ -56,10 +69,12 @@ I used WinUI for this as it was the best option for a native look in my opinion,
 
 # Notes
 
-- About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information.
+- About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information. Run this executable specifically (if you can catch it) with `--version` to see the version.
+
+- About This PC for Linux has a known issue with `sudo`, in that the environment isn't preserved so there are a *lot* of weird quirks. This is why I had to make a special helper project for some data. The current (and probably permanent) workaround is to just, **not run with `sudo`**. This does effect the startup service you can run, in that it won't be able to fetch helper data, leaving some data missing, without running as `sudo`.
 
 - About This PC for Linux utilizes Qt, which is licensed under the GNU Lesser General Public License (LGPL) version 3.
 You can obtain a copy of the LGPL here: https://www.gnu.org/licenses/lgpl-3.0.html
 Qt is a separate project and is not licensed under this project's license.
 
-- Some images originated from (rawpixel.com / Freepik)[https://freepik.com] and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
+- Some images (specifically the `computers` images) originated from (rawpixel.com / Freepik)[https://freepik.com] and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
