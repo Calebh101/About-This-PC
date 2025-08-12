@@ -9,9 +9,11 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <controls:NavigationView PaneDisplayMode="Top" IsBackButtonVisible="Collapsed" IsSettingsVisible="False">
+    <controls:NavigationView SelectionChanged="NavigationChanged" PaneDisplayMode="Top" IsBackButtonVisible="Collapsed" IsSettingsVisible="False">
         <controls:NavigationView.MenuItems>
             <controls:NavigationViewItem Content="Overview" Tag="OverviewPage" IsSelected="True" />
+            <controls:NavigationViewItem Content="Storage" Tag="DrivesPage" IsSelected="False" />
+            <controls:NavigationViewItem Content="Support" Tag="SupportPage" IsSelected="False" />
         </controls:NavigationView.MenuItems>
         <Frame x:Name="MainContentFrame" Padding="10" />
     </controls:NavigationView>

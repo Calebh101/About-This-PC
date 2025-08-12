@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net;
@@ -54,25 +55,41 @@ namespace AboutThisPC
             return ((manufacturer ?? "Unknown") + " " + chassis.Name,  model);
         }
 
-        public static Dictionary<string, string> GetSupportURLs()
+        public static List<SupportUrl> GetSupportURLs()
         {
-            return new Dictionary<string, string>
-            {
-                ["Support"] = "https://support.microsoft.com/",
-                ["Community"] = "https://answers.microsoft.com",
+            var result = new List<SupportUrl>();
 
-                ["Windows Help"] = "https://support.microsoft.com/windows",
-                ["Windows Update Troubleshooter"] = "https://support.microsoft.com/help/4027322/windows-update-troubleshooter",
-                ["Windows Activation"] = "https://support.microsoft.com/help/12440/windows-10-activation",
-                ["Windows Security"] = "https://support.microsoft.com/windows/windows-security-help-2a0a2485-024a-44e6-90d6-1d26186e7759",
-                ["Windows Recovery"] = "https://support.microsoft.com/windows/recovery-options-in-windows-10-f4b99a99-42c1-d704-86b7-52293d29f42b",
-                ["Windows Installation Media"] = "https://www.microsoft.com/software-download/windows10",
-                ["Windows 11 Download"] = "https://www.microsoft.com/software-download/windows11",
+            result.Add(new SupportUrl("support", "Support", "https://support.microsoft.com/"));
+            result.Add(new SupportUrl("community", "Community", "https://answers.microsoft.com"));
 
-                // My own plugs hehe
-                ["GitHub"] = "https://github.com/Calebh101/About-This-PC",
-                ["GitHub Issues"] = "https://github.com/Calebh101/About-This-PC/issues"
-            };
+            result.Add(new SupportUrl("windows.help", "Windows Help", "https://support.microsoft.com/windows"));
+            result.Add(new SupportUrl("windows.update", "Windows Update Troubleshooter", "https://support.microsoft.com/help/4027322/windows-update-troubleshooter"));
+            result.Add(new SupportUrl("windows.download", "Windows Download", $"https://www.microsoft.com/software-download/windows{App.GetWindows(App.GetWindows())}"));
+
+            result.Add(new SupportUrl("atpc.github", "GitHub", "https://github.com/Calebh101/About-This-PC", true));
+            result.Add(new SupportUrl("atpc.github.issues", "GitHub Issues", "https://github.com/Calebh101/About-This-PC/issues", true));
+
+            if (!Generator.GetActivated()) result.Add(new SupportUrl("windows.activate", "Windows Activation", "https://support.microsoft.com/help/12440/windows-10-activation"));
+            Logger.Print("Generated " + result.Count + " support URLs");
+            return result;
+        }
+
+        public class SupportUrl(string id, string title, string value, bool self = false)
+        {
+            public string Id { get; set; } = id.Replace(" ", "_").Replace("\n", "_").ToLowerInvariant();
+            public string Title { get; set; } = title;
+            public Uri Value { get; set; } = new Uri(value);
+            public bool IsAboutThisPCLink = self;
+        }
+
+        public static bool GetActivated()
+        {
+            ManagementObject? result = SearchFor("SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE PartialProductKey IS NOT NULL AND ApplicationID='55c92734-d682-4d71-983e-d6ec3f16059f'");
+            if (result == null) return default;
+
+            uint status = (uint)result["LicenseStatus"];
+            Logger.Print("Found license status: " + status.ToString());
+            return status == 1;
         }
 
         public static List<ManagementObject> SearchForAll(string query)
@@ -111,14 +128,19 @@ namespace AboutThisPC
             return output?[item]?.ToString();
         }
 
-        private static (string Name, double Bytes) GetDisk(string letter)
+        public static (string Name, long Bytes, long Used, DriveType type) GetDisk(string letter)
         {
-            ManagementObject? disk = SearchFor($"SELECT VolumeName,Size FROM Win32_LogicalDisk WHERE DeviceID = '{letter}:'");
-            string name = disk?["VolumeName"]?.ToString() ?? "Unknown";
-            object? size = disk?["size"];
-            ulong bytes = 0;
-            ToUlong(size, out bytes);
-            return (name, bytes);
+            return GetDisk(new DriveInfo(letter));
+        }
+
+        public static (string Name, long Bytes, long Used, DriveType type) GetDisk(DriveInfo drive)
+        {
+            return (drive.Name, drive.TotalSize, drive.TotalFreeSpace, drive.DriveType);
+        }
+
+        public static List<DriveInfo> GetAllDisks()
+        {
+            return [.. DriveInfo.GetDrives()];
         }
 
         private static string? GetCPU()

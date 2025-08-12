@@ -39,6 +39,8 @@ namespace AboutThisPC
             Type? type = page switch
             {
                 "OverviewPage" => typeof(OverviewPage),
+                "SupportPage" => typeof(SupportPage),
+                "DrivesPage" => typeof(DrivesPage),
                 _ => null,
             };
 
