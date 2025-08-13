@@ -14,6 +14,10 @@
 #include <QSharedMemory>
 #include <QLocalSocket>
 #include <QLocalServer>
+#include <filesystem>
+#include <fstream>
+
+namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +29,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QStringList args = QCoreApplication::arguments();
     QSharedMemory sharedMemory(id);
+    QString mainDirectory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
     a.setQuitOnLastWindowClosed(false);
 
 #ifdef QT_DEBUG
@@ -66,6 +71,11 @@ int main(int argc, char *argv[])
 
     if (Global::isElevated()) {
         Logger::warn("WARNING: Running as root will have unintended consequences!");
+    }
+
+    if (!fs::exists(mainDirectory.toStdString()) || !fs::is_directory(mainDirectory.toStdString())) {
+        Logger::print(QString("Creating directory at %1...").arg(mainDirectory), true);
+        fs::create_directory(mainDirectory.toStdString());
     }
 
     QLocalServer server;
@@ -133,6 +143,45 @@ int main(int argc, char *argv[])
     if (!noWindow /* yes window */) {
         Logger::print("Window is to be shown");
         MainWindow::openNewWindow(classic);
+    }
+
+    try { // App icon
+        bool alwaysCreate = true;
+        QString path = QString("%1/AboutThisPC.png").arg(mainDirectory);
+        std::ifstream infile(path.toStdString());
+        std::stringstream buffer;
+        bool status = false;
+        buffer << infile.rdbuf();
+
+        if (infile.good() && alwaysCreate == true) {
+            status = true;
+        } else {
+            Logger::print("Creating icon file...");
+            QFile file(":/appicon/appicon");
+
+            if (file.open(QIODevice::ReadOnly)) {
+                QFile out(path);
+
+                if (out.open(QIODevice::WriteOnly)) {
+                    out.write(file.readAll());
+                    out.close();
+                    QFile::setPermissions(path, QFileDevice::ReadUser | QFileDevice::WriteUser);
+                    status = true;
+                } else {
+                    throw std::filesystem::filesystem_error(QString("Unable to write to output file").toStdString(), fs::path(path.toStdString()), std::make_error_code(std::errc::io_error));
+                }
+            } else {
+                throw std::filesystem::filesystem_error(QString("Unable to open resource file").toStdString(), fs::path(path.toStdString()), std::make_error_code(std::errc::io_error));
+            }
+        }
+
+        if (status == false) {
+            throw std::filesystem::filesystem_error(QString("Unable to create file").toStdString(), fs::path(path.toStdString()), std::make_error_code(std::errc::io_error));
+        }
+    } catch (std::filesystem::filesystem_error e) {
+        Logger::warn(QString("Unable to verify and/or copy application icon! (%1, %2): %3 (code %4)").arg(e.path1().generic_string(), e.path2().generic_string(), e.what(), e.code().message()));
+    } catch (...) {
+        Logger::warn(QString("Unable to verify and/or copy application icon! %1").arg("Unknown error."));
     }
 
     trayEntry->setToolTip("About This PC");

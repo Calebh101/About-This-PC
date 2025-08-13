@@ -25,7 +25,7 @@ MainWindow* MainWindow::openNewWindow(bool classic) {
     w->setWindowTitle("About This PC");
     w->show();
 
-    QIcon appicon(":/appicon/appicon.png");
+    QIcon appicon(QString("%1/.AboutThisPC/AboutThisPC.png").arg(std::getenv("HOME")));
     Logger::print(QString("Setting app icon to: %1").arg(appicon.name()));
     w->setWindowIcon(appicon);
 

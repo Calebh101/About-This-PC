@@ -1,0 +1,18 @@
+# This .desktop file is included so you can install it yourself, if you want this application to be installed. There is no automatic install script included.
+
+[Desktop Entry]
+Version=1.0
+Name=About This PC
+Comment=About This PC [[APPVERSION]] by [[AUTHOR]].
+Terminal=false
+Type=Application
+Categories=Utility;
+
+x-Author=Calebh101
+X-AppVersion=[[APPVERSION]]
+
+# Set this to the path of the About This PC Linux executable.
+Exec=
+
+# If necessary, replace '$HOME' with '/home/username'.
+Icon=$HOME/.AboutThisPC/AboutThisPC.png
