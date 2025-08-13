@@ -8,5 +8,6 @@ namespace AboutThisPC
 {
     internal class SystemTrayManager
     {
+        public SystemTrayManager() { }
     }
 }
