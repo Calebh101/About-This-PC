@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         socket.connectToServer(id);
 
         if (socket.waitForConnected(500)) {
-            socket.write("show");
+            socket.write(QString("show %1").arg(classic ? "--classic" : "()").toStdString().c_str());
             socket.flush();
             socket.waitForBytesWritten(1000);
             return 0;

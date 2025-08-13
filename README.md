@@ -15,7 +15,7 @@ You can also see details like your laptop model, processor, graphics, etcetera. 
 The icon on the side uses a name taken from the `os-release` standard again, and (if found) will search in some directories to try to find the icon file. If none are found, it'll default to an image of Tux.
 
 The eye button in the bottom corner allows you to show/hide your serial and local IP(s) for screenshots.
-z
+
 ![Overview Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-page1.png)
 
 The next page is the Displays page, which, well, shows you your displays. It lists the name, resolution, size, and refresh rate. Then, depending if the display is detected as internal, will show either a laptop icon or a monitor depending on what it finds.
