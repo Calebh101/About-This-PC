@@ -54,11 +54,11 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Assets\AppIcon1.png">
+    <None Update="Assets\appicon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Update="Assets\icons\AppIcon1.png">
+    <None Update="Assets\icons\appicon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
@@ -105,7 +105,7 @@
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ApplicationIcon>Assets\AppIcon1.ico</ApplicationIcon>
-    <PackageIcon>AppIcon1.png</PackageIcon>
+    <ApplicationIcon>Assets\appicon.ico</ApplicationIcon>
+    <PackageIcon>appicon.png</PackageIcon>
   </PropertyGroup>
 </Project>

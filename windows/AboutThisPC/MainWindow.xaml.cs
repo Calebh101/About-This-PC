@@ -80,7 +80,7 @@ namespace AboutThisPC
                 return;
             }
 
-            string icon = Generator.GetIconPath("AppIcon1.ico");
+            string icon = Generator.GetIconPath("appicon.ico");
             StorageFile? storageFile = null;
 
             try
