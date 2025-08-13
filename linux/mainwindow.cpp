@@ -22,7 +22,13 @@ MainWindow* MainWindow::openNewWindow(bool classic) {
     MainWindow* w = new MainWindow(classic);
     w->setAttribute(Qt::WA_DeleteOnClose);
     w->setFixedSize(getWindowSize(classic));
+    w->setWindowTitle("About This PC");
     w->show();
+
+    QIcon appicon(":/appicon/appicon.png");
+    Logger::print(QString("Setting app icon to: %1").arg(appicon.name()));
+    w->setWindowIcon(appicon);
+
     addWindow(w);
     return w;
 }

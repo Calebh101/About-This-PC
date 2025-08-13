@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
     // Log that the app is starting, even when logging is disabled
     Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(Global::version), QT_VERSION_STR), true);
 
-    MainWindow* w;
     QSystemTrayIcon *trayEntry = new QSystemTrayIcon();
     QMenu* trayMenu = new QMenu();
 
@@ -98,7 +97,7 @@ int main(int argc, char *argv[])
         QObject::connect(&server, &QLocalServer::newConnection, &server, [&]() {
             QLocalSocket *connection = server.nextPendingConnection();
 
-            QObject::connect(connection, &QLocalSocket::readyRead, connection, [connection, w]() {
+            QObject::connect(connection, &QLocalSocket::readyRead, connection, [connection]() {
                 QByteArray data = connection->readAll();
                 if (data.startsWith("show")) MainWindow::openNewWindow(data.contains("--classic"));
                 connection->disconnectFromServer();
@@ -133,12 +132,7 @@ int main(int argc, char *argv[])
 
     if (!noWindow /* yes window */) {
         Logger::print("Window is to be shown");
-        w = new MainWindow(classic);
-
-        w->setWindowTitle("About This PC");
-        w->setFixedSize(MainWindow::getWindowSize(classic));
-        w->show();
-        MainWindow::addWindow(w);
+        MainWindow::openNewWindow(classic);
     }
 
     trayEntry->setToolTip("About This PC");

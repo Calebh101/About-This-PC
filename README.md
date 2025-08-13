@@ -64,6 +64,7 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 ## Boot Arguments
 
+- `--version`: Print the version of the app and exit.
 - `--classic`: Load the "classic" page.
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 

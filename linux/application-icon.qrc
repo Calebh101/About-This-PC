@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/appicon">
         <file alias="toolbar">toolbar.png</file>
+        <file alias="appicon">appicon.png</file>
     </qresource>
 </RCC>
