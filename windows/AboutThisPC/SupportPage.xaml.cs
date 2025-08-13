@@ -44,6 +44,7 @@ namespace AboutThisPC
                 var block = new TextBlock
                 {
                     HorizontalAlignment = HorizontalAlignment.Center,
+                    IsTextSelectionEnabled = true,
                 };
 
                 var button = new Hyperlink

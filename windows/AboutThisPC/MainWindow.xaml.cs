@@ -35,6 +35,7 @@ namespace AboutThisPC
                 presenter.IsMaximizable = false;
             }
 
+            App.dimensions = dimensions;
             var (width, height) = dimensions.Build();
             Logger.Verbose("Window size detected: " + width + "x" + height);
             appWindow?.Resize(new SizeInt32((int)width, (int)height));

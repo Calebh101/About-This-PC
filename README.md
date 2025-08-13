@@ -58,9 +58,9 @@ There are some other buttons on Apple's About This Mac apps, like Software Updat
 
 # Windows
 
-About This PC for Windows is written in mostly C# (due to the amount of support it has with WinUI) and some XML for the UI. The UI isn't as dynamic as the Linux version, but I get Hot Reload so that's all that matters. The Windows version uses a lot of WMI to get info like the processor, graphics, and pretty much everything. (It also doesn't need elevated permissions, so I didn't have that weird issue I had on the Linux version.)
+About This PC for Windows is written in mostly C# (due to the amount of support it has with WinUI) and some XML for the UI. I used WinUI for this as it was the best option for a native look in my opinion, and it's also pretty straightforward to make UI elements in.
 
-I used WinUI for this as it was the best option for a native look in my opinion, and it's also pretty straightforward to make UI elements in.
+The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!).
 
 ## Boot Arguments
 
@@ -78,3 +78,5 @@ You can obtain a copy of the LGPL here: https://www.gnu.org/licenses/lgpl-3.0.ht
 Qt is a separate project and is not licensed under this project's license.
 
 - Some images (specifically the `computers` images) originated from (rawpixel.com / Freepik)[https://freepik.com] and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
+
+- Big thanks to [Wikimedia Commons](https://commons.wikimedia.org/) for existing!

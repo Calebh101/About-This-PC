@@ -27,6 +27,7 @@ namespace AboutThisPC
     /// </summary>
     public partial class App : Application
     {
+        static public Dimensions? dimensions;
         static public string Version = "0.0.0A";
         private Window? _window;
 
@@ -38,7 +39,7 @@ namespace AboutThisPC
 
         public static string GetDriveLetter()
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.System)[..1];
+            return Environment.GetFolderPath(Environment.SpecialFolder.System)[..1].Replace(":", "").Replace("\\", "");
         }
 
         public static Windows GetWindows()
@@ -116,6 +117,12 @@ namespace AboutThisPC
             bool classic = false;
             string arguments = args.Arguments;
 
+            if (arguments.Contains("--version"))
+            {
+                Logger.Raw(Version);
+                return;
+            }
+
             if (!string.IsNullOrEmpty(arguments))
             {
                 if (arguments.Contains("--classic"))
@@ -133,6 +140,33 @@ namespace AboutThisPC
             _window.Activate();
         }
 
+        public static double getGigabytes(long bytes)
+        {
+            return formatBytes(bytes, 1000, 3);
+        }
+
+        public static double getGigabits(long bytes)
+        {
+            return formatBytes(bytes, 1024, 3);
+        }
+
+        public static double getMegabytes(long bytes)
+        {
+            return formatBytes(bytes, 1000, 2);
+        }
+
+        public static double getMegabits(long bytes)
+        {
+            return formatBytes(bytes, 1024, 2);
+        }
+
+        public static double formatBytes(long bytes, double factor, int rounds)
+        {
+            if (bytes < 0 || rounds < 0) return default;
+            double divisor = Math.Pow(factor, rounds);
+            return bytes / divisor;
+        }
+
         public class Dimensions(double Width, double Height)
         {
             public (double Width, double Height) Build()
@@ -147,5 +181,15 @@ namespace AboutThisPC
             public string Title { get; set; } = title;
             public string Value { get; set; } = value;
         }
+    }
+
+    public class Drive
+    {
+        public string Name { get; set; } = "Unknown";
+        public string Letter { get; set; } = "Unknown";
+        public long Bytes { get; set; } = (long)0;
+        public long Used { get; set; } = (long)0;
+        public DriveType Type { get; set; } = DriveType.Unknown;
+        public bool Ready { get; set; } = false;
     }
 }

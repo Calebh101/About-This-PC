@@ -41,7 +41,7 @@ namespace AboutThisPC
             OSVersion.Text = windowsInfo.Pretty;
             OSVersionSub.Text = "Version " + windowsInfo.FeatureRelease + " (" + windowsInfo.Build + ")";
 
-            FontWeight? boldWeight = new FontWeight(625);
+            FontWeight? boldWeight = new FontWeight(600);
             if (boldWeight != null) ComputerModelSub.FontWeight = (FontWeight)boldWeight;
 
             foreach (var item in results)
@@ -67,6 +67,7 @@ namespace AboutThisPC
                 {
                     Text = value,
                     FontSize = fontSize,
+                    IsTextSelectionEnabled = true,
                 };
 
                 if (boldWeight != null) blockB.FontWeight = (FontWeight)boldWeight;

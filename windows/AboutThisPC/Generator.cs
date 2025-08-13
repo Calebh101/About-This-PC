@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.Win32;
 using SharpDX.DXGI;
 using System;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -133,26 +132,41 @@ namespace AboutThisPC
             return GetDisk(new DriveInfo(letter));
         }
 
-        public static (string Name, long Bytes, long Used, DriveType type) GetDisk(DriveInfo drive)
+        private static string GetDiskName(DriveInfo drive)
         {
-            return (drive.Name, drive.TotalSize, drive.TotalFreeSpace, drive.DriveType);
+            return drive.VolumeLabel;
         }
 
-        public static List<DriveInfo> GetAllDisks()
+        public static (string Name, long Bytes, long Used, DriveType type) GetDisk(DriveInfo drive)
         {
-            return [.. DriveInfo.GetDrives()];
+            return (GetDiskName(drive), drive.TotalSize, drive.TotalSize - drive.TotalFreeSpace, drive.DriveType);
+        }
+
+        public static List<Drive> GetAllDisks()
+        {
+            List<DriveInfo> drives = [.. DriveInfo.GetDrives()];
+            List<Drive> result = new();
+            
+            foreach (DriveInfo drive in drives)
+            {
+                result.Add(new Drive { Name = GetDiskName(drive), Letter = drive.Name.Replace(":", "").Replace("\\", ""), Bytes = drive.TotalSize, Used = drive.TotalSize - drive.TotalFreeSpace, Type = drive.DriveType, Ready = drive.IsReady });
+            }
+
+            return result;
         }
 
         private static string? GetCPU()
         {
+            bool editCpuName = true; // If I get into legal trouble (doubtful) then I know where to go haha
             ManagementObject? data = SearchFor("SELECT Name,MaxClockSpeed FROM Win32_Processor");
             if (data == null) return null;
             string model = data["Name"]?.ToString() ?? "Unknown";
+            if (editCpuName) model = model.Replace("(R)", "").Replace("(TM)", "");
             uint speed = (uint)(data["MaxClockSpeed"] ?? 0);
-            return GetArchitecture() + " " + Math.Round(speed / 1000.0, 1).ToString() + "GHz " + model;
+            return GetArchitecture() + " " + Math.Round(speed / 1000.0, 1).ToString() + "GHz " + model.Trim();
         }
 
-        private static (string Letter, string Name, double Bytes) GetStartupDisk()
+        public static (string Letter, string Name, double Bytes) GetStartupDisk()
         {
             string letter = App.GetDriveLetter();
             var disk = GetDisk(letter);

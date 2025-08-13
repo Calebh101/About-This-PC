@@ -9,6 +9,25 @@
     mc:Ignorable="d">
 
     <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsRepeater ItemsSource="{x:Bind Drives}">
+                <ItemsRepeater.Layout>
+                    <UniformGridLayout x:Name="DrivesPageGridLayout" Orientation="Horizontal" MinItemHeight="150" />
+                </ItemsRepeater.Layout>
 
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="local:DriveObject">
+                        <Button Margin="10" Padding="10,20" Tapped="Border_Tapped" Tag="{x:Bind}" HorizontalAlignment="Stretch" Width="Auto">
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind Title}" FontSize="20" IsTextSelectionEnabled="True" />
+                                <TextBlock Text="{x:Bind Subtitle}" IsTextSelectionEnabled="True" />
+                                <TextBlock Text="{x:Bind Pretty}" IsTextSelectionEnabled="True" />
+                                <ProgressBar Minimum="0" Maximum="{x:Bind Bytes}" Value="{x:Bind Used}" Height="20" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </ScrollViewer>
     </Grid>
 </Page>

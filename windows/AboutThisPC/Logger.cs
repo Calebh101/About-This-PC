@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX.DXGI;
+using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -12,20 +13,30 @@ namespace AboutThisPC
         private static void Output(String prefix, Object input, int effect = 0)
         {
             string output = "> " + prefix + " " + DateTime.UtcNow.ToString("o") + " >> \\e[" + effect.ToString() + "m" + input.ToString() + "\\e[0m";
+            OutputRaw(output);
+        }
 
+        private static void OutputRaw(string input)
+        {
             if (Debugger.IsAttached)
             {
                 string pattern = "\\\\e\\[\\d+m";
-                System.Diagnostics.Debug.WriteLine(Regex.Replace(output, pattern, ""));
-            } else
+                System.Diagnostics.Debug.WriteLine(Regex.Replace(input, pattern, ""));
+            }
+            else
             {
-                Console.WriteLine(output);
+                Console.WriteLine(input);
             }
         }
 
         private static void OutputVerbose(Object input)
         {
             Output("VBS", input, 2);
+        }
+
+        static public void Raw(Object input)
+        {
+            OutputRaw(input?.ToString() ?? "");
         }
 
         public static void Print(Object input, bool always = false)

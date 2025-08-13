@@ -57,8 +57,8 @@ namespace AboutThisPC
                 {
                     Text = value,
                     HorizontalAlignment = HorizontalAlignment.Left,
-                    //FontWeight = FontWeights.Bold,
                     FontSize = fontSize,
+                    IsTextSelectionEnabled = true
                 };
 
                 ClassicStackPanelColumn1.Children.Add(blockA);

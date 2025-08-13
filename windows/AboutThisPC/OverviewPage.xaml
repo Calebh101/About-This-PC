@@ -37,10 +37,10 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <TextBlock x:Name="OSVersion" Grid.Row="0" FontSize="32" FontWeight="Normal" />
-                <TextBlock x:Name="OSVersionSub" Grid.Row="1" FontSize="14" FontWeight="Normal" />
+                <TextBlock x:Name="OSVersion" Grid.Row="0" FontSize="32" FontWeight="Normal" IsTextSelectionEnabled="True" />
+                <TextBlock x:Name="OSVersionSub" Grid.Row="1" FontSize="14" FontWeight="Normal" IsTextSelectionEnabled="True" />
                 <StackPanel Grid.Row="2" />
-                <TextBlock x:Name="ComputerModelSub" Grid.Row="3" FontSize="11" />
+                <TextBlock x:Name="ComputerModelSub" Grid.Row="3" FontSize="11" IsTextSelectionEnabled="True" />
                 <StackPanel x:Name="OverviewStackPanelColumn" Grid.Row="4" Orientation="Vertical" />
             </Grid>
         </Grid>
