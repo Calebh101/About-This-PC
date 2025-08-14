@@ -239,11 +239,13 @@ int main(int argc, char *argv[])
     trayEntry->setContextMenu(trayMenu);
     trayEntry->show();
 
-    Logger::print("Starting main application...");
-    a.exec();
-
-    if (Global::settings().get<bool>("checkForUpdatesAtStart")) {
+    if (Global::settings().get<bool>({"checkForUpdatesAtStart"})) {
         Logger::print("Starting automated update check...");
-        updater.check(true, false);
+        QTimer::singleShot(0, [&updater]() {
+            updater.check(true, false);
+        });
     }
+
+    Logger::print("Starting main application...");
+    return a.exec();
 }

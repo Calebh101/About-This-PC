@@ -4,6 +4,13 @@
 #include <fstream>
 #include <filesystem>
 #include "logger.h"
+#include <QWidget>
+#include <QTreeView>
+#include <QStandardItemModel>
+#include "global.h"
+#include <QComboBox>
+#include <QVBoxLayout>
+#include <QLabel>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -48,9 +55,63 @@ Settings::Settings() {
     Logger::print("Continuing...");
 }
 
-json Settings::defaults() {
-    json result;
-    result["isBeta"] = false;
-    result["checkForUpdatesAtStart"] = false;
+QWidget* title(QWidget* parent, QString text) {
+    QLabel* result = new QLabel(parent);
+    QFont font = result->font();
+
+    font.setPointSize(20);
+    result->setText(text);
+    result->setFont(font);
+
     return result;
+}
+
+QWidget* setting(QWidget* parent, QString title, QString description, QWidget* selector) {
+    QWidget* container = new QWidget();
+    QHBoxLayout* mainLayout = new QHBoxLayout(container);
+    QVBoxLayout* textLayout = new QVBoxLayout();
+
+    QLabel* titleLabel = new QLabel(container);
+    QLabel* descLabel = new QLabel(container);
+
+    QFont titleFont = titleLabel->font();
+    QFont descFont = descLabel->font();
+
+    titleFont.setPointSize(16);
+    descFont.setPointSize(10);
+
+    titleLabel->setFont(titleFont);
+    descLabel->setFont(descFont);
+    titleLabel->setText(title);
+    descLabel->setText(description);
+
+    textLayout->addWidget(titleLabel);
+    textLayout->addWidget(descLabel);
+    mainLayout->addLayout(textLayout);
+    mainLayout->addWidget(selector);
+    return container;
+}
+
+QWidget* booleanSelector(QWidget* parent, QStringList keys) {
+    bool value = Global::settings().get<bool>(keys);
+    QComboBox* box = new QComboBox(parent);
+    box->setCurrentText(value ? "Yes" : "No");
+    box->addItems({"Yes", "No"});
+
+    QObject::connect(box, &QComboBox::currentTextChanged, parent, [=](const QString &text){
+        Logger::print(QString("Setting changed to: %1").arg(text));
+        Global::settings().set<bool>(text == "Yes", keys);
+    });
+
+    return box;
+}
+
+QWidget* Settings::page(QWidget* parent) {
+    QWidget* container = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout(container);
+
+    layout->addWidget(title(container, "General"));
+    layout->addWidget(setting(container, "Use Beta Versions", "Allow the Update Checker to allow beta (prerelease) versions.", booleanSelector(container, {"isBeta"})));
+
+    return container;
 }

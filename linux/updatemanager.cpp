@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include "global.h"
+#include <QTimer>
 
 using json = nlohmann::json;
 
@@ -23,7 +24,10 @@ void UpdateManager::check(bool gui, bool implicit) {
     QNetworkRequest request(url);
     QNetworkReply* reply = manager->get(request);
     Logger::print(QString("Sending update request to %1...").arg(url.toDisplayString()));
-    if (implicit) QMessageBox::information(nullptr, "Loading...", "Checking for updates...");
+
+    QMessageBox* message = new QMessageBox(QMessageBox::Information, "Loading...", "Checking for updates...");
+    message->setAttribute(Qt::WA_DeleteOnClose);
+    message->show();
 
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, gui, implicit]() {
         Logger::print("Reply received");
@@ -31,7 +35,7 @@ void UpdateManager::check(bool gui, bool implicit) {
         Version currentversion = Version::parse(QString::fromStdString(Global::version));
 
         int status = -1;
-        bool useBeta = Global::settings().get<bool>("isBeta");
+        bool useBeta = Global::settings().get<bool>({"isBeta"});
         bool isx86 = sizeof(void*) == 8 || sizeof(void*) == 4;
 
         try {
