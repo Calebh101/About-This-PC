@@ -6,7 +6,9 @@
         <file alias="eye-dark">images/icons/eye-solid-full-dark.svg</file>
         <file alias="lock-open-dark">images/icons/lock-open-solid-full-dark.svg</file>
         <file alias="lock-open-light">images/icons/lock-open-solid-full-light.svg</file>
-        <file alias="lockk-dark">images/icons/lock-solid-full-dark.svg</file>
+        <file alias="lock-dark">images/icons/lock-solid-full-dark.svg</file>
         <file alias="lock-light">images/icons/lock-solid-full-light.svg</file>
+        <file alias="settings-dark">images/icons/settings-dark.svg</file>
+        <file alias="settings-light">images/icons/settings-light.svg</file>
     </qresource>
 </RCC>

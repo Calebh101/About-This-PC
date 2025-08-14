@@ -14,6 +14,7 @@ public:
     Settings();
     json loaded;
     static QWidget* page(QWidget* parent);
+    static void window(QWidget* parent);
 
     static json& defaults() {
         static json result = [] {

@@ -32,3 +32,4 @@ CIcon* CIcon::eye() {return new CIcon("eye");}
 CIcon* CIcon::eyeClosed() {return new CIcon("eye-slash");}
 CIcon* CIcon::lock() {return new CIcon("lock");}
 CIcon* CIcon::lockOpen() {return new CIcon("lock-open");}
+CIcon* CIcon::settings() {return new CIcon("settings");}

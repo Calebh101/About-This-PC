@@ -11,7 +11,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(bool classic, QWidget *parent = nullptr);
     ~MainWindow();
-    static QSize getWindowSize(bool classic);
+    static QSize getWindowSize(bool classic = false);
     static MainWindow* openNewWindow(bool classic);
     static void addWindow(MainWindow* w);
     static void removeMostRecentWindow();

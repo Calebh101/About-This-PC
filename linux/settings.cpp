@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QVBoxLayout>
 #include <QLabel>
+#include "mainwindow.h"
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -114,4 +115,15 @@ QWidget* Settings::page(QWidget* parent) {
     layout->addWidget(setting(container, "Use Beta Versions", "Allow the Update Checker to allow beta (prerelease) versions.", booleanSelector(container, {"isBeta"})));
 
     return container;
+}
+
+void Settings::window(QWidget* parent) {
+    QWidget* w = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout();
+
+    layout->addWidget(page(w));
+    w->setWindowTitle("About This PC Settings");
+    w->resize(MainWindow::getWindowSize());
+    w->setLayout(layout);
+    w->show();
 }

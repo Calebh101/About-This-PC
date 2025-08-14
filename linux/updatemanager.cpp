@@ -25,9 +25,11 @@ void UpdateManager::check(bool gui, bool implicit) {
     QNetworkReply* reply = manager->get(request);
     Logger::print(QString("Sending update request to %1...").arg(url.toDisplayString()));
 
-    QMessageBox* message = new QMessageBox(QMessageBox::Information, "Loading...", "Checking for updates...");
-    message->setAttribute(Qt::WA_DeleteOnClose);
-    message->show();
+    if (implicit) {
+        QMessageBox* message = new QMessageBox(QMessageBox::Information, "Loading...", "Checking for updates...");
+        message->setAttribute(Qt::WA_DeleteOnClose);
+        message->show();
+    }
 
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, gui, implicit]() {
         Logger::print("Reply received");
@@ -45,11 +47,14 @@ void UpdateManager::check(bool gui, bool implicit) {
                 Logger::print(QString("Received response of %1 bytes").arg(response.length()));
 
                 if (document.isArray()) {
-                    for (const QJsonValue& value : document.array()) {
+                    for (int i = 0; i < document.array().count(); i++) {
+                        const QJsonValue& value = document.array()[i];
+
                         if (value.isObject()) {
                             QJsonObject release = value.toObject();
                             QString releaseVersion = release["tag_name"].toString();
                             Version versionObject = Version::parse(releaseVersion);
+                            QJsonArray assets = release["assets"].toArray();
 
                             if (versionObject <= currentversion) {
                                 Logger::print(QString("Hit end of version hunt at: %1").arg(releaseVersion));
@@ -61,7 +66,8 @@ void UpdateManager::check(bool gui, bool implicit) {
                             bool isValidReleaseType = beta == false || useBeta;
                             bool containsValidRelease = false;
 
-                            for (const QJsonValue& asset : release["assets"].toArray()) {
+                            for (int i = 0; i < assets.count(); i++) {
+                                const QJsonValue& asset = assets[i];
                                 QString name = asset["name"].toString();
                                 if (name.contains(QString("linux-%1").arg(isx86 ? "x64" : "arm64"))) containsValidRelease = true;
                             }

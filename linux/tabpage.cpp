@@ -17,6 +17,7 @@
 #include <QProcess>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QStyle>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -80,7 +81,6 @@ LocalTabPage::LocalTabPage() {}
 
 ordered_json LocalTabPage::getDetails(QWidget* parent) {
     ordered_json results;
-
     json chassis = Global::getChassis(); // Load chassis (model)
     json cpuInfo = Global::getCPU(); // Load CPU info
     json gpuInfo = Global::getGPU(); // Load GPU info
@@ -181,7 +181,6 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
 
 QWidget* LocalTabPage::overview(QWidget* parent) {
     bool showPrivate = true;
-    bool showLockButton = false;
     bool isElevated = Global::isElevated();
     float fontSize = Global::fontSize;
     int fontWeight = Global::fontWeight;
@@ -260,21 +259,21 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     }
 
     QPushButton* eyeButton = new QPushButton();
-    QPushButton* lockButton = new QPushButton();
+    QPushButton* settingsButton = new QPushButton();
     QStringList bottomText = LocalTabPage::bottomText();
 
     eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
     eyeButton->setIconSize(QSize(16, 16));
     eyeButton->setFixedSize(eyeButton->sizeHint());
 
-    lockButton->setIcon(isElevated ? *CIcon::lockOpen()->build() : *CIcon::lock()->build());
-    lockButton->setIconSize(QSize(16, 16));
-    lockButton->setFixedSize(lockButton->sizeHint());
-    if (isElevated) lockButton->setEnabled(false);
+    settingsButton->setIcon(*CIcon::settings()->build());
+    settingsButton->setIconSize(QSize(16, 16));
+    settingsButton->setFixedSize(settingsButton->sizeHint());
+    if (isElevated) settingsButton->setEnabled(false);
 
     QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
         eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
-        lockButton->setIcon(isElevated ? *CIcon::lockOpen()->build() : *CIcon::lock()->build());
+        settingsButton->setIcon(*CIcon::settings()->build());
     });
 
     QObject::connect(eyeButton, &QPushButton::clicked, parent, [=]() mutable {
@@ -295,11 +294,9 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         page->update();
     });
 
-    QObject::connect(lockButton, &QPushButton::clicked, parent, [=]() mutable {
-        Logger::print("lockButton pressed");
-        if (isElevated) return;
-
-        // Couldn't get this to work properly, so I had to make a helper script instead
+    QObject::connect(settingsButton, &QPushButton::clicked, parent, [=]() mutable {
+        Logger::print("settingsButton pressed");
+        Settings::window(parent);
     });
 
     layout->addWidget(processImage(iconPath, parent, 148, 10), 5);
@@ -321,10 +318,10 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     }
 
     bottomLayout->addSpacing(eyeButton->width());
-    if (showLockButton) bottomLayout->addSpacing(lockButton->width());
+    bottomLayout->addSpacing(settingsButton->width());
     bottomLayout->addLayout(bottomTextLayout);
     bottomLayout->addWidget(eyeButton);
-    if (showLockButton) bottomLayout->addWidget(lockButton);
+    bottomLayout->addWidget(settingsButton);
     vlayout->addLayout(bottomLayout);
     page->setLayout(vlayout);
     return page;
