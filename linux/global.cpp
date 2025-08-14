@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/types.h>
+#include "settings.hpp"
 
 Global::Global() {}
 
@@ -27,6 +28,15 @@ const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
 
 json helperData;
+Settings settingsData;
+
+void Global::setSettings(Settings s) {
+    settingsData = s;
+}
+
+Settings Global::settings() {
+    return settingsData;
+}
 
 void Global::setHelperData(std::string data) {
     try {

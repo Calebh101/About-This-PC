@@ -16,6 +16,8 @@
 #include <QLocalServer>
 #include <filesystem>
 #include <fstream>
+#include "settings.hpp"
+#include "updatemanager.h"
 
 namespace fs = std::filesystem;
 
@@ -30,7 +32,7 @@ int main(int argc, char *argv[])
     QStringList args = QCoreApplication::arguments();
     QSharedMemory sharedMemory(id);
     QString mainDirectory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
-    a.setQuitOnLastWindowClosed(false);
+    UpdateManager updater = UpdateManager();
 
 #ifdef QT_DEBUG
     Logger::enableLogging();
@@ -78,6 +80,7 @@ int main(int argc, char *argv[])
         fs::create_directory(mainDirectory.toStdString());
     }
 
+    a.setQuitOnLastWindowClosed(false);
     QLocalServer server;
     bool listening = false;
 
@@ -94,6 +97,7 @@ int main(int argc, char *argv[])
 
     // Log that the app is starting, even when logging is disabled
     Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(Global::version), QT_VERSION_STR), true);
+    Global::setSettings(Settings());
 
     QSystemTrayIcon *trayEntry = new QSystemTrayIcon();
     QMenu* trayMenu = new QMenu();
@@ -202,6 +206,8 @@ int main(int argc, char *argv[])
     trayMenu->addAction(&closeAll);
 
     trayMenu->addSeparator();
+    QAction checkForUpdates("Check For Updates", &a);
+    trayMenu->addAction(&checkForUpdates);
     QAction restart("Restart", &a);
 
     QAction quit("Quit", &a);
@@ -213,6 +219,11 @@ int main(int argc, char *argv[])
         QStringList arguments = QCoreApplication::arguments();
         QProcess::startDetached(program, arguments);
         QCoreApplication::quit();
+    });
+
+    QObject::connect(&checkForUpdates, &QAction::triggered, &a, [&]() {
+        Logger::print("Starting update check...");
+        updater.check(true);
     });
 
     QObject::connect(&closeWindow, &QAction::triggered, &a, [&]() {
@@ -229,5 +240,10 @@ int main(int argc, char *argv[])
     trayEntry->show();
 
     Logger::print("Starting main application...");
-    return a.exec();
+    a.exec();
+
+    if (Global::settings().get<bool>("checkForUpdatesAtStart")) {
+        Logger::print("Starting automated update check...");
+        updater.check(true, false);
+    }
 }

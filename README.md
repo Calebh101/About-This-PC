@@ -16,23 +16,23 @@ The icon on the side uses a name taken from the `os-release` standard again, and
 
 The eye button in the bottom corner allows you to show/hide your serial and local IP(s) for screenshots.
 
-![Overview Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-page1.png)
+![Overview Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page1.png)
 
 The next page is the Displays page, which, well, shows you your displays. It lists the name, resolution, size, and refresh rate. Then, depending if the display is detected as internal, will show either a laptop icon or a monitor depending on what it finds.
 
-![Displays Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-page2.png)
+![Displays Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page2.png)
 
 The next page will show you connected storage devices, their sized, how much of that is used, and a progress bar showing how much is used. It'll also tell you if it's a startup disk, internal, or recognized as external. (This is based on if the drive is hot-pluggable.)
 
-![Storage Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-page3.png)
+![Storage Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page3.png)
 
 The last page is the Support page, which, like macOS, will show you several links that you can open. My implementation again uses the `os-release` standard, which uses what your distro provides to show some links. I also added on some links to About This PC resources, like the GitHub repo and the GitHub Issues page. (All of mine come *after* your distro's links, so "Homepage" and "Report Bugs" are for your *distro*, not for About This PC.)
 
-![Support Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-page4.png)
+![Support Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page4.png)
 
 This next page is not in a tab bar like the others, but is instead different from the other section. This is the "classic" page, that resembles the *newer* Ventura+ About This Mac app. Its window is vertical, and instead of an OS icon, it displays a computer image (laptop, monitor, etcetera) like Apple's version. It shows the exact same info as the Overview tab on the other section, with an eye button again, but it also has a "More Info" button. This button opens up the Overview page.
 
-![Classic Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/assets/screenshots/linux-classic.png)
+![Classic Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-classic.png)
 
 ## The System Tray
 
@@ -42,6 +42,7 @@ About This PC for Linux comes with built-in system tray support, that starts whe
 - `About This PC (Classic)`: Opens the "classic" page.
 - `Close`: Closes the most recent About This PC window.
 - `Close All`: Closes all About This PC windows.
+- `Check For Updates`: Check GitHub for updates.
 - `Quit`: Quits the service and all open windows.
 - `Restart`: Quits the service and all open windows, then reruns itself.
 

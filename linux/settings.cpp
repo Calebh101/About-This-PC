@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "settings.hpp"
 #include "json.hpp"
 #include <QString>
 #include <fstream>
@@ -50,5 +50,7 @@ Settings::Settings() {
 
 json Settings::defaults() {
     json result;
+    result["isBeta"] = false;
+    result["checkForUpdatesAtStart"] = false;
     return result;
 }

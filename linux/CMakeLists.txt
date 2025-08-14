@@ -55,7 +55,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         storage.h storage.cpp
         binaries.qrc
         data.h data.cpp
-        settings.h settings.cpp
+        settings.hpp settings.cpp
+        updatemanager.h updatemanager.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET AboutThisPC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
