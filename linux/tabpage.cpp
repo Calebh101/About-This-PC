@@ -194,7 +194,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     QLabel* serialValueLabel = nullptr;
     QLabel* localIPLabel = nullptr;
     QStringList subtitleItems;
-    json details = getDetails(parent);
+    ordered_json details = getDetails(parent);
     ordered_json results = details["results"];
     std::string localIPName = details["localIPName"];
 

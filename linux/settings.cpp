@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <qscrollarea.h>
 #include "mainwindow.h"
 
 namespace fs = std::filesystem;
@@ -63,7 +64,6 @@ QWidget* title(QWidget* parent, QString text) {
     font.setPointSize(20);
     result->setText(text);
     result->setFont(font);
-
     return result;
 }
 
@@ -89,15 +89,18 @@ QWidget* setting(QWidget* parent, QString title, QString description, QWidget* s
     textLayout->addWidget(titleLabel);
     textLayout->addWidget(descLabel);
     mainLayout->addLayout(textLayout);
+    mainLayout->addStretch();
     mainLayout->addWidget(selector);
+
+    container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     return container;
 }
 
 QWidget* booleanSelector(QWidget* parent, QStringList keys) {
     bool value = Global::settings().get<bool>(keys);
     QComboBox* box = new QComboBox(parent);
-    box->setCurrentText(value ? "Yes" : "No");
     box->addItems({"Yes", "No"});
+    box->setCurrentText(value ? "Yes" : "No");
 
     QObject::connect(box, &QComboBox::currentTextChanged, parent, [=](const QString &text){
         Logger::print(QString("Setting changed to: %1").arg(text));
@@ -110,20 +113,29 @@ QWidget* booleanSelector(QWidget* parent, QStringList keys) {
 QWidget* Settings::page(QWidget* parent) {
     QWidget* container = new QWidget();
     QVBoxLayout* layout = new QVBoxLayout(container);
+    QScrollArea* scroll = new QScrollArea();
 
     layout->addWidget(title(container, "General"));
     layout->addWidget(setting(container, "Use Beta Versions", "Allow the Update Checker to allow beta (prerelease) versions.", booleanSelector(container, {"isBeta"})));
+    layout->addWidget(setting(container, "Check for Updates at Start", "When the About This PC service starts, check for updates automatically.", booleanSelector(container, {"checkForUpdatesAtStart"})));
 
-    return container;
+    scroll->setWidgetResizable(true);
+    container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    container->setFixedHeight(container->sizeHint().height());
+    scroll->setWidget(container);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    return scroll;
 }
 
 void Settings::window(QWidget* parent) {
     QWidget* w = new QWidget();
     QVBoxLayout* layout = new QVBoxLayout();
 
-    layout->addWidget(page(w));
+    layout->addWidget(page(w), 1);
     w->setWindowTitle("About This PC Settings");
     w->resize(MainWindow::getWindowSize());
+    w->setMinimumSize(w->size());
     w->setLayout(layout);
     w->show();
 }

@@ -204,6 +204,7 @@ json Global::getOS() {
 }
 
 json Global::getCPU() {
+    bool editCPU = true;
     std::vector<json> results;
     std::vector<std::string> processors;
     std::ifstream file("/proc/cpuinfo");
@@ -219,6 +220,16 @@ json Global::getCPU() {
                 std::string value = trim(line.substr(pos + 1));
 
                 if (key == "model name" && !(std::find(processors.begin(), processors.end(), value) != processors.end())) {
+                    if (editCPU) {
+                        std::string r = "(R)";
+                        std::string tm = "(TM)";
+
+                        size_t rPos = value.find(r);
+                        if (rPos != std::string::npos) value.replace(rPos, r.length(), "");
+                        size_t tmPos = value.find(tm);
+                        if (tmPos != std::string::npos) value.replace(tmPos, tm.length(), "");
+                    }
+
                     processors.push_back(value);
                 }
 
