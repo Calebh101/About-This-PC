@@ -48,6 +48,7 @@ About This PC for Linux comes with built-in system tray support, that starts whe
 - `About This PC (Classic)`: Opens the "classic" page.
 - `Close`: Closes the most recent About This PC window.
 - `Close All`: Closes all About This PC windows.
+- `Settings`: Opens the Settings window.
 - `Check For Updates`: Check GitHub for updates.
 - `Quit`: Quits the service and all open windows.
 - `Restart`: Quits the service and all open windows, then reruns itself.

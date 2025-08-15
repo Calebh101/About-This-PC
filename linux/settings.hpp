@@ -5,7 +5,11 @@
 #include "json.hpp"
 #include <QWidget>
 #include <fstream>
-#include <filesystem>
+
+#ifdef Unsorted
+#undef Unsorted
+#endif
+#include <QDir>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -15,8 +19,10 @@ class Settings
 public:
     Settings();
     json loaded;
-    static QWidget* page(QWidget* window);
+
     static void window(QWidget* parent);
+    static QWidget* page(QWidget* window);
+    static QDir directory;
     static QString file;
 
     static json& defaults() {
@@ -86,13 +92,6 @@ public:
     }
 
     void reload() {
-        QString directory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
-
-        if (!fs::exists(directory.toStdString()) || !fs::is_directory(directory.toStdString())) {
-            Logger::print(QString("Creating directory at %1...").arg(directory), true);
-            fs::create_directory(directory.toStdString());
-        }
-
         std::ifstream infile(file.toStdString());
         std::stringstream buffer;
         bool status = false;
@@ -103,16 +102,17 @@ public:
                 this->loaded = json::parse(buffer.str());
                 status = true;
             } catch (...) {
-                Logger::warn(QString("Unable to parse settings file! Recovering..."));
+                Logger::warn(QString("Unable to parse settings file at %1! Recovering...").arg(file));
             }
+        } else {
+            Logger::warn(QString("Unable to open settings file at %1! Recovering...").arg(file));
         }
 
         if (status == false) {
             Logger::print("Loading default settings...", true);
             json j = defaults();
-            this->loaded = j;
-
             std::ofstream outfile(file.toStdString());
+            this->loaded = j;
 
             if (outfile.is_open()) {
                 outfile << j.dump() << std::endl;

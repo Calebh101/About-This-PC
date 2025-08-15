@@ -7,17 +7,21 @@
 #include "QErrorMessage"
 #include <QFile>
 #include "global.h"
-#include <QDir>
 #include <QProcess>
 #include <QSystemTrayIcon>
 #include <QMenu>
-#include <QSharedMemory>
+#include <QLockFile>
 #include <QLocalSocket>
 #include <QLocalServer>
 #include <filesystem>
 #include <fstream>
 #include "settings.hpp"
 #include "updatemanager.h"
+
+#ifdef Unsorted
+#undef Unsorted
+#endif
+#include <QDir>
 
 namespace fs = std::filesystem;
 
@@ -26,12 +30,16 @@ int main(int argc, char *argv[])
     QString id = "AboutThisPCLinuxApplication";
     bool classic = false;
     bool noWindow = false;
-    qputenv("QT_FONT_DPI", "96"); // Fixed size, since sudo and other environments likes to be weird with text size
+    qputenv("QT_FONT_DPI", "96"); // Fixed size
+
+    if (!Settings::directory.exists()) {
+        Logger::print(QString("Creating directory at %1...").arg(Settings::directory.absolutePath()), true);
+        fs::create_directory(Settings::directory.absolutePath().toStdString());
+    }
 
     QApplication a(argc, argv);
     QStringList args = QCoreApplication::arguments();
-    QSharedMemory sharedMemory(id);
-    QString mainDirectory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
+    QLockFile lock(Settings::directory.absoluteFilePath("AboutThisPC.lock"));
     UpdateManager updater = UpdateManager();
 
 #ifdef QT_DEBUG
@@ -39,12 +47,12 @@ int main(int argc, char *argv[])
     Logger::setVerbose(false);
 #endif
 
-    if (args.contains("--version")) {
+    if (args.contains("--version")) { // Print version and exit
         std::cout << Global::version << std::endl;
         return 0;
     }
 
-    if (args.contains("--verbose"))  {
+    if (args.contains("--verbose")) { // Enable logging and verbose
         Logger::enableLogging();
         Logger::enableVerbose();
     }
@@ -52,8 +60,8 @@ int main(int argc, char *argv[])
     if (args.contains("--classic")) classic = true;
     if (args.contains("--no-window")) noWindow = true;
 
-    if (!sharedMemory.create(1)) {
-        Logger::print("Process is already running.");
+    if (!lock.tryLock()) {
+        Logger::print("Process is already running.", true);
         QLocalSocket socket;
         socket.connectToServer(id);
 
@@ -64,20 +72,12 @@ int main(int argc, char *argv[])
             return 0;
         } else {
             Logger::error("Process is running, but server is not found!");
-            Logger::warn("The process is currently using shared memory, but a local server was not found. This may result in some broken functions.");
-
-            if (sharedMemory.isAttached()) sharedMemory.detach();
-            if (sharedMemory.attach()) sharedMemory.detach();
+            Logger::warn("The lock file is currently locked, but a local server was not found. This may result in some broken functions.");
         }
     }
 
     if (Global::isElevated()) {
         Logger::warn("WARNING: Running as root will have unintended consequences!");
-    }
-
-    if (!fs::exists(mainDirectory.toStdString()) || !fs::is_directory(mainDirectory.toStdString())) {
-        Logger::print(QString("Creating directory at %1...").arg(mainDirectory), true);
-        fs::create_directory(mainDirectory.toStdString());
     }
 
     a.setQuitOnLastWindowClosed(false);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
     try { // App icon
         bool alwaysCreate = true;
-        QString path = QString("%1/AboutThisPC.png").arg(mainDirectory);
+        QString path = Settings::directory.absoluteFilePath("AboutThisPC.png");
         std::ifstream infile(path.toStdString());
         std::stringstream buffer;
         bool status = false;

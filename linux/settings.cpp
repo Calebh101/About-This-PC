@@ -13,10 +13,16 @@
 #include <qscrollarea.h>
 #include "mainwindow.h"
 
+#ifdef Unsorted
+#undef Unsorted
+#endif
+#include <QDir>
+
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-QString Settings::file = QString("%1/.AboutThisPC/settings.json").arg(std::getenv("HOME"));
+QDir Settings::directory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
+QString Settings::file = directory.absoluteFilePath("settings.json");
 
 Settings::Settings() {
     this->reload();
