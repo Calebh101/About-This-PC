@@ -16,6 +16,7 @@ public:
     static void addWindow(MainWindow* w);
     static void removeMostRecentWindow();
     static void closeAllWindows();
+    static void processParent(QWidget* parent);
 };
 
 #endif // MAINWINDOW_H

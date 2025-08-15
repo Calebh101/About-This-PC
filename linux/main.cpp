@@ -192,25 +192,29 @@ int main(int argc, char *argv[])
     trayEntry->setIcon(QIcon(":/appicon/toolbar"));
 
     QAction open("About This PC", &a);
+    QAction openClassic("About This PC (Classic)", &a);
+    QAction closeWindow("Close", &a);
+    QAction closeAll("Close All", &a);
+    QAction settingsOption("Settings", &a);
+    QAction checkForUpdates("Check For Updates", &a);
+    QAction restart("Restart", &a);
+    QAction quit("Quit", &a);
+
     QObject::connect(&open, &QAction::triggered, [&]() {MainWindow::openNewWindow(false);});
     trayMenu->addAction(&open);
 
-    QAction openClassic("About This PC (Classic)", &a);
     QObject::connect(&openClassic, &QAction::triggered, [&]() {MainWindow::openNewWindow(true);});
     trayMenu->addAction(&openClassic);
 
     trayMenu->addSeparator();
-    QAction closeWindow("Close", &a);
-    QAction closeAll("Close All", &a);
     trayMenu->addAction(&closeWindow);
     trayMenu->addAction(&closeAll);
 
     trayMenu->addSeparator();
-    QAction checkForUpdates("Check For Updates", &a);
+    trayMenu->addAction(&settingsOption);
     trayMenu->addAction(&checkForUpdates);
-    QAction restart("Restart", &a);
+    trayMenu->addSeparator();
 
-    QAction quit("Quit", &a);
     QObject::connect(&quit, &QAction::triggered, &a, &QApplication::quit);
     trayMenu->addAction(&quit);
 
@@ -232,6 +236,10 @@ int main(int argc, char *argv[])
 
     QObject::connect(&closeAll, &QAction::triggered, &a, [&]() {
         MainWindow::closeAllWindows();
+    });
+
+    QObject::connect(&settingsOption, &QAction::triggered, &a, [&]() {
+        Settings::window(nullptr);
     });
 
     trayMenu->addAction(&restart);

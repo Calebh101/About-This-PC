@@ -14,7 +14,7 @@ You can also see details like your laptop model, processor, graphics, etcetera. 
 
 The icon on the side uses a name taken from the `os-release` standard again, and (if found) will search in some directories to try to find the icon file. If none are found, it'll default to an image of Tux.
 
-The eye button in the bottom corner allows you to show/hide your serial and local IP(s) for screenshots.
+The eye button in the bottom right corner allows you to show/hide your serial and local IP(s) for screenshots. The settings button (also in the bottom right corner) opens the Settings window.
 
 ![Overview Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page1.png)
 
@@ -33,6 +33,12 @@ The last page is the Support page, which, like macOS, will show you several link
 This next page is not in a tab bar like the others, but is instead different from the other section. This is the "classic" page, that resembles the *newer* Ventura+ About This Mac app. Its window is vertical, and instead of an OS icon, it displays a computer image (laptop, monitor, etcetera) like Apple's version. It shows the exact same info as the Overview tab on the other section, with an eye button again, but it also has a "More Info" button. This button opens up the Overview page.
 
 ![Classic Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-classic.png)
+
+This page is the Settings page, which is opened by the Settings button in the Overview page. Each setting explains itself.
+
+The Settings window is resizable (me making a resizable window? never) but you can't make it smaller than its original dimensions.
+
+![Settings Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-settings.png)
 
 ## The System Tray
 

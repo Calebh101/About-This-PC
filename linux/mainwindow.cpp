@@ -40,30 +40,26 @@ void MainWindow::addWindow(MainWindow* w) {
 }
 
 void MainWindow::removeMostRecentWindow() {
-    if (windows.size() > windowThreshold) {
-        MainWindow* w = windows.back();
-        Logger::print(QString("Closing window..."));
-        w->close();
-    } else {
-        Logger::print("Window close blocked");
-    }
+    MainWindow* w = windows.back();
+    Logger::print(QString("Closing window..."));
+    w->close();
+    delete w;
+    windows.pop_back();
 }
 
 void MainWindow::closeAllWindows() {
-    if (windows.size() > windowThreshold) {
-        for (int i = 0; i < windows.size() - windowThreshold; i++) {
-            MainWindow* w = *(windows.rbegin() + i);
-            Logger::print(QString("Closing window %1...").arg(i));
-            w->close();
-        }
-
-        Logger::print(QString("Closed %1 windows!").arg(windows.size() - windowThreshold));
-    } else {
-        Logger::print("Window close blocked");
+    for (int i = 0; i < windows.size(); i++) {
+        MainWindow* w = *(windows.rbegin() + i);
+        Logger::print(QString("Closing window %1...").arg(i));
+        w->close();
+        delete w;
     }
+
+    Logger::print(QString("Closed %1 windows!").arg(windows.size()));
+    windows.clear();
 }
 
-void processParent(QWidget* parent) {
+void MainWindow::processParent(QWidget* parent) {
     QList<QLabel*> labels = parent->findChildren<QLabel*>();
 
     for (int i = 0; i < labels.size(); i++) {

@@ -1,8 +1,6 @@
 #include "settings.hpp"
 #include "json.hpp"
 #include <QString>
-#include <fstream>
-#include <filesystem>
 #include "logger.h"
 #include <QWidget>
 #include <QTreeView>
@@ -11,60 +9,41 @@
 #include <QComboBox>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <qpushbutton.h>
 #include <qscrollarea.h>
 #include "mainwindow.h"
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
+QString Settings::file = QString("%1/.AboutThisPC/settings.json").arg(std::getenv("HOME"));
+
 Settings::Settings() {
-    QString directory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
-    QString settingsfile = QString("%1/%2").arg(directory, "settings.json");
-
-    if (!fs::exists(directory.toStdString()) || !fs::is_directory(directory.toStdString())) {
-        Logger::print(QString("Creating directory at %1...").arg(directory), true);
-        fs::create_directory(directory.toStdString());
-    }
-
-    std::ifstream infile(settingsfile.toStdString());
-    std::stringstream buffer;
-    bool status = false;
-    buffer << infile.rdbuf();
-
-    if (infile.good()) {
-        try {
-            this->loaded = json::parse(buffer.str());
-            status = true;
-        } catch (...) {
-            Logger::warn(QString("Unable to parse settings file! Recovering..."));
-        }
-    }
-
-    if (status == false) {
-        Logger::print("Loading default settings...", true);
-        json j = defaults();
-        this->loaded = j;
-
-        std::ofstream outfile(settingsfile.toStdString());
-
-        if (outfile.is_open()) {
-            outfile << j.dump() << std::endl;
-        } else {
-            Logger::print(QString("Unable to write to settings file %1: File not open").arg(settingsfile));
-        }
-    }
-
-    Logger::print("Continuing...");
+    this->reload();
 }
 
-QWidget* title(QWidget* parent, QString text) {
-    QLabel* result = new QLabel(parent);
-    QFont font = result->font();
+QWidget* title(QWidget* parent, QString title, QString description) {
+    QWidget* container = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout(container);
+
+    QLabel* titleLabel = new QLabel(parent);
+    QFont font = titleLabel->font();
+
+    QLabel* desc = new QLabel(parent);
+    QFont descFont = desc->font();
 
     font.setPointSize(20);
-    result->setText(text);
-    result->setFont(font);
-    return result;
+    descFont.setPointSize(9);
+
+    titleLabel->setText(title);
+    titleLabel->setFont(font);
+
+    desc->setText(description);
+    desc->setFont(descFont);
+
+    layout->addWidget(titleLabel);
+    layout->addWidget(desc);
+    return container;
 }
 
 QWidget* setting(QWidget* parent, QString title, QString description, QWidget* selector) {
@@ -78,25 +57,26 @@ QWidget* setting(QWidget* parent, QString title, QString description, QWidget* s
     QFont titleFont = titleLabel->font();
     QFont descFont = descLabel->font();
 
-    titleFont.setPointSize(16);
-    descFont.setPointSize(10);
+    titleFont.setPointSize(12);
+    descFont.setPointSize(9);
 
     titleLabel->setFont(titleFont);
     descLabel->setFont(descFont);
     titleLabel->setText(title);
     descLabel->setText(description);
+    titleLabel->setWordWrap(true);
+    descLabel->setWordWrap(true);
 
     textLayout->addWidget(titleLabel);
     textLayout->addWidget(descLabel);
-    mainLayout->addLayout(textLayout);
-    mainLayout->addStretch();
+    mainLayout->addLayout(textLayout, 1);
     mainLayout->addWidget(selector);
 
     container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     return container;
 }
 
-QWidget* booleanSelector(QWidget* parent, QStringList keys) {
+QWidget* Selector::boolean(QWidget* parent, QStringList keys) {
     bool value = Global::settings().get<bool>(keys);
     QComboBox* box = new QComboBox(parent);
     box->addItems({"Yes", "No"});
@@ -110,18 +90,32 @@ QWidget* booleanSelector(QWidget* parent, QStringList keys) {
     return box;
 }
 
-QWidget* Settings::page(QWidget* parent) {
+QWidget* Selector::button(QWidget* parent, QString text, QString tooltip, std::function<void()> callback) {
+    QPushButton* button = new QPushButton(text, parent);
+    button->setToolTip(tooltip);
+    QObject::connect(button, &QPushButton::clicked, callback);
+    return button;
+}
+
+QWidget* Settings::page(QWidget* window) {
     QWidget* container = new QWidget();
     QVBoxLayout* layout = new QVBoxLayout(container);
     QScrollArea* scroll = new QScrollArea();
 
-    layout->addWidget(title(container, "General"));
-    layout->addWidget(setting(container, "Use Beta Versions", "Allow the Update Checker to allow beta (prerelease) versions.", booleanSelector(container, {"isBeta"})));
-    layout->addWidget(setting(container, "Check for Updates at Start", "When the About This PC service starts, check for updates automatically.", booleanSelector(container, {"checkForUpdatesAtStart"})));
+    layout->addWidget(title(container, "General", "General settings for About This PC."));
+    layout->addWidget(setting(container, "Use Beta Versions", "Allow the Update Checker to allow beta (prerelease) versions.", Selector::boolean(container, {"isBeta"})));
+    layout->addWidget(setting(container, "Check for Updates at Start", "When the About This PC service starts, check for updates automatically.", Selector::boolean(container, {"checkForUpdatesAtStart"})));
+
+    layout->addWidget(setting(container, "Reset All Settings", "Reset all About This PC settings to default.", Selector::button(container, "Reset", "Reset all About This PC settings to default.", [window] {
+        Logger::print("Reset called");
+        Global::settings().reset();
+        window->close();
+    })));
 
     scroll->setWidgetResizable(true);
     container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     container->setFixedHeight(container->sizeHint().height());
+    MainWindow::processParent(container);
     scroll->setWidget(container);
     scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);

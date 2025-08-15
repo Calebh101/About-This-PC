@@ -12,6 +12,7 @@
 #include <QApplication>
 #include "global.h"
 #include <QTimer>
+#include <QDesktopServices>
 
 using json = nlohmann::json;
 
@@ -105,16 +106,26 @@ void UpdateManager::check(bool gui, bool implicit) {
         reply->deleteLater();
 
         if (status < 0 /* bad */) {
+            Logger::warn(QString("Updater: Bad response! (%1)").arg(status));
             if (gui) QMessageBox::critical(nullptr, "Error", "We were unable to check for updates.");
             return false;
         } else if (status == 0 || version == std::nullopt /* none found */) {
+            Logger::print("Updater: No updates found");
             if (gui && implicit) QMessageBox::information(nullptr, "Check for Updates", "No updates found.");
             return false;
         } else /* one found */ {
+            json update = version;
+            Logger::print(QString("Updater: Update found: %1").arg(update["version"]));
+
             if (gui) {
-                json update = version;
                 QString message = QString("A new update was found!\n\nTitle: %1\nVersion: %2 (%3)\nPublished: %4\nURL: %5\n\n%6\n\nDo you want to open it on GitHub?").arg(update["title"]).arg(update["version"]).arg(update["beta"] ? "beta" : "release").arg(update["published"]).arg(update["url"]).arg(update["body"]);
-                QMessageBox::information(nullptr, "Check for Updates", message, QMessageBox::Yes | QMessageBox::Close);
+                QMessageBox::StandardButton reply = QMessageBox::information(nullptr, "Check for Updates", message, QMessageBox::Yes | QMessageBox::Close);
+
+                if (reply == QMessageBox::Yes) {
+                    QUrl url = QUrl(QString::fromStdString(update["url"].get<std::string>()));
+                    Logger::print(QString("Opening URL %1...").arg(url.toDisplayString()));
+                    QDesktopServices::openUrl(url);
+                }
             }
 
             return true;

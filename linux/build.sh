@@ -25,7 +25,7 @@ cd $OUTPUT_DIR/linux
 mkdir -p x64
 cp $SCRIPT_DIR/build/Desktop_Qt_6_9_1-Release/AboutThisPC x64/AboutThisPC
 cp $PARENT_DIR/README.md x64/README.md
-cp $PARENT_DIR/LICENSE x64/LICENSE.md
+cp $PARENT_DIR/LICENSE.md x64/LICENSE.md
 sed -e "s/\[\[APPVERSION\]\]/$VERSION/g" -e "s/\[\[AUTHOR\]\]/$AUTHOR/g" "$SCRIPT_DIR/Sample.desktop" > x64/AboutThisPC.desktop
 
 x64zip=$OUTPUT_DIR/AboutThisPC-$VERSION-linux-x64.zip
