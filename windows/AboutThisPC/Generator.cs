@@ -91,12 +91,12 @@ namespace AboutThisPC
             return status == 1;
         }
 
-        public static List<ManagementObject> SearchForAll(string query)
+        public static List<ManagementObject> SearchForAll(string query, string? containingNamespace = null)
         {
             try
             {
                 List<ManagementObject> items = new List<ManagementObject>();
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+                ManagementObjectSearcher searcher = containingNamespace != null ? new ManagementObjectSearcher(containingNamespace, query) : new ManagementObjectSearcher(query);
                 foreach (ManagementObject obj in searcher.Get().Cast<ManagementObject>()) items.Add(obj);
                 return items;
             } catch (ManagementException e)
@@ -110,7 +110,8 @@ namespace AboutThisPC
         {
             try
             {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+                string? containingNamespace = null;
+                ManagementObjectSearcher searcher = containingNamespace != null ? new ManagementObjectSearcher(containingNamespace, query) : new ManagementObjectSearcher(query);
                 foreach (ManagementObject obj in searcher.Get().Cast<ManagementObject>()) return obj;
                 return null;
             }

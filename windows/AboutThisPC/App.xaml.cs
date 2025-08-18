@@ -113,7 +113,6 @@ namespace AboutThisPC
         /// </summary>
         public App()
         {
-            Bootstrap.Initialize(0x00010007, "stable");
             Logger.Print("Starting AboutThisPC version " + Version + "...", true);
             InitializeComponent();
         }

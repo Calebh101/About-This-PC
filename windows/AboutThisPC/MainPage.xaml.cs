@@ -41,6 +41,7 @@ namespace AboutThisPC
                 "OverviewPage" => typeof(OverviewPage),
                 "SupportPage" => typeof(SupportPage),
                 "DrivesPage" => typeof(DrivesPage),
+                "DisplaysPage" => typeof(DisplaysPage),
                 "SettingsPage" => typeof(SettingsPage),
                 _ => null,
             };

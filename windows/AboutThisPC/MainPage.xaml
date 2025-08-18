@@ -12,6 +12,7 @@
     <controls:NavigationView SelectionChanged="NavigationChanged" PaneDisplayMode="Top" IsBackButtonVisible="Collapsed" IsSettingsVisible="False">
         <controls:NavigationView.MenuItems>
             <controls:NavigationViewItem Content="Overview" Tag="OverviewPage" IsSelected="True" />
+            <controls:NavigationViewItem Content="Displays" Tag="DisplaysPage" IsSelected="False" />
             <controls:NavigationViewItem Content="Storage" Tag="DrivesPage" IsSelected="False" />
             <controls:NavigationViewItem Content="Support" Tag="SupportPage" IsSelected="False" />
         </controls:NavigationView.MenuItems>
