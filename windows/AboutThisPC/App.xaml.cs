@@ -7,15 +7,23 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
 using Microsoft.Win32;
+using Microsoft.Windows.ApplicationModel.DynamicDependency;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Graphics;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -29,6 +37,7 @@ namespace AboutThisPC
     {
         static public Dimensions? dimensions;
         static public string Version = "0.0.0A";
+        static public Settings? settings;
         private Window? _window;
 
         public enum Windows
@@ -104,6 +113,7 @@ namespace AboutThisPC
         /// </summary>
         public App()
         {
+            Bootstrap.Initialize(0x00010007, "stable");
             Logger.Print("Starting AboutThisPC version " + Version + "...", true);
             InitializeComponent();
         }
@@ -133,9 +143,10 @@ namespace AboutThisPC
 
 #if DEBUG
             Logger.EnableLogging();
-            Logger.EnableVerbose();
+            Logger.SetVerbose(true);
 #endif
 
+            settings = new Settings();
             _window = new MainWindow(classic);
             _window.Activate();
         }
@@ -169,9 +180,9 @@ namespace AboutThisPC
 
         public class Dimensions(double Width, double Height)
         {
-            public (double Width, double Height) Build()
+            public SizeInt32 Build()
             {
-                return (Width, Height);
+                return new SizeInt32((int) Width, (int)Height);
             }
         }
 
@@ -180,6 +191,20 @@ namespace AboutThisPC
             public string Id { get; set; } = id.Replace(" ", "_").Replace("\n", "_").ToLowerInvariant();
             public string Title { get; set; } = title;
             public string Value { get; set; } = value;
+        }
+
+        public static async Task<ContentDialogResult> Error(XamlRoot root, string message, object? code, bool warning = false, bool ok = false)
+        {
+            var dialogue = new ContentDialog
+            {
+                Title = warning ? "Warning" : "Error",
+                Content = $"{message}\n\nCode: {code}",
+                PrimaryButtonText = ok ? "OK" : null,
+                CloseButtonText = "Close",
+                XamlRoot = root,
+            };
+
+            return await dialogue.ShowAsync();
         }
     }
 
@@ -191,5 +216,245 @@ namespace AboutThisPC
         public long Used { get; set; } = (long)0;
         public DriveType Type { get; set; } = DriveType.Unknown;
         public bool Ready { get; set; } = false;
+    }
+
+    public class Version
+    {
+        private int aa;
+        private int ab;
+        private int ac;
+        private int ba;
+        private int ca;
+
+        public Version(int major, int intermediate = 0, int minor = 0, int patch = 0, int release = 0)
+        {
+            aa = major;
+            ab = intermediate;
+            ac = minor;
+            ba = patch;
+            ca = release;
+        }
+
+        public override bool Equals(object? o)
+        {
+            if (o is Version)
+            {
+                return this == (Version)o;
+            } else
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(aa, ab, ac, ba, ca);
+        }
+
+        public override string ToString()
+        {
+            return (string.Join(".", new List<string> { aa.ToString(), ab.ToString(), ac.ToString() }) + (char)(ba + 'A') + "-R" + ca.ToString());
+        }
+
+        public static bool operator ==(Version a, Version b)
+        {
+            return a.aa == b.aa && a.ab == b.ab && a.ac == b.ac && a.ba == b.ba && a.ca == b.ca;
+        }
+
+        public static bool operator !=(Version a, Version b)
+        {
+            return !(a == b);
+        }
+
+        public static bool operator >(Version a, Version b)
+        {
+            if (a.aa != b.aa) return a.aa > b.aa;
+            if (a.ab != b.ab) return a.ab > b.ab;
+            if (a.ac != b.ac) return a.ac > b.ac;
+            if (a.ba != b.ba) return a.ba > b.ba;
+            return a.ca > b.ca;
+        }
+
+        public static bool operator <(Version a, Version b)
+        {
+            if (a.aa != b.aa) return a.aa < b.aa;
+            if (a.ab != b.ab) return a.ab < b.ab;
+            if (a.ac != b.ac) return a.ac < b.ac;
+            if (a.ba != b.ba) return a.ba < b.ba;
+            return a.ca < b.ca;
+        }
+
+        public static bool operator >=(Version a, Version b)
+        {
+            return a > b || a == b;
+        }
+
+        public static bool operator <=(Version a, Version b)
+        {
+            return a < b || a == b;
+        }
+
+        public static Version Parse(string input)
+        {
+            int major = 0;
+            int intermediate = 0;
+            int minor = 0;
+            int patch = 0;
+            int release = 0;
+
+            string[] areas = input.Split("-");
+            string[] sections = areas[0].Split(".");
+
+            if (sections.Length >= 3)
+            {
+                char[] text = sections[2].ToCharArray();
+                string letters = "";
+                string numbers = "";
+
+                foreach (char c in text)
+                {
+                    if (char.IsDigit(c))
+                    {
+                        numbers.Append(c);
+                    } else if (char.IsLetter(c))
+                    {
+                        letters.Append(c);
+                    }
+                }
+
+                if (numbers.Length > 0)
+                {
+                    minor = int.Parse(numbers);
+                }
+
+                if (letters.Length == 1)
+                {
+                    char c = char.ToUpper(letters.ToCharArray().First());
+                    patch = c - 'A';
+                }
+            }
+
+            if (sections.Length >= 2) intermediate = int.Parse(sections[1]);
+            if (sections.Length >= 1) major = int.Parse(sections[0]);
+            if (areas.Length >= 2) release = int.Parse(areas[1].Replace("R", ""));
+            return new Version(major, intermediate, minor, patch, release);
+        }
+
+        public static async Task<Version?> CheckForUpdates(XamlRoot root, bool inferred = true)
+        {
+            Logger.Print("Checking for updates...");
+            Version current = Version.Parse(App.Version);
+            Release? result = null;
+
+            bool useBeta = App.settings!.Get<bool>("betaVersions");
+            string url = "https://api.github.com/repos/Calebh101/About-This-PC/releases";
+            using HttpClient client = new HttpClient();
+            string architecture;
+
+            if (RuntimeInformation.OSArchitecture == Architecture.X64)
+            {
+                architecture = "x64";
+            }
+            else if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
+            {
+                architecture = "ARM64";
+            }
+            else
+            {
+                architecture = "x64";
+            }
+
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("AboutThisPC/" + App.Version);
+            HttpResponseMessage response = await client.GetAsync(url);
+            string content = (await response.Content.ReadAsStringAsync()).Trim();
+            Logger.Print("Fetched response from URL " + url + " and status " + response.StatusCode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Logger.Print("Response was successful");
+            } else
+            {
+                Logger.Warn("Unable to fetch for updates: Bad status code: " + response.StatusCode + " with content: " + content);
+                _ = App.Error(root, "We were unable to fetch for updates.\nStatus code: " + response.StatusCode, "BAD_STATUS");
+                return null;
+            }
+
+            string json = content;
+            List<Release> releases = JsonSerializer.Deserialize<List<Release>>(json) ?? [];
+
+            if (releases.Count <= 0)
+            {
+                Logger.Warn("Unable to fetch for updates: Releases was null or empty");
+                _ = App.Error(root, "We were unable to fetch for updates.", "NO_RESULTS");
+                return null;
+            }
+            
+            foreach (Release release in releases)
+            {
+                Version version = Version.Parse(release.TagName);
+                bool status = false;
+                Logger.Verbose("Scanning release " + version.ToString() + " " + (release.Prerelease ? "prerelease" : "release") + "... (current: " + current + ":" + (version > current) + ")");
+
+                if (version <= current) break;
+                if (useBeta == false && release.Prerelease) continue;
+
+                foreach (Asset asset in release.Assets)
+                {
+                    Logger.Verbose("Scanning asset " + asset.Name + "... (arch: " + architecture + ")");
+                    if (asset.Name.Contains("windows-" + architecture) || asset.Name.Contains("windows-" + "universal"))
+                    {
+                        status = true;
+                        break;
+                    }
+                }
+
+                if (status)
+                {
+                    Logger.Verbose("Release " + version + " passed");
+                    result = release;
+                    break;
+                }
+            }
+
+            if (result == null)
+            {
+                var dialogue = new ContentDialog
+                {
+                    Title = "No Updates Found",
+                    Content = "No new updates found.",
+                    PrimaryButtonText = "OK",
+                    XamlRoot = root,
+                };
+
+                if (inferred) _ = dialogue.ShowAsync();
+                return null;
+            } else
+            {
+                async void show(Release release)
+                {
+                    var dialogue = new ContentDialog
+                    {
+                        Title = "Updates Found",
+                        Content = "A new update was found!\n\n" + result.Name + "\nVersion: " + result.TagName + " (" + (result.Prerelease ? "Beta" : "Release") + ")" + "\nReleased: " + result.PublishedAt.ToString("dddd, MMMM dd, yyyy") + "\n\n" + result.Body,
+                        PrimaryButtonText = "Open",
+                        CloseButtonText = "OK",
+                        DefaultButton = ContentDialogButton.Close,
+                        XamlRoot = root,
+                    };
+
+                    var output = await dialogue.ShowAsync();
+                    Logger.Print("Showed dialogue: " + result);
+
+                    if (output == ContentDialogResult.Primary)
+                    {
+                        Uri url = new Uri(release.HtmlUrl);
+                        await Launcher.LaunchUriAsync(url);
+                    }
+                }
+
+                show(result);
+                return Version.Parse(result.TagName);
+            }
+        }
     }
 }

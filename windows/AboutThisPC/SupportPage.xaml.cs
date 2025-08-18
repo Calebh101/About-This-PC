@@ -14,6 +14,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
+using static AboutThisPC.App;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -79,6 +80,11 @@ namespace AboutThisPC
                 block.HorizontalAlignment = HorizontalAlignment.Center;
                 BottomText.Children.Add(block);
             }
+        }
+
+        private void SelfSettingsButtonClick(object sender, RoutedEventArgs e)
+        {
+            SettingsPage.Window();
         }
     }
 }

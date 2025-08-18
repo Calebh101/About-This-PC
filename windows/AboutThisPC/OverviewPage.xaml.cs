@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Text;
@@ -104,14 +105,23 @@ namespace AboutThisPC
 
         private async void MoreInfoButtonClick(object sender, RoutedEventArgs e)
         {
-            Uri uri = new Uri("ms-settings:about");
-            await Windows.System.Launcher.LaunchUriAsync(uri);
+            await Launch("ms-settings:about");
         }
 
         private async void SoftwareUpdateButtonClick(object sender, RoutedEventArgs e)
         {
-            Uri uri = new Uri("ms-settings:windowsupdate");
-            await Windows.System.Launcher.LaunchUriAsync(uri);
+            await Launch("ms-settings:windowsupdate");
+        }
+
+        private async void SettingsButtonClick(object sender, RoutedEventArgs e)
+        {
+            await Launch("ms-settings:");
+        }
+
+        private static async Task<bool> Launch(string url)
+        {
+            Uri uri = new Uri(url);
+            return await Windows.System.Launcher.LaunchUriAsync(uri);
         }
     }
 }

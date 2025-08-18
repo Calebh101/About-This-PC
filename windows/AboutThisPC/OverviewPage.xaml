@@ -47,10 +47,12 @@
 
         <StackPanel Grid.Row="1" />
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
-            <Button Content="More Info" Padding="8" Click="MoreInfoButtonClick" />
-            <Button Content="Software Update" Padding="8" Click="SoftwareUpdateButtonClick" />
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="More Info" Padding="8" Margin="5" Click="MoreInfoButtonClick" />
+            <Button Content="Software Update" Padding="8" Margin="5" Click="SoftwareUpdateButtonClick" />
+            <Button Content="Settings" Padding="8" Margin="5" Click="SettingsButtonClick" />
+            <Rectangle Width="0" Fill="Transparent"></Rectangle>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5" Spacing="10">
                 <Button Click="EyeButtonClick" x:Name="EyeButton" Padding="9.25">
                     <Grid Width="16" Height="16">
                         <FontIcon x:Name="EyeIconGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;" FontSize="16" />

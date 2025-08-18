@@ -17,6 +17,9 @@ namespace AboutThisPC
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        bool redoTitlebar = true; // Make content expand into the title bar
+        private AppWindow? window;
+
         public MainWindow(bool classic)
         {
             InitializeComponent();
@@ -25,16 +28,11 @@ namespace AboutThisPC
 
         async void init(bool classic)
         {
-            bool redoTitlebar = true; // Make content expand into the title bar
-            App.Dimensions dimensions;
-
-            var hWnd = WindowNative.GetWindowHandle(this);
-            var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            var appWindow = AppWindow.GetFromWindowId(windowId);
+            var appWindow = this.AppWindow;
             var presenter = appWindow.Presenter as OverlappedPresenter;
 
-            if (classic) dimensions = new App.Dimensions(350, 500);
-            else /* - */ dimensions = new App.Dimensions(600, 375);
+            if (classic) App.dimensions = new App.Dimensions(350, 500);
+            else /* - */ App.dimensions = new App.Dimensions(600, 375);
 
             if (presenter != null)
             {
@@ -42,10 +40,11 @@ namespace AboutThisPC
                 presenter.IsMaximizable = false;
             }
 
-            App.dimensions = dimensions;
-            var (width, height) = dimensions.Build();
-            Logger.Verbose("Window size detected: " + width + "x" + height);
-            appWindow?.Resize(new SizeInt32((int)width, (int)height));
+            this.window = appWindow;
+            MainWindowGrid.ActualThemeChanged += SetTitleBarForeground;
+            SizeInt32 dimensions = App.dimensions!.Build();
+            Logger.Verbose("Window size detected: " + dimensions.ToString());
+            appWindow?.Resize(dimensions);
             if (redoTitlebar) this.ExtendsContentIntoTitleBar = true;
             await SetIcon(appWindow);
 
@@ -58,6 +57,7 @@ namespace AboutThisPC
             {
                 appWindow.TitleBar.BackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
                 appWindow.TitleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+                SetTitleBarForeground();
             }
 
             if (classic)
@@ -72,7 +72,7 @@ namespace AboutThisPC
             }
         }
 
-        private static async Task SetIcon(AppWindow? window)
+        public static async Task SetIcon(AppWindow? window)
         {
             if (window == null)
             {
@@ -99,6 +99,18 @@ namespace AboutThisPC
                 window.SetTaskbarIcon(path);
                 window.SetTitleBarIcon(path);
             }
+        }
+
+        public void SetTitleBarForeground()
+        {
+            if (!redoTitlebar) return;
+            var color = (Windows.UI.Color)Application.Current.Resources["SystemBaseHighColor"];
+            window!.TitleBar.ForegroundColor = color;
+        }
+
+        public void SetTitleBarForeground(FrameworkElement sender, object args)
+        {
+            SetTitleBarForeground();
         }
     }
 }

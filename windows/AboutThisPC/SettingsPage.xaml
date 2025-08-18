@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="AboutThisPC.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AboutThisPC"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="SettingTemplate" x:DataType="local:Setting">
+            <Grid Margin="0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Title}" FontSize="17" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+                    <TextBlock Text="{x:Bind Description}" FontSize="14" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <ContentControl Grid.Column="1" Content="{x:Bind Selector, Mode=OneWay}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SettingTitleTemplate" x:DataType="local:SettingTitle">
+            <StackPanel Grid.Column="0" Margin="0,16" Orientation="Vertical" VerticalAlignment="Center">
+                <TextBlock Text="{x:Bind Title}" FontSize="24" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+                <TextBlock Text="{x:Bind Description}" FontSize="14" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+            </StackPanel>
+        </DataTemplate>
+
+        <local:SettingTemplateSelector x:Key="MyTemplateSelector" SettingTemplate="{StaticResource SettingTemplate}" SettingTitleTemplate="{StaticResource SettingTitleTemplate}" />
+    </Page.Resources>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16,32,16,16">
+            <ItemsRepeater ItemsSource="{x:Bind AllSettings}" ItemTemplate="{StaticResource MyTemplateSelector}" />
+        </ScrollViewer>
+    </Grid>
+</Page>

@@ -69,5 +69,12 @@ namespace AboutThisPC
             useVerbose = true;
             OutputVerbose("Verbose is enabled");
         }
+
+        public static void SetVerbose(bool status)
+        {
+            bool output = useVerbose == false && status == true;
+            useVerbose = status;
+            if (output) OutputVerbose("Verbose is enabled");
+        }
     }
 }

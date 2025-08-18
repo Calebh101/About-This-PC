@@ -33,6 +33,18 @@
         </Grid>
 
         <StackPanel Grid.Row="2" />
-        <StackPanel Grid.Row="3" x:Name="BottomText" Orientation="Vertical" VerticalAlignment="Center" />
+        <Grid Grid.Row="3" HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="54" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="54" />
+            </Grid.ColumnDefinitions>
+            
+            <Rectangle Grid.Column="0" Fill="Transparent"></Rectangle>
+            <StackPanel Grid.Column="1" x:Name="BottomText" Orientation="Vertical" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Padding="8" Margin="6" Click="SelfSettingsButtonClick">
+                <SymbolIcon Symbol="Setting"></SymbolIcon>
+            </Button>
+        </Grid>
     </Grid>
 </Page>
