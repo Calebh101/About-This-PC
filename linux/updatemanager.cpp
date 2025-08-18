@@ -48,7 +48,10 @@ void UpdateManager::check(bool gui, bool implicit) {
                 Logger::print(QString("Received response of %1 bytes").arg(response.length()));
 
                 if (document.isArray()) {
-                    for (int i = 0; i < document.array().count(); i++) {
+                    int count = document.array().count();
+                    Logger::print(QString("Input is valid and array: %1 items").arg(count));
+
+                    for (int i = 0; i < count; i++) {
                         const QJsonValue& value = document.array()[i];
 
                         if (value.isObject()) {
@@ -56,6 +59,7 @@ void UpdateManager::check(bool gui, bool implicit) {
                             QString releaseVersion = release["tag_name"].toString();
                             Version versionObject = Version::parse(releaseVersion);
                             QJsonArray assets = release["assets"].toArray();
+                                Logger::verbose(QString("Scanning release %1...").arg(releaseVersion));
 
                             if (versionObject <= currentversion) {
                                 Logger::print(QString("Hit end of version hunt at: %1").arg(releaseVersion));
@@ -63,18 +67,21 @@ void UpdateManager::check(bool gui, bool implicit) {
                             }
 
                             bool beta = release["prerelease"].toBool();
-                            bool isPublic = release["draft"].toBool();
+                            bool isPublic = release["draft"].toBool() == false;
                             bool isValidReleaseType = beta == false || useBeta;
                             bool containsValidRelease = false;
 
                             for (int i = 0; i < assets.count(); i++) {
                                 const QJsonValue& asset = assets[i];
                                 QString name = asset["name"].toString();
+                                Logger::verbose(QString("Scanning asset %1...").arg(name));
                                 if (name.contains(QString("linux-%1").arg(isx86 ? "x64" : "arm64"))) containsValidRelease = true;
                             }
 
                             if (isPublic && isValidReleaseType && containsValidRelease) {
+                                Logger::print(QString("Version hunt was successful: Found version %1").arg(releaseVersion));
                                 json result;
+
                                 result["title"] = release["name"].toString().toStdString();
                                 result["body"] = release["body"].toString().toStdString();
                                 result["version"] = releaseVersion.toStdString();
@@ -83,7 +90,10 @@ void UpdateManager::check(bool gui, bool implicit) {
                                 result["beta"] = beta;
 
                                 status = 1;
+                                version = result;
                                 break;
+                            } else {
+                                Logger::verbose(QString("Version hunt will keep going: Failed version %1: %2%3%4").arg(releaseVersion).arg(isPublic).arg(isValidReleaseType).arg(containsValidRelease));
                             }
                         }
                     }
