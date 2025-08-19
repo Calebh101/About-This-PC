@@ -32,7 +32,7 @@ void UpdateManager::check(bool gui, bool implicit) {
         message->show();
     }
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, gui, implicit]() {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, gui, implicit, url]() {
         Logger::print("Reply received");
         std::optional<json> version = std::nullopt;
         Version currentversion = Version::parse(QString::fromStdString(Global::version));
@@ -86,7 +86,7 @@ void UpdateManager::check(bool gui, bool implicit) {
                                 result["body"] = release["body"].toString().toStdString();
                                 result["version"] = releaseVersion.toStdString();
                                 result["published"] = release["published_at"].toString().toStdString();
-                                result["url"] = release["url"].toString().toStdString();
+                                result["url"] = release["html_url"].toString().toStdString();
                                 result["beta"] = beta;
 
                                 status = 1;
@@ -117,7 +117,7 @@ void UpdateManager::check(bool gui, bool implicit) {
 
         if (status < 0 /* bad */) {
             Logger::warn(QString("Updater: Bad response! (%1)").arg(status));
-            if (gui) QMessageBox::critical(nullptr, "Error", "We were unable to check for updates.");
+            if (gui) QMessageBox::critical(nullptr, "Error", QString("We were unable to check for updates. Make sure you're connected to the Internet and that the following URL is accessible.\n\nURL: %1").arg(url.toDisplayString()));
             return false;
         } else if (status == 0 || version == std::nullopt /* none found */) {
             Logger::print("Updater: No updates found");
@@ -125,14 +125,14 @@ void UpdateManager::check(bool gui, bool implicit) {
             return false;
         } else /* one found */ {
             json update = version;
-            Logger::print(QString("Updater: Update found: %1").arg(update["version"]));
+            Logger::print(QString("Updater: Update found: %1").arg(QString::fromStdString(update["version"].get<std::string>())));
 
             if (gui) {
-                QString message = QString("A new update was found!\n\nTitle: %1\nVersion: %2 (%3)\nPublished: %4\nURL: %5\n\n%6\n\nDo you want to open it on GitHub?").arg(update["title"]).arg(update["version"]).arg(update["beta"] ? "beta" : "release").arg(update["published"]).arg(update["url"]).arg(update["body"]);
-                QMessageBox::StandardButton reply = QMessageBox::information(nullptr, "Check for Updates", message, QMessageBox::Yes | QMessageBox::Close);
+                QUrl url = QUrl(QString::fromStdString(update["url"].get<std::string>()));
+                QString message = QString("A new update was found!\n\nTitle: %1\nVersion: %2 (%3)\nPublished: %4\nURL: %5\n\n%6").arg(QString::fromStdString(update["title"].get<std::string>())).arg(QString::fromStdString(update["version"].get<std::string>())).arg(update["beta"].get<bool>() ? "beta" : "release").arg(QString::fromStdString(update["published"].get<std::string>())).arg(url.toDisplayString()).arg(QString::fromStdString(update["body"].get<std::string>()));
+                QMessageBox::StandardButton reply = QMessageBox::information(nullptr, "Check for Updates", message, QMessageBox::Open | QMessageBox::Ok);
 
-                if (reply == QMessageBox::Yes) {
-                    QUrl url = QUrl(QString::fromStdString(update["url"].get<std::string>()));
+                if (reply == QMessageBox::Open) {
                     Logger::print(QString("Opening URL %1...").arg(url.toDisplayString()));
                     QDesktopServices::openUrl(url);
                 }

@@ -67,6 +67,7 @@ public:
 
         stream << loaded.dump() << std::endl;
         stream.close();
+        reload();
         return true;
     }
 
