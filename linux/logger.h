@@ -11,9 +11,10 @@ public:
     static void print(const QString& input, bool override = false);
     static void success(const QString& input, bool override = false);
     static void verbose(const QString& input, bool override = false);
+    static void setLogging(const bool status);
     static void setVerbose(const bool status);
-    static void enableVerbose();
     static void enableLogging();
+    static void enableVerbose();
 };
 
 #endif

@@ -54,8 +54,13 @@ void Logger::verbose(const QString& input, bool override) {
 
 void Logger::setVerbose(const bool status) {
     if (!useLogging) return;
-    if (status) _verbose("Enabling verbose...");
+    if (useVerbose == false && status == true) _verbose("Enabling verbose...");
     useVerbose = status;
+}
+
+void Logger::setLogging(const bool status) {
+    if (useLogging == false && status == true) _verbose("Enabling logging...");
+    useLogging = status;
 }
 
 void Logger::enableVerbose() {

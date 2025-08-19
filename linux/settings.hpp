@@ -40,6 +40,7 @@ public:
     T get(QStringList keys) {
         json* output = &_get(this->loaded, keys);
         if (output->is_null()) output = &_get(defaults(), keys);
+        Logger::print(QString("Found setting %1: %2").arg(keys.join(":")).arg(_get(loaded, keys)));
 
         if (output->is_null()) {
             Logger::warn(QString("Error with settings: Unable to load set nor default: %1 (got is_null())").arg(keys.join(":")));
@@ -68,6 +69,7 @@ public:
         stream << loaded.dump() << std::endl;
         stream.close();
         reload();
+        Logger::print(QString("Found new setting %1: %2").arg(keys.join(":")).arg(_get(loaded, keys)));
         return true;
     }
 

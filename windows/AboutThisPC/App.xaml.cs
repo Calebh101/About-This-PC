@@ -67,12 +67,12 @@ namespace AboutThisPC
         /// <returns>String identifier (like "10" or "XP")</returns>
         public static string GetWindows(Windows windows)
         {
-            switch (windows)
+            return windows switch
             {
-                case Windows.ten: return "10";
-                case Windows.eleven: return "11";
-                default: return "12";
-            }
+                Windows.ten => "10",
+                Windows.eleven => "11",
+                _ => "12",
+            };
         }
 
         public static string GetWindowsFeatureRelease()

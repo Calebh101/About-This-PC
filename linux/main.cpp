@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
     UpdateManager updater = UpdateManager();
 
 #ifdef QT_DEBUG
-    Logger::enableLogging();
-    Logger::setVerbose(true);
+    Logger::setLogging(true);
+    Logger::setVerbose(false);
 #endif
 
     if (args.contains("--version")) { // Print version and exit

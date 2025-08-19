@@ -25,14 +25,14 @@ void UpdateManager::check(bool gui, bool implicit) {
     QNetworkRequest request(url);
     QNetworkReply* reply = manager->get(request);
     Logger::print(QString("Sending update request to %1...").arg(url.toDisplayString()));
+    QMessageBox* message = new QMessageBox(QMessageBox::Information, "Loading...", "Checking for updates...");
 
     if (implicit) {
-        QMessageBox* message = new QMessageBox(QMessageBox::Information, "Loading...", "Checking for updates...");
         message->setAttribute(Qt::WA_DeleteOnClose);
         message->show();
     }
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, gui, implicit, url]() {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, gui, implicit, url, message]() {
         Logger::print("Reply received");
         std::optional<json> version = std::nullopt;
         Version currentversion = Version::parse(QString::fromStdString(Global::version));
@@ -68,7 +68,7 @@ void UpdateManager::check(bool gui, bool implicit) {
 
                             bool beta = release["prerelease"].toBool();
                             bool isPublic = release["draft"].toBool() == false;
-                            bool isValidReleaseType = beta == false || useBeta;
+                            bool isValidReleaseType = beta == false || useBeta == true;
                             bool containsValidRelease = false;
 
                             for (int i = 0; i < assets.count(); i++) {
@@ -113,6 +113,7 @@ void UpdateManager::check(bool gui, bool implicit) {
             Logger::warn(QString("Update error: %1").arg("Unknown error"));
         }
 
+        if (message->isVisible()) message->close();
         reply->deleteLater();
 
         if (status < 0 /* bad */) {

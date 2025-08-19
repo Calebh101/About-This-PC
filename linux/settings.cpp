@@ -12,6 +12,7 @@
 #include <qpushbutton.h>
 #include <qscrollarea.h>
 #include "mainwindow.h"
+#include <QStandardPaths>
 
 #ifdef Unsorted
 #undef Unsorted
@@ -21,7 +22,7 @@
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-QDir Settings::directory = QString("%1/.AboutThisPC").arg(std::getenv("HOME"));
+QDir Settings::directory = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 QString Settings::file = directory.absoluteFilePath("settings.json");
 
 Settings::Settings() {
