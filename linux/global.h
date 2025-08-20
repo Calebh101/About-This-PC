@@ -40,8 +40,8 @@ public:
     static std::string toSentenceCase(std::string input);
     static std::string trimDecimal(double value, int decimal = 1);
     static std::vector<json> getLocalIPs();
-    static void setSettings(Settings s);
-    static Settings settings();
+    static void setSettings(Settings* s);
+    static Settings* settings();
 
     template<typename T>
     static std::optional<T> atKeyOrNull(const json& j, const std::string& key) {

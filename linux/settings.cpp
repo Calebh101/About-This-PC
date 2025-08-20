@@ -22,9 +22,6 @@
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
-QDir Settings::directory = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-QString Settings::file = directory.absoluteFilePath("settings.json");
-
 Settings::Settings() {
     this->reload();
 }
@@ -83,15 +80,16 @@ QWidget* setting(QWidget* parent, QString title, QString description, QWidget* s
     return container;
 }
 
-QWidget* Selector::boolean(QWidget* parent, QStringList keys) {
-    bool value = Global::settings().get<bool>(keys);
+QWidget* Selector::boolean(QWidget* parent, QString keys) {
+    bool value = Global::settings()->get<bool>(keys);
     QComboBox* box = new QComboBox(parent);
     box->addItems({"Yes", "No"});
     box->setCurrentText(value ? "Yes" : "No");
 
     QObject::connect(box, &QComboBox::currentTextChanged, parent, [=](const QString &text){
         Logger::print(QString("Setting changed to: %1").arg(text));
-        Global::settings().set<bool>(text == "Yes", keys);
+        Global::settings()->set<bool>(text == "Yes", keys);
+        Logger::print(QString("Current settings: %1").arg(Global::settings()->raw().dump()));
     });
 
     return box;
@@ -115,7 +113,7 @@ QWidget* Settings::page(QWidget* window) {
 
     layout->addWidget(setting(container, "Reset All Settings", "Reset all About This PC settings to default.", Selector::button(container, "Reset", "Reset all About This PC settings to default.", [window] {
         Logger::print("Reset called");
-        Global::settings().reset();
+        Global::settings()->reset();
         window->close();
     })));
 

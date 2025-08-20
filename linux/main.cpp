@@ -32,19 +32,19 @@ int main(int argc, char *argv[])
     bool noWindow = false;
     qputenv("QT_FONT_DPI", "96"); // Fixed size
 
-    if (!Settings::directory.exists()) {
-        Logger::print(QString("Creating directory at %1...").arg(Settings::directory.absolutePath()), true);
-        fs::create_directory(Settings::directory.absolutePath().toStdString());
+    if (!Settings::directory().exists()) {
+        Logger::print(QString("Creating directory at %1...").arg(Settings::directory().absolutePath()), true);
+        fs::create_directory(Settings::directory().absolutePath().toStdString());
     }
 
     QApplication a(argc, argv);
     QStringList args = QCoreApplication::arguments();
-    QLockFile lock(Settings::directory.absoluteFilePath("AboutThisPC.lock"));
+    QLockFile lock(Settings::directory().absoluteFilePath("AboutThisPC.lock"));
     UpdateManager updater = UpdateManager();
 
 #ifdef QT_DEBUG
     Logger::setLogging(true);
-    Logger::setVerbose(false);
+    Logger::setVerbose(true);
 #endif
 
     if (args.contains("--version")) { // Print version and exit
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
     // Log that the app is starting, even when logging is disabled
     Logger::print(QString("Starting application... (version: %1) (qt: %2)").arg(QString::fromStdString(Global::version), QT_VERSION_STR), true);
-    Global::setSettings(Settings());
+    Global::setSettings(new Settings());
 
     QSystemTrayIcon *trayEntry = new QSystemTrayIcon();
     QMenu* trayMenu = new QMenu();
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
     try { // App icon
         bool alwaysCreate = true;
-        QString path = Settings::directory.absoluteFilePath("AboutThisPC.png");
+        QString path = Settings::directory().absoluteFilePath("AboutThisPC.png");
         std::ifstream infile(path.toStdString());
         std::stringstream buffer;
         bool status = false;
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
     trayEntry->setContextMenu(trayMenu);
     trayEntry->show();
 
-    if (Global::settings().get<bool>({"checkForUpdatesAtStart"})) {
+    if (Global::settings()->get<bool>({"checkForUpdatesAtStart"})) {
         Logger::print("Starting automated update check...");
         QTimer::singleShot(0, [&updater]() {
             updater.check(true, false);

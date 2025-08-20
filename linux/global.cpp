@@ -28,13 +28,13 @@ const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
 
 json helperData;
-Settings settingsData;
+Settings* settingsData;
 
-void Global::setSettings(Settings s) {
+void Global::setSettings(Settings* s) {
     settingsData = s;
 }
 
-Settings Global::settings() {
+Settings* Global::settings() {
     return settingsData;
 }
 

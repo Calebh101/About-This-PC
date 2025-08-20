@@ -38,8 +38,8 @@ void UpdateManager::check(bool gui, bool implicit) {
         Version currentversion = Version::parse(QString::fromStdString(Global::version));
 
         int status = -1;
-        bool useBeta = Global::settings().get<bool>({"isBeta"});
         bool isx86 = sizeof(void*) == 8 || sizeof(void*) == 4;
+        bool useBeta = Global::settings()->get<bool>("isBeta");
 
         try {
             if (reply->error() == QNetworkReply::NoError) {
