@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=0.0.0A-R2
+VERSION=0.0.0A-R3
 AUTHOR=Calebh101
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
