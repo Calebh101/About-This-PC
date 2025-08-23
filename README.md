@@ -70,6 +70,13 @@ About This PC for Windows is written in mostly C# (due to the amount of support 
 
 The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!).
 
+<!--
+## Important Notes
+
+- About This PC for Windows requires version [1.7.3 (1.7.250606001)](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel#version-173-17250606001) of the Windows App SDK.
+
+-->
+
 ## Boot Arguments
 
 - `--version`: Print the version of the app and exit.

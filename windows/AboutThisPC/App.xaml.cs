@@ -356,7 +356,7 @@ namespace AboutThisPC
             }
             else if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
             {
-                architecture = "ARM64";
+                architecture = "arm64";
             }
             else
             {
@@ -400,7 +400,7 @@ namespace AboutThisPC
                 foreach (Asset asset in release.Assets)
                 {
                     Logger.Verbose("Scanning asset " + asset.Name + "... (arch: " + architecture + ")");
-                    if (asset.Name.Contains("windows-" + architecture) || asset.Name.Contains("windows-" + "universal"))
+                    if (asset.Name.Contains("win-" + architecture) || asset.Name.Contains("win-" + "universal"))
                     {
                         status = true;
                         break;

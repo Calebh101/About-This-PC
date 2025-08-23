@@ -69,6 +69,9 @@ namespace AboutThisPC
 
         [DllImport("user32.dll", CharSet = CharSet.Ansi)]
         public static extern bool EnumDisplayDevices(string lpDevice, uint iDevNum, ref DISPLAY_DEVICE lpDisplayDevice, uint dwFlags);
+
+        [DllImport("user32.dll")]
+        private static extern int GetSystemMetrics(int nIndex);
     }
 
     public sealed partial class DisplaysPage : Page
@@ -83,7 +86,8 @@ namespace AboutThisPC
             foreach (var display in displays)
             {
                 List<string> attributes = new();
-                attributes.Add(string.Join("x", new List<string> { display.Data.WorkArea.Width.ToString(), display.Data.WorkArea.Height.ToString() }));
+                var dimensions = display.Data.OuterBounds;
+                attributes.Add(string.Join("x", new List<string> { dimensions.Width.ToString(), dimensions.Height.ToString() }));
                 if (display.Data.IsPrimary) attributes.Add("Primary");
 
                 string icon = "monitor";

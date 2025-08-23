@@ -11,8 +11,9 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
-	<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	<WindowsPackageType>None</WindowsPackageType>
+	<WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+	<PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="DisplaysPage.xaml" />
