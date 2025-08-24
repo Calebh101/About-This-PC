@@ -26,6 +26,7 @@ mkdir -p x64
 cp $SCRIPT_DIR/build/Desktop_Qt_6_9_1-Release/AboutThisPC x64/AboutThisPC
 cp $PARENT_DIR/README.md x64/README.md
 cp $PARENT_DIR/LICENSE.md x64/LICENSE.md
+cp $PARENT_DIR/SECURITY.md x64/SECURITY.md
 cp $PARENT_DIR/CONTRIBUTING.md x64/CONTRIBUTING.md
 sed -e "s/\[\[APPVERSION\]\]/$VERSION/g" -e "s/\[\[AUTHOR\]\]/$AUTHOR/g" "$SCRIPT_DIR/Sample.desktop" > x64/AboutThisPC.desktop
 
