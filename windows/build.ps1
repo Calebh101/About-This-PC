@@ -38,16 +38,8 @@ function Build {
     Copy-Item -Path "$ParentDir\CONTRIBUTING.md" -Destination "$directory\CONTRIBUTING.md"
     Copy-Item -Path "$ParentDir\CODE_OF_CONDUCT.md" -Destination "$directory\CODE_OF_CONDUCT.md"
 
-    if (Test-Path $OutputDir) {
-        Remove-Item $OutputDir -Recurse -Force
-    }
-
-    if (Test-Path $ArchivePath) {
-        Remove-Item $ArchivePath -Recurse -Force
-    }
-
     Write-Output "Creating archive at $ArchivePath..."
-    Compress-Archive -Path "$directory\*" -DestinationPath "$ArchivePath"
+    Compress-Archive -Force -Path "$directory\*" -DestinationPath "$ArchivePath"
 }
 
 Build -Target "win-x64"
