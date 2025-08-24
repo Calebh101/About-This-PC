@@ -9,6 +9,8 @@ using Microsoft.UI.Xaml.Shapes;
 using Microsoft.Win32;
 using Microsoft.Windows.ApplicationModel.DynamicDependency;
 using SharpDX;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,8 +37,9 @@ namespace AboutThisPC
     /// </summary>
     public partial class App : Application
     {
+        public static bool reverseEyeButtons = true; // TODO
         static public Dimensions? dimensions;
-        static public string Version = "0.0.0A";
+        static public string Version = "0.0.0A-R4";
         static public Settings? settings;
         private Window? _window;
 
@@ -190,7 +193,10 @@ namespace AboutThisPC
         {
             public SizeInt32 Build()
             {
-                return new SizeInt32((int) Width, (int)Height);
+                double dpi = PInvoke.GetDpiForWindow(new HWND((nint)MainWindow.Window!.Id.Value));
+                double width = Width * (dpi / 92);
+                double height = Height * (dpi / 92);
+                return new SizeInt32((int)width, (int)height);
             }
         }
 

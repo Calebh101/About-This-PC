@@ -41,15 +41,20 @@ namespace AboutThisPC
             }
         }
 
+        private static string EffectToString(int effect)
+        {
+            return "\u001b[" + effect + "m";
+        }
+
         private static void Output(String prefix, Object input, bool pass, int effect = 0)
         {
-            string output = "> " + prefix + " " + DateTime.UtcNow.ToString("o") + " >> \\e[" + effect.ToString() + "m" + input.ToString() + "\\e[0m";
+            string output = "> " + prefix + " " + DateTime.UtcNow.ToString("o") + " >> " + EffectToString(effect) + input.ToString() + EffectToString(0);
             OutputRaw(output, pass);
         }
 
         private static void OutputRaw(string input, bool pass)
         {
-            string raw = Regex.Replace(input, "\\\\e\\[\\d+m", "");
+            string raw = Regex.Replace(input, @"\u001b\[\d+m", "");
             logs.Add(raw);
             if (!pass) return;
 

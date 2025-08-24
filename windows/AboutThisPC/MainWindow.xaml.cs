@@ -1,3 +1,4 @@
+using Microsoft.Graphics.Display;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -17,8 +18,8 @@ namespace AboutThisPC
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        bool redoTitlebar = true; // Make content expand into the title bar
-        private AppWindow? window;
+        private bool redoTitlebar = true; // Make content expand into the title bar
+        public static AppWindow? Window;
 
         public MainWindow(bool classic)
         {
@@ -32,7 +33,7 @@ namespace AboutThisPC
             var presenter = appWindow.Presenter as OverlappedPresenter;
 
             if (classic) App.dimensions = new App.Dimensions(350, 500);
-            else /* - */ App.dimensions = new App.Dimensions(600, 375);
+            else /* - */ App.dimensions = new App.Dimensions(525, 350);
 
             if (presenter != null)
             {
@@ -40,7 +41,7 @@ namespace AboutThisPC
                 presenter.IsMaximizable = false;
             }
 
-            this.window = appWindow;
+            Window = appWindow;
             MainWindowGrid.ActualThemeChanged += SetTitleBarForeground;
             SizeInt32 dimensions = App.dimensions!.Build();
             Logger.Verbose("Window size detected: " + dimensions.ToString());
@@ -105,7 +106,7 @@ namespace AboutThisPC
         {
             if (!redoTitlebar) return;
             var color = (Windows.UI.Color)Application.Current.Resources["SystemBaseHighColor"];
-            window!.TitleBar.ForegroundColor = color;
+            Window!.TitleBar.ForegroundColor = color;
         }
 
         public void SetTitleBarForeground(FrameworkElement sender, object args)
