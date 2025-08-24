@@ -113,7 +113,11 @@ namespace AboutThisPC
         /// </summary>
         public App()
         {
-            Logger.Print("Starting AboutThisPC version " + Version + "...", true);
+#if DEBUG
+            Logger.EnableLogging();
+            Logger.SetVerbose(true);
+#endif
+
             InitializeComponent();
         }
 
@@ -124,29 +128,34 @@ namespace AboutThisPC
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             bool classic = false;
-            string arguments = args.Arguments;
+            string[] arguments = Environment.GetCommandLineArgs();
+            Logger.Print("Found arguments: " + string.Join(" ", arguments));
 
             if (arguments.Contains("--version"))
             {
+                Logger.Attach(true);
                 Logger.Raw(Version);
+                App.Current.Exit();
                 return;
             }
 
-            if (!string.IsNullOrEmpty(arguments))
+            if (arguments.Contains("--debug"))
             {
-                if (arguments.Contains("--classic"))
-                {
-                    classic = true;
-                }
+                Logger.Attach();
+                Logger.EnableLogging();
+                Logger.EnableVerbose();
             }
 
-#if DEBUG
-            Logger.EnableLogging();
-            Logger.SetVerbose(true);
-#endif
+            if (arguments.Contains("--classic"))
+            {
+                Logger.Print("Classic mode activated");
+                classic = true;
+            }
 
             settings = new Settings();
             _window = new MainWindow(classic);
+
+            Logger.Print("Starting AboutThisPC version " + Version + "...", true);
             _window.Activate();
         }
 

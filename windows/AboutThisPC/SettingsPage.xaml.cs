@@ -129,6 +129,8 @@ namespace AboutThisPC
 
     public sealed partial class SettingsPage : Page
     {
+        private Window window;
+
         public ObservableCollection<SettingObject> AllSettings { get; } = new();
 
         public SettingsPage(SettingsWindow? window = null)
@@ -182,6 +184,17 @@ namespace AboutThisPC
                         }
                     }),
                 },
+                new SettingTitle {
+                    Title = "Debug",
+                    Description = "Debug options for About This PC.",
+                },
+                new Setting {
+                    Title = "Open Debug Logs",
+                    Description = "Show logs for debugging.",
+                    Selector = Selector.Button("Open", (Button sender, RoutedEventArgs e) => {
+                        DebugLogPage.Window();
+                    }),
+                },
             ];
 
             foreach (SettingObject setting in settings)
@@ -191,6 +204,11 @@ namespace AboutThisPC
             }
 
             InitializeComponent();
+        }
+
+        public SettingsPage(Window window)
+        {
+            this.window = window;
         }
 
         public static async void Window()

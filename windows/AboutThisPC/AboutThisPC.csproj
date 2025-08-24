@@ -16,6 +16,7 @@
 	<PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="DebugLogPage.xaml" />
     <None Remove="DisplaysPage.xaml" />
     <None Remove="DrivesPage.xaml" />
     <None Remove="SettingsPage.xaml" />
@@ -62,6 +63,7 @@
     <PackageReference Include="System.Drawing.Common" Version="9.0.8" />
     <PackageReference Include="System.Management" Version="9.0.8" />
     <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +75,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Page Update="DebugLogPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="DisplaysPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

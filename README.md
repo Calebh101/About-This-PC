@@ -81,7 +81,7 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 - `--version`: Print the version of the app and exit.
 - `--classic`: Load the "classic" page.
-- `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
+- `--debug`: Load the program in verbose and attempt to attach the console. This gives you a *ton* of extra logging in the terminal.
 
 # Notes
 
