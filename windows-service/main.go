@@ -18,11 +18,11 @@ import (
 //go:embed build/archive.zip
 var archive []byte
 
-//go:embed build/icon.png
+//go:embed build/icon.ico
 var appicon []byte
 
 var Version = ""
-var args = os.Args
+var args = os.Args[1:]
 
 func getDetectedVersion(directory string) string {
 	filename := directory + "\\VERSION-IDENTIFIER"
@@ -67,7 +67,7 @@ func main() {
 	var foundArgs []string
 	foundUninstall := false
 
-	for _, arg := range os.Args[1:] {
+	for _, arg := range args {
 		if strings.Contains(arg, "--uninstall") {
 			foundUninstall = true
 			break
@@ -116,7 +116,11 @@ func main() {
 		extract(directory)
 	}
 
-	cmd := exec.Command(directory+"\\AboutThisPC.exe", foundArgs...)
+	run(directory, foundArgs)
+}
+
+func run(directory string, args []string) {
+	cmd := exec.Command(directory+"\\AboutThisPC.exe", args...)
 	log.Println("Running application...")
 	err := cmd.Run()
 
@@ -130,10 +134,22 @@ func extract(directory string) {
 	log.Println("Found archive of " + strconv.Itoa(len(archive)) + " bytes")
 	readerAt := bytes.NewReader(archive)
 	zr, e := zip.NewReader(readerAt, int64(len(archive)))
-	log.Println("Extracting files to " + directory + "...")
 
 	if e != nil {
 		log.Fatalln(e)
+	}
+
+	log.Println("Extracting files to " + directory + "...")
+	ok, e := dlgs.Question("Confirm", "Are you sure you want to install About This PC? This will overwrite your current installation. Settings will not be overwritten.\n\nThis will install About This PC to "+directory+".", true)
+
+	if e != nil {
+		log.Fatalln(e)
+		return
+	}
+
+	if !ok {
+		log.Println("Aborting...")
+		return
 	}
 
 	for _, file := range zr.File {

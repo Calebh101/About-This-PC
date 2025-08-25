@@ -20,31 +20,46 @@ function Build {
     )
 
     $directory="$OutputDir\$Target-Raw"
+    $ServicePath="$ParentDir\windows-service\build"
     Write-Output "Building application for $Target..."
-    dotnet publish -c Release -r "$Target" --self-contained true -o "$directory"
+    & dotnet publish -c Release -r "$Target" --self-contained true -o "$directory"
+
+    if (Test-Path $ServicePath) {
+        Remove-Item "$ServicePath\*" -Recurse -Force
+    } else {
+        New-Item -Path "$ServicePath" -ItemType Directory
+    }
+
+    if (Test-Path "$ParentDir\windows-service\rsrc.syso") {
+        Remove-Item "$ParentDir\windows-service\rsrc.syso" -Force
+    }
 
     Write-Output "Creating archive for $directory..."
     Compress-Archive -Path "$directory\*" -DestinationPath "$OutputDir\$Target-Raw-Archive"
 
     Write-Output "Creating service application..."
-    Copy-Item -Path "$OutputDir\$Target-Raw-Archive.zip" -Destination "$ParentDir\windows-service\build\archive.zip"
-    Copy-Item -Path "$WindowsDir\AboutThisPC\Assets\appicon.png" -Destination "$ParentDir\windows-service\build\icon.png"
+    Copy-Item -Path "$OutputDir\$Target-Raw-Archive.zip" -Destination "$ServicePath\archive.zip"
+    Copy-Item -Path "$WindowsDir\AboutThisPC\Assets\appicon.ico" -Destination "$ServicePath\icon.ico"
 
     Set-Location -Path "$ParentDir\windows-service"
     $env:GOOS = "windows"
     $env:GOARCH = $Arch
-    & go build -ldflags "-H=windowsgui -X 'main.Version=$version'" -o build/app.exe # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up
-    Set-Location -Path "$WindowsDir\AboutThisPC"
+
+    # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up
+    & rsrc -arch $Arch -ico build/icon.ico -o rsrc.syso
+    & go build -ldflags "-X 'main.Version=$version'" -o build/app.exe
 
     $directory="$OutputDir\$Target-Results"
     $ArchivePath="$ParentDir\Output\AboutThisPC-$version-$Target.zip"
+
+    Set-Location -Path "$WindowsDir\AboutThisPC"
     Write-Output "Creating result for $directory..."
 
     if (-not (Test-Path $directory)) {
         New-Item -Path $directory -ItemType Directory
     }
 
-    Copy-Item -Path "$ParentDir\windows-service\build\app.exe" -Destination "$directory\AboutThisPC.exe"
+    Copy-Item -Path "$ServicePath\app.exe" -Destination "$directory\AboutThisPC.exe"
     Copy-Item -Path "$ParentDir\README.md" -Destination "$directory\README.md"
     Copy-Item -Path "$ParentDir\LICENSE.md" -Destination "$directory\LICENSE.md"
     Copy-Item -Path "$ParentDir\SECURITY.md" -Destination "$directory\SECURITY.md"
@@ -60,4 +75,4 @@ Build -Arch "arm64" -Target "win-arm64"
 
 Set-Location -Path "$ParentDir"
 $stopwatch.Stop()
-Write-Output "All jobs done after $($stopwatch.Elapsed)! Version: $version"
+Write-Output "All jobs done at $((Get-Date).ToString("MM/dd HH:mm:ss")) ($($stopwatch.Elapsed) elapsed)! Version: $version"
