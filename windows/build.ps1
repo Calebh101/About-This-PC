@@ -1,5 +1,12 @@
-# A small script to build the Windows version of AboutThisPC.
-$version = "0.0.0A-R4"
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$Version
+)
+
+if ($env:OS -ne "Windows_NT") {
+    Write-Host "This script must be run on Windows."
+    exit 1
+}
 
 $WindowsDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $ParentDir = Split-Path -Path $WindowsDir -Parent
@@ -9,7 +16,7 @@ if (Test-Path $OutputDir) {
     Remove-Item $OutputDir -Recurse -Force
 }
 
-Write-Output "Creating About This PC version $version..."
+Write-Output "Creating About This PC version $Version..."
 Set-Location -Path "$WindowsDir\AboutThisPC"
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
@@ -47,10 +54,10 @@ function Build {
 
     # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up
     & rsrc -arch $Arch -ico build/icon.ico -o rsrc.syso
-    & go build -ldflags "-X 'main.Version=$version'" -o build/app.exe
+    & go build -ldflags "-X 'main.Version=$Version'" -o build/app.exe
 
     $directory="$OutputDir\$Target-Results"
-    $ArchivePath="$ParentDir\Output\AboutThisPC-$version-$Target.zip"
+    $ArchivePath="$ParentDir\Output\AboutThisPC-$Version-$Target.zip"
 
     Set-Location -Path "$WindowsDir\AboutThisPC"
     Write-Output "Creating result for $directory..."
@@ -75,4 +82,4 @@ Build -Arch "arm64" -Target "win-arm64"
 
 Set-Location -Path "$ParentDir"
 $stopwatch.Stop()
-Write-Output "All jobs done at $((Get-Date).ToString("MM/dd HH:mm:ss")) ($($stopwatch.Elapsed) elapsed)! Version: $version"
+Write-Output "All jobs done at $((Get-Date).ToString("MM/dd HH:mm:ss")) ($($stopwatch.Elapsed) elapsed)! Version: $Version"

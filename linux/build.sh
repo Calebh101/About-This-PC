@@ -1,11 +1,21 @@
 #!/bin/bash
-VERSION=0.0.0A-R3
+VERSION=$1
 AUTHOR=Calebh101
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"
 HELPER_DIR=$PARENT_DIR/linux-helper
 OUTPUT_DIR=$PARENT_DIR/Output
+
+if [ "$(uname -s)" != "Linux" ]; then
+  echo "This script must be run on Linux."
+  exit 1
+fi
+
+if [ -z "$VERSION" ]; then
+    echo "Usage: $0 <version>"
+    exit 1
+fi
 
 echo "Building AboutThisPC $VERSION by $AUTHOR..."
 cd "$SCRIPT_DIR"
