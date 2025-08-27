@@ -28,7 +28,7 @@ var appicon []byte
 
 var Version = ""
 var IsConsole = "0"
-var isInConsole = false
+var isDebugExecutable = false
 var args = os.Args[1:]
 var verbose = Contains(args, "--debug") // Not used for now
 
@@ -41,7 +41,7 @@ var mu sync.Mutex
 
 func main() {
 	if IsConsole != "0" {
-		isInConsole = true
+		isDebugExecutable = true
 	}
 
 	if Contains(args, "--version") {
@@ -383,7 +383,7 @@ func extract() bool {
 		return false
 	}
 
-	if isInConsole {
+	if isDebugExecutable {
 		ok, e := dlgs.Question("Confirm", "Since you are installing with a debug executable, the installed version will use a debug executable as well. To revert this, you can reinstall with the Windows GUI.", true)
 
 		if e != nil {
