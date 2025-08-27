@@ -2,6 +2,16 @@
 
 This is a small project I'm in the process of making, that is supposed to be like the `About This Mac` Apple utility, but for Linux and Windows, using native UI elements (or at least semi-native for some Linux distros), and with some more OS-specific features.
 
+## Downloading, Running, and Installing
+
+First go to the [Releases](https://github.com/Calebh101/About-This-PC/releases) page. Download the latest stable (or prerelease/beta if you want) release compatible with your computer. Then open and extract the ZIP archive.
+
+Next, simply double-click the executable (`AboutThisPC` for Linux, `AboutThisPC.exe` for Windows) to start it up for the first time. The Windows version will ask you if you're OK with it extracting the files.
+
+- Note: The Windows version may trigger a popup telling you that the app is untrusted. Click `More Info` then `Run Anyway` if you want to continue. (If you want to inspect the code first or just not go through with it, then it won't hurt my feelings)
+
+Follow the instructions in [INSTALLING.md](https://github.com/Calebh101/About-This-PC/blob/master/INSTALLING.md) (either in the extracted archive or in GitHub) to install as an actual application in your OS.
+
 # Linux
 
 About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux distros (compared to Windows, which modern Windows only has 10 and 11), so bear with me while I improve it over time. I've hopefully prepared enough for this though.
