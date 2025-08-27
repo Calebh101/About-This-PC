@@ -64,24 +64,6 @@ There are some other buttons on Apple's About This Mac apps, like Software Updat
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 - `--no-window`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup. The program won't request `pkexec` when run with this argument, and if the helper fails then it will act like `pkexec` was rejected.
 
-# Windows
-
-About This PC for Windows is written in mostly C# (due to the amount of support it has with WinUI) and some XML for the UI. I used WinUI for this as it was the best option for a native look in my opinion, and it's also pretty straightforward to make UI elements in.
-
-The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!).
-
-<!-- ## Important Notes -->
-
-<!--
-- About This PC for Windows requires version [1.7.3 (1.7.250606001)](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel#version-173-17250606001) of the Windows App SDK.
--->
-
-## Boot Arguments
-
-- `--version`: Print the version of the app and exit.
-- `--classic`: Load the "classic" page.
-- `--debug`: Load the program in verbose and attempt to attach the console. This gives you a *ton* of extra logging in the terminal.
-
 # Notes
 
 - About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information. Run this executable specifically (if you can catch it) with `--version` to see the version.
@@ -91,6 +73,40 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 - About This PC for Linux utilizes Qt, which is licensed under the GNU Lesser General Public License (LGPL) version 3.
 You can obtain a copy of the LGPL here: https://www.gnu.org/licenses/lgpl-3.0.html
 Qt is a separate project and is not licensed under this project's license.
+
+- Developing About This PC for Linux using Qt was honestly pretty fun, I would recommend using Qt as your framework for desktop apps like this.
+
+# Windows
+
+About This PC for Windows is written in C# (and XAML) using the WinUI library. This was done so it can have a native look in Windows 11, and so that I can more directly interact with Windows.
+
+However, to package all the files that .NET generates, and since it's just generally confusing to do certain things in C#, there's a separate "service" in `windows-service`, written entirely in Go. It basically acts as the unpackager, runner, manager, and uninstaller, and can even show the system tray icon.
+
+The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!), so you don't have to worry about that.
+
+## Boot Arguments
+
+- Application Service (what you actually run)
+    - `--version`: Print the version of the app and exit.
+    - `--classic`: Load the "classic" page as the default to show instead of the normal page.
+    - `--service`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup.
+    - `--uninstall`: Prompt to uninstall About This PC, then exit.
+    - `--reinstall`: Prompt to reinstall About This PC, then exit.
+- Application Executable (these can be used for debug or automation)
+    - `--version`: Print the version of the app and exit. This pulls from the application itself instead of just the service around it.
+    - `--classic`: Launch the "classic" page. This is used by the service.
+    - `--settings`: Launch the settings page. This is used by the service.
+    - `--debug`: Attach the running terminal and enable verbose to show logs.
+
+## Notes
+
+- The "service" executable doesn't actually install anything to your desktop or Start menu. This has to be done manually.
+
+- About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-CLI.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
+
+- If you're a beginner to WinUI (like I was when I started this), I wouldn't generally recommend using WinUI to make a Windows app. It's pretty confusing, and sometimes even restricting.
+
+# Extra Notes
 
 - Some images (specifically the `computers` images) originated from (rawpixel.com / Freepik)[https://freepik.com] and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
 

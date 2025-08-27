@@ -3,6 +3,9 @@ param (
     [string]$Version
 )
 
+# A small script to build and package About This PC for Windows.
+$Author = "Calebh101"
+
 if ($env:OS -ne "Windows_NT") {
     Write-Host "This script must be run on Windows."
     exit 1
@@ -11,11 +14,13 @@ if ($env:OS -ne "Windows_NT") {
 $WindowsDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $ParentDir = Split-Path -Path $WindowsDir -Parent
 $OutputDir = "$ParentDir\Output\windows"
+$AppDataDir = "$env:LOCALAPPDATA\AboutThisPC"
 
 if (Test-Path $OutputDir) {
     Remove-Item $OutputDir -Recurse -Force
 }
 
+New-Item -Path $OutputDir -ItemType Directory
 Write-Output "Creating About This PC version $Version..."
 Set-Location -Path "$WindowsDir\AboutThisPC"
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -52,9 +57,10 @@ function Build {
     $env:GOOS = "windows"
     $env:GOARCH = $Arch
 
-    # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up
+    # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up, but it also prevents logging.
     & rsrc -arch $Arch -ico build/icon.ico -o rsrc.syso
-    & go build -ldflags "-X 'main.Version=$Version'" -o build/app.exe
+    & go build -ldflags "-X 'main.Version=$Version' -H=windowsgui" -o build/app.exe
+    & go build -ldflags "-X 'main.Version=$Version' -X 'main.IsConsole=1'" -o build/app-cli.exe
 
     $directory="$OutputDir\$Target-Results"
     $ArchivePath="$ParentDir\Output\AboutThisPC-$Version-$Target.zip"
@@ -67,16 +73,33 @@ function Build {
     }
 
     Copy-Item -Path "$ServicePath\app.exe" -Destination "$directory\AboutThisPC.exe"
+    Copy-Item -Path "$ServicePath\app-cli.exe" -Destination "$directory\AboutThisPC-Debug.exe"
+    Copy-Item -Path "$OutputDir\shortcut.lnk" -Destination "$directory\About This PC.lnk"
     Copy-Item -Path "$ParentDir\README.md" -Destination "$directory\README.md"
     Copy-Item -Path "$ParentDir\LICENSE.md" -Destination "$directory\LICENSE.md"
     Copy-Item -Path "$ParentDir\SECURITY.md" -Destination "$directory\SECURITY.md"
     Copy-Item -Path "$ParentDir\CONTRIBUTING.md" -Destination "$directory\CONTRIBUTING.md"
     Copy-Item -Path "$ParentDir\CODE_OF_CONDUCT.md" -Destination "$directory\CODE_OF_CONDUCT.md"
+    Copy-Item -Path "$ParentDir\INSTALLING.md" -Destination "$directory\INSTALLING.md"
 
     Write-Output "Creating archive at $ArchivePath..."
     Compress-Archive -Force -Path "$directory\*" -DestinationPath "$ArchivePath"
 }
 
+function Shortcut() {
+    $shortcutPath = "$OutputDir\shortcut.lnk"
+    $targetPath = "$AppDataDir\AboutThisPC-Service.exe"
+    Write-Output "Building shortcut for $targetPath..."
+
+    $wsh = New-Object -ComObject WScript.Shell
+    $shortcut = $wsh.CreateShortcut($shortcutPath)
+    $shortcut.TargetPath = $targetPath
+    $shortcut.Description = "About This PC $Version by $Author"
+    $shortcut.IconLocation = "$AppDataDir\Assets\appicon.ico"
+    $shortcut.Save()
+}
+
+Shortcut
 Build -Arch "amd64" -Target "win-x64"
 Build -Arch "arm64" -Target "win-arm64"
 

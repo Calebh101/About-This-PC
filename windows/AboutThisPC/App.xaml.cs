@@ -39,7 +39,7 @@ namespace AboutThisPC
     {
         public static bool reverseEyeButtons = true; // TODO
         static public Dimensions? dimensions;
-        static public string Version = "0.0.0A-R4";
+        static public string Version = "0.0.0A-R5";
         static public Settings? settings;
         private Window? _window;
 
@@ -138,7 +138,7 @@ namespace AboutThisPC
             {
                 Logger.Attach(true);
                 Logger.Raw(Version);
-                App.Current.Exit();
+                Current.Exit();
                 return;
             }
 
@@ -156,9 +156,16 @@ namespace AboutThisPC
             }
 
             settings = new Settings();
-            _window = new MainWindow(classic);
+
+            if (arguments.Contains("--settings"))
+            {
+                Logger.Print("Showing settings...");
+                SettingsPage.Window();
+                return;
+            }
 
             Logger.Print("Starting AboutThisPC version " + Version + "...", true);
+            _window = new MainWindow(classic);
             _window.Activate();
         }
 

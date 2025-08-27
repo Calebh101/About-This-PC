@@ -23,8 +23,10 @@ var archive []byte
 var appicon []byte
 
 var Version = ""
+var IsConsole = "0"
+var isInConsole = false
 var args = os.Args[1:]
-var verbose = Contains(args, "--debug")
+var verbose = Contains(args, "--debug") // Not used for now
 
 var localAppData = os.Getenv("LOCALAPPDATA")
 var directory = filepath.Join(localAppData, "AboutThisPC")
@@ -33,6 +35,10 @@ var processes []*exec.Cmd
 var mu sync.Mutex
 
 func main() {
+	if IsConsole != "0" {
+		isInConsole = true
+	}
+
 	if Contains(args, "--version") {
 		os.Stdout.Write([]byte(Version))
 		os.Exit(0)
@@ -51,6 +57,7 @@ func onReady() {
 
 	actionOpen := systray.AddMenuItem("About This PC", "Open a new window.")
 	actionOpenClassic := systray.AddMenuItem("About This PC (Classic)", "Open a new window in classic mode.")
+	actionOpenSettings := systray.AddMenuItem("About This PC Settings", "Open a new settings window.")
 	systray.AddSeparator()
 	actionCloseOne := systray.AddMenuItem("Close", "Close the most recent window.")
 	actionCloseAll := systray.AddMenuItem("Close All", "Close all windows.")
@@ -62,9 +69,11 @@ func onReady() {
 		for {
 			select {
 			case <-actionOpen.ClickedCh:
-				run(false)
+				run(0)
 			case <-actionOpenClassic.ClickedCh:
-				run(true)
+				run(1)
+			case <-actionOpenSettings.ClickedCh:
+				run(2)
 			case <-actionCloseOne.ClickedCh:
 				mu.Lock()
 				cmds := processes
@@ -150,14 +159,48 @@ func start() {
 		return
 	}
 
-	foundUninstall := false
 	foundService := false
 	foundClassic := false
 
 	for _, arg := range args {
 		if strings.Contains(arg, "--uninstall") {
-			foundUninstall = true
-			break
+			Print("Found uninstall argument")
+			ok, e := dlgs.Question("Confirm", "Are you sure you want to uninstall About This PC? This will erase all About This PC data and settings.", true)
+
+			if e != nil {
+				Fatal(e)
+				return
+			}
+
+			if ok {
+				Print("Uninstalling application...")
+				e := os.RemoveAll(directory)
+
+				if e != nil {
+					Fatal(e)
+					return
+				} else {
+					Print("Directory " + directory + " removed.")
+				}
+
+				_, e = dlgs.Info("All Done", "About This PC has been uninstalled.")
+
+				if e != nil {
+					Fatal(e)
+					return
+				}
+
+				os.Exit(0)
+				return
+			} else {
+				Print("Aborting")
+			}
+
+			return
+		} else if strings.Contains(arg, "--reinstall") {
+			if extract() {
+				os.Exit(0)
+			}
 		} else if strings.Contains(arg, "--service") {
 			foundService = true
 		} else if strings.Contains(arg, "--classic") {
@@ -168,41 +211,6 @@ func start() {
 		}
 	}
 
-	if foundUninstall {
-		ok, e := dlgs.Question("Confirm", "Are you sure you want to uninstall About This PC? This will erase all About This PC data and settings.", true)
-
-		if e != nil {
-			Fatal(e)
-			return
-		}
-
-		if ok {
-			Print("Uninstalling application...")
-			e := os.RemoveAll(directory)
-
-			if e != nil {
-				Fatal(e)
-				return
-			} else {
-				Print("Directory " + directory + " removed.")
-			}
-
-			_, e = dlgs.Info("All Done", "About This PC has been uninstalled.")
-
-			if e != nil {
-				Fatal(e)
-				return
-			}
-
-			os.Exit(0)
-			return
-		} else {
-			Print("Aborting")
-		}
-
-		return
-	}
-
 	var currentVersion = GetDetectedVersion(directory)
 
 	if currentVersion == "" || currentVersion != Version {
@@ -210,19 +218,35 @@ func start() {
 	}
 
 	if !foundService {
-		run(foundClassic)
+		mode := 0
+
+		if foundClassic {
+			mode = 1
+		}
+
+		run(mode)
 	}
 }
 
-func run(classic bool) {
-	Print("Detected run with classic: " + strconv.FormatBool(classic))
-	var classicArg = []string{}
+// Modes (for [mode])
+// 	 0: Normal
+// 	 1: Classic
+//   2: Settings
+
+func run(mode int) {
+	classic := mode == 1
+	settings := mode == 2
+
+	Print("Detected run with mode " + strconv.Itoa(mode))
+	var extraArg = []string{}
 
 	if classic {
-		classicArg = []string{"--classic"}
+		extraArg = []string{"--classic"}
+	} else if settings {
+		extraArg = []string{"--settings"}
 	}
 
-	finalArgs := append(classicArg, args...)
+	finalArgs := append(extraArg, args...)
 	cmd := exec.Command(directory+"\\AboutThisPC.exe", finalArgs...)
 	mu.Lock()
 	processes = append(processes, cmd)
@@ -258,7 +282,7 @@ func run(classic bool) {
 	}()
 }
 
-func extract() {
+func extract() bool {
 	Print("Found archive of " + strconv.Itoa(len(archive)) + " bytes")
 	readerAt := bytes.NewReader(archive)
 	zr, e := zip.NewReader(readerAt, int64(len(archive)))
@@ -266,7 +290,7 @@ func extract() {
 
 	if e != nil {
 		Fatal(e)
-		return
+		return false
 	}
 
 	Print("Extracting files to " + directory + "...")
@@ -274,12 +298,26 @@ func extract() {
 
 	if e != nil {
 		Fatal(e)
-		return
+		return false
 	}
 
 	if !ok {
 		Print("Aborting...")
-		return
+		return false
+	}
+
+	if isInConsole {
+		ok, e := dlgs.Question("Confirm", "Since you are installing with a debug executable, the installed version will use a debug executable as well. To revert this, you can reinstall with the Windows GUI.", true)
+
+		if e != nil {
+			Fatal(e)
+			return false
+		}
+
+		if !ok {
+			Print("Aborting...")
+			return false
+		}
 	}
 
 	for _, file := range zr.File {
@@ -289,21 +327,21 @@ func extract() {
 		if file.FileInfo().IsDir() {
 			if e := os.MkdirAll(extractPath, os.ModePerm); e != nil {
 				Fatal(e)
-				return
+				return false
 			}
 			continue
 		}
 
 		if e := os.MkdirAll(filepath.Dir(extractPath), os.ModePerm); e != nil {
 			Fatal(e)
-			return
+			return false
 		}
 
 		srcFile, e := file.Open()
 
 		if e != nil {
 			Fatal(e)
-			return
+			return false
 		}
 
 		dstFile, e := os.Create(extractPath)
@@ -311,14 +349,14 @@ func extract() {
 		if e != nil {
 			srcFile.Close()
 			Fatal(e)
-			return
+			return false
 		}
 
 		if _, e := io.Copy(dstFile, srcFile); e != nil {
 			srcFile.Close()
 			dstFile.Close()
 			Fatal(e)
-			return
+			return false
 		}
 
 		srcFile.Close()
@@ -329,7 +367,7 @@ func extract() {
 	if copySelf() {
 		count++
 	} else {
-		return
+		return false
 	}
 
 	Print("Copied " + strconv.Itoa(len(zr.File)) + " files!")
@@ -338,14 +376,16 @@ func extract() {
 
 	if e != nil {
 		Fatal(e)
-		return
+		return false
 	}
 
 	_, e = dlgs.Info("All Done", "About This PC has been installed.")
 
 	if e != nil {
 		Fatal(e)
-		return
+		return false
+	} else {
+		return true
 	}
 }
 
@@ -353,6 +393,11 @@ func copySelf() bool {
 	file, e := os.Executable()
 	Print("Copying self-path " + file + "...")
 	extractPath := filepath.Join(directory, "AboutThisPC-Service.exe")
+
+	if file == extractPath {
+		Print("Aborting, due to already existing")
+		return false
+	}
 
 	if e != nil {
 		Fatal(e)
