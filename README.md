@@ -1,6 +1,6 @@
 # About This PC
 
-This is a small project I'm in the process of making, that is supposed to be like the `About This Mac` Apple utility, but for Linux and Windows, using native UI elements (or at least semi-native for some Linux distros), and with some more OS-specific features.
+This is a cool little app of mine that is supposed to be like the `About This Mac` Apple utility, but for Linux and Windows, using native and OS-specific implementations and features.
 
 ## Downloading, Running, and Installing
 
@@ -63,10 +63,6 @@ About This PC for Linux comes with built-in system tray support, that starts whe
 - `Quit`: Quits the service and all open windows.
 - `Restart`: Quits the service and all open windows, then reruns itself.
 
-## Where are the buttons in the Overview page?
-
-There are some other buttons on Apple's About This Mac apps, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
-
 ## Boot Arguments
 
 - `--version`: Print the version of the app and exit.
@@ -83,8 +79,6 @@ There are some other buttons on Apple's About This Mac apps, like Software Updat
 - About This PC for Linux utilizes Qt, which is licensed under the GNU Lesser General Public License (LGPL) version 3.
 You can obtain a copy of the LGPL here: https://www.gnu.org/licenses/lgpl-3.0.html
 Qt is a separate project and is not licensed under this project's license.
-
-- Developing About This PC for Linux using Qt was honestly pretty fun, I would recommend using Qt as your framework for desktop apps like this.
 
 # Windows
 
@@ -112,7 +106,17 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 - The "service" executable doesn't actually install anything to your desktop or Start menu. This has to be done manually.
 
-- About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
+# FAQ
+
+<details>
+    <summary>What is `AboutThisPC-Debug.exe`?</summary><br>
+    About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
+</details>
+
+<details>
+    <summary>Where are the buttons in the Linux version Overview page?</summary><br>
+    There are some other buttons on Apple's About This Mac apps, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
+</details>
 
 # Extra Notes
 
