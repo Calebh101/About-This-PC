@@ -46,7 +46,7 @@ About This PC for Linux comes with built-in system tray support, that starts whe
 
 - `About This PC`: Opens the main page.
 - `About This PC (Classic)`: Opens the "classic" page.
-- `Close`: Closes the most recent About This PC window.
+- `Close`: Closes the About This PC window that was interacted with last.
 - `Close All`: Closes all About This PC windows.
 - `Settings`: Opens the Settings window.
 - `Check For Updates`: Check GitHub for updates.
@@ -70,11 +70,10 @@ About This PC for Windows is written in mostly C# (due to the amount of support 
 
 The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!).
 
+<!-- ## Important Notes -->
+
 <!--
-## Important Notes
-
 - About This PC for Windows requires version [1.7.3 (1.7.250606001)](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel#version-173-17250606001) of the Windows App SDK.
-
 -->
 
 ## Boot Arguments

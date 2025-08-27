@@ -4,14 +4,13 @@ import (
 	"archive/zip"
 	"bytes"
 	_ "embed"
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gen2brain/dlgs"
 	"github.com/getlantern/systray"
@@ -25,18 +24,24 @@ var appicon []byte
 
 var Version = ""
 var args = os.Args[1:]
+var verbose = Contains(args, "--debug")
 
 var localAppData = os.Getenv("LOCALAPPDATA")
 var directory = filepath.Join(localAppData, "AboutThisPC")
 
-func Fatal[T any](input T) {
-	e := fmt.Sprint(input)
-	log.Fatalln(e)
-}
+var processes []*exec.Cmd
+var mu sync.Mutex
 
 func main() {
-	systray.Run(onReady, onExit)
+	if Contains(args, "--version") {
+		os.Stdout.Write([]byte(Version))
+		os.Exit(0)
+		return
+	}
+
+	Print("Starting...")
 	start()
+	systray.Run(onReady, onExit)
 }
 
 func onReady() {
@@ -45,43 +50,85 @@ func onReady() {
 	systray.SetIcon(appicon)
 
 	actionOpen := systray.AddMenuItem("About This PC", "Open a new window.")
-	actionQuit := systray.AddMenuItem("Quit", "Quit the application.")
+	actionOpenClassic := systray.AddMenuItem("About This PC (Classic)", "Open a new window in classic mode.")
+	systray.AddSeparator()
+	actionCloseOne := systray.AddMenuItem("Close", "Close the most recent window.")
+	actionCloseAll := systray.AddMenuItem("Close All", "Close all windows.")
+	systray.AddSeparator()
+	actionQuit := systray.AddMenuItem("Quit", "Quit the service.")
+	actionRestart := systray.AddMenuItem("Restart", "Restart the service.")
 
 	go func() {
 		for {
 			select {
 			case <-actionOpen.ClickedCh:
-				run()
-				return
+				run(false)
+			case <-actionOpenClassic.ClickedCh:
+				run(true)
+			case <-actionCloseOne.ClickedCh:
+				mu.Lock()
+				cmds := processes
+
+				for i, j := 0, len(cmds)-1; i < j; i, j = i+1, j-1 {
+					cmds[i], cmds[j] = cmds[j], cmds[i]
+				}
+
+				for i, cmd := range cmds {
+					if cmd.Process != nil {
+						Print("Found process " + strconv.Itoa(i) + ": " + strconv.Itoa(cmd.Process.Pid))
+						CloseProcess(cmd)
+						break
+					}
+				}
+
+				mu.Unlock()
+			case <-actionCloseAll.ClickedCh:
+				mu.Lock()
+
+				for i, cmd := range processes {
+					if cmd.Process != nil {
+						Print("Found process " + strconv.Itoa(i) + ": " + strconv.Itoa(cmd.Process.Pid))
+						CloseProcess(cmd)
+					}
+				}
+
+				mu.Unlock()
+			case <-actionRestart.ClickedCh:
+				restart()
 			case <-actionQuit.ClickedCh:
 				systray.Quit()
-				return
 			}
 		}
 	}()
 }
 
-func onExit() {
-	log.Println("Exiting...")
-}
-
-func getDetectedVersion(directory string) string {
-	filename := directory + "\\VERSION-IDENTIFIER"
-
-	if _, e := os.Stat(filename); os.IsNotExist(e) {
-		log.Println("File " + filename + " does not exist")
-		return ""
-	}
-
-	content, e := os.ReadFile(filename)
+func restart() {
+	selfPath, e := os.Executable()
 
 	if e != nil {
 		Fatal(e)
-		return ""
+		return
 	}
 
-	log.Println("Detected file content: " + string(content))
-	return string(content)
+	cmd := exec.Command(selfPath, os.Args[1:]...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	Print("Starting new process...")
+	e = cmd.Start()
+
+	if e != nil {
+		Fatal(e)
+		return
+	}
+
+	Print("Restarting...")
+	os.Exit(0)
+}
+
+func onExit() {
+	Print("Exiting...")
 }
 
 func start() {
@@ -105,6 +152,7 @@ func start() {
 
 	foundUninstall := false
 	foundService := false
+	foundClassic := false
 
 	for _, arg := range args {
 		if strings.Contains(arg, "--uninstall") {
@@ -112,6 +160,8 @@ func start() {
 			break
 		} else if strings.Contains(arg, "--service") {
 			foundService = true
+		} else if strings.Contains(arg, "--classic") {
+			foundClassic = true
 		} else {
 			foundArgs = append(foundArgs, arg)
 			args = foundArgs
@@ -127,14 +177,14 @@ func start() {
 		}
 
 		if ok {
-			log.Println("Uninstalling application...")
+			Print("Uninstalling application...")
 			e := os.RemoveAll(directory)
 
 			if e != nil {
 				Fatal(e)
 				return
 			} else {
-				log.Println("Directory " + directory + " removed.")
+				Print("Directory " + directory + " removed.")
 			}
 
 			_, e = dlgs.Info("All Done", "About This PC has been uninstalled.")
@@ -144,47 +194,83 @@ func start() {
 				return
 			}
 
+			os.Exit(0)
 			return
 		} else {
-			log.Println("Aborting")
+			Print("Aborting")
 		}
 
 		return
 	}
 
-	var currentVersion = getDetectedVersion(directory)
+	var currentVersion = GetDetectedVersion(directory)
 
 	if currentVersion == "" || currentVersion != Version {
 		extract()
 	}
 
-	if foundService {
-		run()
+	if !foundService {
+		run(foundClassic)
 	}
 }
 
-func run() {
-	cmd := exec.Command(directory+"\\AboutThisPC.exe", args...)
-	log.Println("Running application...")
-	err := cmd.Run()
+func run(classic bool) {
+	Print("Detected run with classic: " + strconv.FormatBool(classic))
+	var classicArg = []string{}
 
-	if err != nil {
-		Fatal(err)
-		return
+	if classic {
+		classicArg = []string{"--classic"}
 	}
-}
 
-func extract() {
-	log.Println("Found archive of " + strconv.Itoa(len(archive)) + " bytes")
-	readerAt := bytes.NewReader(archive)
-	zr, e := zip.NewReader(readerAt, int64(len(archive)))
+	finalArgs := append(classicArg, args...)
+	cmd := exec.Command(directory+"\\AboutThisPC.exe", finalArgs...)
+	mu.Lock()
+	processes = append(processes, cmd)
+	mu.Unlock()
+
+	Print("Running application...")
+	e := cmd.Start()
 
 	if e != nil {
 		Fatal(e)
+		return
 	}
 
-	log.Println("Extracting files to " + directory + "...")
-	ok, e := dlgs.Question("Confirm", "Are you sure you want to install About This PC? This will overwrite your current installation. Settings will not be overwritten.\n\nThis will install About This PC to "+directory+".", true)
+	go func() {
+		e := cmd.Wait()
+
+		if e != nil {
+			Print("Process exited with error: " + e.Error())
+		} else {
+			Print("Process exited successfully")
+		}
+
+		mu.Lock()
+
+		for i, p := range processes {
+			if p == cmd {
+				processes = append(processes[:i], processes[i+1:]...)
+				break
+			}
+		}
+
+		mu.Unlock()
+	}()
+}
+
+func extract() {
+	Print("Found archive of " + strconv.Itoa(len(archive)) + " bytes")
+	readerAt := bytes.NewReader(archive)
+	zr, e := zip.NewReader(readerAt, int64(len(archive)))
+	count := 0
+
+	if e != nil {
+		Fatal(e)
+		return
+	}
+
+	Print("Extracting files to " + directory + "...")
+	ok, e := dlgs.Question("Confirm", "Are you sure you want to install About This PC? This will overwrite your current installation, if present. Settings will not be overwritten.\n\nThis will install About This PC to "+directory+".", true)
 
 	if e != nil {
 		Fatal(e)
@@ -192,57 +278,115 @@ func extract() {
 	}
 
 	if !ok {
-		log.Println("Aborting...")
+		Print("Aborting...")
 		return
 	}
 
 	for _, file := range zr.File {
-		log.Println("Found file: " + file.Name)
+		Print("Found file: " + file.Name)
 		extractPath := filepath.Join(directory, file.Name)
 
 		if file.FileInfo().IsDir() {
 			if e := os.MkdirAll(extractPath, os.ModePerm); e != nil {
 				Fatal(e)
+				return
 			}
 			continue
 		}
 
 		if e := os.MkdirAll(filepath.Dir(extractPath), os.ModePerm); e != nil {
 			Fatal(e)
+			return
 		}
 
 		srcFile, e := file.Open()
+
 		if e != nil {
 			Fatal(e)
+			return
 		}
 
 		dstFile, e := os.Create(extractPath)
+
 		if e != nil {
 			srcFile.Close()
 			Fatal(e)
+			return
 		}
 
 		if _, e := io.Copy(dstFile, srcFile); e != nil {
 			srcFile.Close()
 			dstFile.Close()
 			Fatal(e)
+			return
 		}
 
 		srcFile.Close()
 		dstFile.Close()
+		count++
 	}
 
-	log.Println("Copied " + strconv.Itoa(len(zr.File)) + " files!")
+	if copySelf() {
+		count++
+	} else {
+		return
+	}
+
+	Print("Copied " + strconv.Itoa(len(zr.File)) + " files!")
 	data := []byte(Version)
 	e = os.WriteFile(directory+"\\VERSION-IDENTIFIER", data, 0644)
 
 	if e != nil {
 		Fatal(e)
+		return
 	}
 
 	_, e = dlgs.Info("All Done", "About This PC has been installed.")
 
 	if e != nil {
 		Fatal(e)
+		return
 	}
+}
+
+func copySelf() bool {
+	file, e := os.Executable()
+	Print("Copying self-path " + file + "...")
+	extractPath := filepath.Join(directory, "AboutThisPC-Service.exe")
+
+	if e != nil {
+		Fatal(e)
+		return false
+	}
+
+	if e := os.MkdirAll(filepath.Dir(extractPath), os.ModePerm); e != nil {
+		Fatal(e)
+		return false
+	}
+
+	srcFile, e := os.Open(file)
+
+	if e != nil {
+		Fatal(e)
+		return false
+	}
+
+	dstFile, e := os.Create(extractPath)
+
+	if e != nil {
+		srcFile.Close()
+		Fatal(e)
+		return false
+	}
+
+	if _, e := io.Copy(dstFile, srcFile); e != nil {
+		srcFile.Close()
+		dstFile.Close()
+		Fatal(e)
+		return false
+	}
+
+	srcFile.Close()
+	dstFile.Close()
+	return true
 }
