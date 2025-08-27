@@ -4,8 +4,9 @@ go 1.25.0
 
 require github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 
+require github.com/nightlyone/lockfile v1.0.0
+
 require (
-	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 // indirect
 	github.com/getlantern/errors v0.0.0-20190325191628-abdb3e3e36f7 // indirect
 	github.com/getlantern/golog v0.0.0-20190830074920-4ef2e798c2d7 // indirect
@@ -16,5 +17,6 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 )

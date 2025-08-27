@@ -102,9 +102,7 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 - The "service" executable doesn't actually install anything to your desktop or Start menu. This has to be done manually.
 
-- About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-CLI.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
-
-- If you're a beginner to WinUI (like I was when I started this), I wouldn't generally recommend using WinUI to make a Windows app. It's pretty confusing, and sometimes even restricting.
+- About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
 
 # Extra Notes
 

@@ -25,9 +25,29 @@ Write-Output "Creating About This PC version $Version..."
 Set-Location -Path "$WindowsDir\AboutThisPC"
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
+function Sign {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Path
+    )
+
+    $Cert = Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert | Select-Object -First 1
+    Write-Output $Cert
+
+    if ($null -eq $Cert) {
+        Write-Error "No code signing certificate found."
+        return
+    }
+
+    Set-AuthenticodeSignature -FilePath "$Path" -Certificate $Cert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com"
+    Get-AuthenticodeSignature -FilePath "$Path"
+}
+
 function Build {
     param(
+        [Parameter(Mandatory=$true)]
         [string]$Arch,
+        [Parameter(Mandatory=$true)]
         [string]$Target
     )
 
@@ -35,6 +55,7 @@ function Build {
     $ServicePath="$ParentDir\windows-service\build"
     Write-Output "Building application for $Target..."
     & dotnet publish -c Release -r "$Target" --self-contained true -o "$directory"
+    Sign -Path "$directory\AboutThisPC.exe"
 
     if (Test-Path $ServicePath) {
         Remove-Item "$ServicePath\*" -Recurse -Force
@@ -59,8 +80,11 @@ function Build {
 
     # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up, but it also prevents logging.
     & rsrc -arch $Arch -ico build/icon.ico -o rsrc.syso
-    & go build -ldflags "-X 'main.Version=$Version' -H=windowsgui" -o build/app.exe
-    & go build -ldflags "-X 'main.Version=$Version' -X 'main.IsConsole=1'" -o build/app-cli.exe
+    & go build -ldflags "-X 'main.Version=$Version' -H=windowsgui" -o build\app.exe
+    & go build -ldflags "-X 'main.Version=$Version' -X 'main.IsConsole=1'" -o build\app-cli.exe
+
+    Sign -Path "$ServicePath\app.exe"
+    Sign -Path "$ServicePath\app-cli.exe"
 
     $directory="$OutputDir\$Target-Results"
     $ArchivePath="$ParentDir\Output\AboutThisPC-$Version-$Target.zip"

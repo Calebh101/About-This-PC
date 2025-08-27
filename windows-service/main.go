@@ -2,9 +2,12 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	_ "embed"
+	"fmt"
 	"io"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +17,7 @@ import (
 
 	"github.com/gen2brain/dlgs"
 	"github.com/getlantern/systray"
+	"github.com/nightlyone/lockfile"
 )
 
 //go:embed build/archive.zip
@@ -28,6 +32,7 @@ var isInConsole = false
 var args = os.Args[1:]
 var verbose = Contains(args, "--debug") // Not used for now
 
+var socketport = 9525
 var localAppData = os.Getenv("LOCALAPPDATA")
 var directory = filepath.Join(localAppData, "AboutThisPC")
 
@@ -46,8 +51,80 @@ func main() {
 	}
 
 	Print("Starting...")
+	lock, e := lockfile.New(filepath.Join(directory, "AboutThisPC.lck"))
+
+	if e != nil {
+		Fatal("Cannot initialize lockfile: " + e.Error())
+		return
+	}
+
+	if e = lock.TryLock(); e != nil {
+		Print("Cannot lock lockfile: " + e.Error())
+		onIsLocked(lock)
+		return
+	}
+
+	go listen()
 	start()
 	systray.Run(onReady, onExit)
+}
+
+func listen() {
+	ln, e := net.Listen("tcp", "127.0.0.1:"+strconv.Itoa(socketport))
+
+	if e != nil {
+		Fatal(e)
+	}
+
+	defer ln.Close()
+	Print("Listening on localhost:" + strconv.Itoa(socketport) + "...")
+
+	for {
+		connection, e := ln.Accept()
+
+		if e != nil {
+			Fatal("Client connection error! " + e.Error())
+			continue
+		}
+
+		reader := bufio.NewReader(connection)
+		message, e := reader.ReadString('|')
+		message = strings.TrimSuffix(message, "|")
+
+		if e != nil {
+			Fatal(e)
+			continue
+		} else {
+			Print("Received message: " + message)
+			mode, e := strconv.Atoi(message)
+
+			if e != nil {
+				Print("Unable to parse mode '" + message + "': " + e.Error())
+				continue
+			} else {
+				run(mode)
+			}
+		}
+	}
+}
+
+func onIsLocked(lock lockfile.Lockfile) {
+	Print("Running onIsLocked with arguments '" + strings.Join(args, " ") + "'...")
+	classic := Contains(args, "--classic")
+	mode := 0
+	connection, e := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(socketport))
+
+	if e != nil {
+		Fatal(e)
+	}
+
+	if classic {
+		mode = 1
+	}
+
+	defer connection.Close()
+	Print("Sending message to server... (mode: " + strconv.Itoa(mode) + ")")
+	fmt.Fprint(connection, strconv.Itoa(mode)+"|")
 }
 
 func onReady() {
