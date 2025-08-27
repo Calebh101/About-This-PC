@@ -70,6 +70,13 @@ About This PC for Linux comes with built-in system tray support, that starts whe
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 - `--no-window`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup. The program won't request `pkexec` when run with this argument, and if the helper fails then it will act like `pkexec` was rejected.
 
+## Supported Display Servers
+
+In About This PC for Linux, I had to use APIs specific to certain display servers. A display server is what renders your display and handles inputs. You may not know which one you are using, or that this existed; I sure didn't. However, different distros use different display servers.
+
+Supported display servers:
+- X11
+
 ## Notes
 
 - About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information. Run this executable specifically (if you can catch it) with `--version` to see the version.
@@ -116,6 +123,11 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 <details>
     <summary>Where are the buttons in the Linux version Overview page?</summary><br>
     There are some other buttons on Apple's About This Mac apps, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
+</details>
+
+<details>
+    <summary>Why does the Displays tab say my display server is not supported?</summary><br>
+    If your display server is unsupported, that means About This PC doesn't have an implementation for your display server. I'm only interested in supporting mainstream ones (like X11), so if you really want to see your displays (that's all this affects) then you'll need to use a supported display server. Please see above (in the Linux notes) for supported servers.
 </details>
 
 # Extra Notes
