@@ -26,6 +26,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics;
 using Windows.System;
+using Microsoft.UI.Windowing;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -198,9 +199,9 @@ namespace AboutThisPC
 
         public class Dimensions(double Width, double Height)
         {
-            public SizeInt32 Build()
+            public SizeInt32 Build(AppWindow? window = null)
             {
-                double dpi = PInvoke.GetDpiForWindow(new HWND((nint)MainWindow.Window!.Id.Value));
+                double dpi = PInvoke.GetDpiForWindow(new HWND((nint)(window ?? MainWindow.Window)!.Id.Value));
                 double width = Width * (dpi / 92);
                 double height = Height * (dpi / 92);
                 return new SizeInt32((int)width, (int)height);

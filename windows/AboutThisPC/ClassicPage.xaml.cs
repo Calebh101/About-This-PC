@@ -89,7 +89,7 @@ namespace AboutThisPC
             EyeIconLine.Visibility = isEye ? Visibility.Visible : Visibility.Collapsed;
             TextBlock? serialBlock = widgets["Results(serial)"];
             serialBlock.Text = isEye ? (widgetValues.Find((x) => x.Id == "serial")!.Value) : "";
-            TextBlock? ipBlock = widgets["Results(local_iP)"];
+            TextBlock? ipBlock = widgets["Results(local_ip)"];
             ipBlock.Text = isEye ? (widgetValues.Find((x) => x.Id == "local_ip")!.Value) : "";
         }
 

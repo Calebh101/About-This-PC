@@ -213,10 +213,10 @@ namespace AboutThisPC
 
         public static async void Window()
         {
-            var dimensions = new App.Dimensions(800, 500).Build();
             var window = new SettingsWindow();
             var appwindow = window.AppWindow;
             var presenter = appwindow?.Presenter as OverlappedPresenter;
+            var dimensions = new App.Dimensions(800, 500).Build(appwindow);
 
             appwindow?.Resize(dimensions);
             window.ExtendsContentIntoTitleBar = true;
