@@ -74,7 +74,7 @@ There are some other buttons on Apple's About This Mac apps, like Software Updat
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 - `--no-window`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup. The program won't request `pkexec` when run with this argument, and if the helper fails then it will act like `pkexec` was rejected.
 
-# Notes
+## Notes
 
 - About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information. Run this executable specifically (if you can catch it) with `--version` to see the version.
 
