@@ -6,6 +6,8 @@ About This PC uses several programming languages:
 - C++: For the entire Linux stack.
 - C#: For the Windows application.
 - Go: For the Windows service.
+- Bash: For scripting Linux building.
+- PowerShell: For scripting Windows building and running.
 
 ## Downloading, Running, and Installing
 
