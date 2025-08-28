@@ -39,7 +39,7 @@ namespace AboutThisPC
     public partial class App : Application
     {
         static public string Version = "0.0.0A-R6";
-        public static bool reverseEyeButtons = true;
+        public static bool ReverseEyeButtons = true;
         static public Dimensions? dimensions;
         static public Settings? settings;
         private Window? _window;
