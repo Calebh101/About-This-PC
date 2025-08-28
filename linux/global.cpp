@@ -23,12 +23,16 @@
 
 Global::Global() {}
 
-const std::string Global::version = "0.0.0A-R5";
 const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
 
+std::string Global::version;
 json helperData;
 Settings* settingsData;
+
+void Global::setVersion(QString v) {
+    version = v.toStdString();
+}
 
 void Global::setSettings(Settings* s) {
     settingsData = s;

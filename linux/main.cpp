@@ -36,6 +36,7 @@ bool isGnome() {
 
 int main(int argc, char *argv[])
 {
+    Global::setVersion("0.0.0A-R6"); // Set the application version
     QString id = "AboutThisPCLinuxApplication";
     QString gnomeStyle = "None"; // Set to None to not try to apply GNOME styles
     bool classic = false;

@@ -18,6 +18,7 @@ public:
     static const float fontSize;
     static const int fontWeight;
 
+    static void setVersion(QString v);
     static std::string getModel();
     static std::string getFamily();
     static json getOS();
