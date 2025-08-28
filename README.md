@@ -2,6 +2,11 @@
 
 This is a cool little app of mine that is supposed to be like the `About This Mac` Apple utility, but for Linux and Windows, using native and OS-specific implementations and features.
 
+About This PC uses several programming languages:
+- C++: For the entire Linux stack.
+- C#: For the Windows application.
+- Go: For the Windows service.
+
 ## Downloading, Running, and Installing
 
 First go to the [Releases](https://github.com/Calebh101/About-This-PC/releases) page. Download the latest stable (or prerelease/beta if you want) release compatible with your computer. Then open and extract the ZIP archive.

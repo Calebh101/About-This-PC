@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         if (QStyleFactory::keys().contains(gnomeStyle)) {
             a.setStyle(QStyleFactory::create(gnomeStyle));
         } else {
-            Logger::warn(QString("Unable to use GNOME theme: keys() did not contain the required value (%1): %2").arg(style).arg(QStyleFactory::keys().join(", ")));
+            Logger::warn(QString("Unable to use GNOME theme: keys() did not contain the required value (%1): %2").arg(gnomeStyle).arg(QStyleFactory::keys().join(", ")));
         }
     } else {
         Logger::print("Not using GNOME theme...");

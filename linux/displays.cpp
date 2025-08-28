@@ -8,6 +8,7 @@
 #include <X11/extensions/Xrandr.h>
 #include "global.h"
 #include "tabpage.h"
+#include "waylandmanager.h"
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
@@ -83,14 +84,26 @@ json getAllX11Displays() {
     return results;
 }
 
+json getDisplays(std::string server) {
+    Logger::print(QString("Getting displays for server %1...").arg(server));
+
+    if (server == "x11") {
+        return getAllX11Displays();
+    } else if (server == "wayland") {
+        WaylandManager manager = WaylandManager();
+        return manager.getAllWaylandDisplays();
+    } else {
+        return json();
+    }
+}
+
 QWidget* Displays::page(QWidget* parent) {
     QWidget *page = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(page);
     std::string server = getDisplayServer();
+    json data = getDisplays(server);
 
-    if (server == "x11") {
-        json data = getAllX11Displays();
-
+    if (!data.empty()) {
         if (data["status"] == true) {
             std::vector<json> displays = data["displays"];
             int length = displays.size();
