@@ -122,7 +122,7 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 # FAQ
 
 <details>
-    <summary>What is `AboutThisPC-Debug.exe`?</summary><br>
+    <summary>What is 'AboutThisPC-Debug.exe'?</summary><br>
     About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
 </details>
 
