@@ -89,7 +89,7 @@ QWidget* Selector::boolean(QWidget* parent, QString keys) {
     QObject::connect(box, &QComboBox::currentTextChanged, parent, [=](const QString &text){
         Logger::print(QString("Setting changed to: %1").arg(text));
         Global::settings()->set<bool>(text == "Yes", keys);
-        Logger::print(QString("Current settings: %1").arg(Global::settings()->raw().dump()));
+        Logger::print(QString("Current settings: %1").arg(QString::fromStdString(Global::settings()->raw().dump())));
     });
 
     return box;

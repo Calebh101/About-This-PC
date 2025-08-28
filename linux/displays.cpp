@@ -84,7 +84,7 @@ json getAllX11Displays() {
 }
 
 json getDisplays(std::string server) {
-    Logger::print(QString("Getting displays for server %1...").arg(server));
+    Logger::print(QString("Getting displays for server %1...").arg(QString::fromStdString(server)));
 
     if (server == "x11") {
         return getAllX11Displays();
@@ -142,7 +142,7 @@ QWidget* Displays::page(QWidget* parent) {
 
                     QLabel* titleLabel = new QLabel(parent);
                     QFont titleFont;
-                    titleLabel->setText(QString("%1").arg(name));
+                    titleLabel->setText(QString("%1").arg(QString::fromStdString(name)));
                     titleFont.setPointSize(12);
                     titleLabel->setFont(titleFont);
                     titleLabel->setAlignment(Qt::AlignCenter);
@@ -151,7 +151,7 @@ QWidget* Displays::page(QWidget* parent) {
                     if (crtc) {
                         QLabel* label = new QLabel(parent);
                         QFont font;
-                        label->setText(QString("%1x%2").arg(display["width"]).arg(display["height"]));
+                        label->setText(QString("%1x%2").arg(QString::number(display["width"].get<int>())).arg(QString::number(display["height"].get<int>())));
                         font.setPointSize(8);
                         label->setFont(font);
                         label->setAlignment(Qt::AlignCenter);
@@ -160,7 +160,7 @@ QWidget* Displays::page(QWidget* parent) {
 
                     QLabel* message1 = new QLabel(parent);
                     QFont font1;
-                    message1->setText(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"])).arg(display["refresh"]) : QString("%1Hz").arg(display["refresh"]));
+                    message1->setText(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"].get<double>())).arg(QString::number(display["refresh"].get<int>())) : QString("%1Hz").arg(QString::number(display["refresh"].get<int>())));
                     font1.setPointSize(8);
                     message1->setFont(font1);
                     message1->setAlignment(Qt::AlignCenter);
@@ -182,7 +182,7 @@ QWidget* Displays::page(QWidget* parent) {
 
             QLabel* messageLabel = new QLabel(parent);
             messageLabel->setTextFormat(Qt::RichText);
-            messageLabel->setText(QString("We encountered an issue loading your displays.").arg(server));
+            messageLabel->setText(QString("We encountered an issue loading your displays."));
             messageLabel->setAlignment(Qt::AlignCenter);
 
             layout->addWidget(titleLabel);
@@ -199,7 +199,7 @@ QWidget* Displays::page(QWidget* parent) {
 
         QLabel* messageLabel = new QLabel(parent);
         messageLabel->setTextFormat(Qt::RichText);
-        messageLabel->setText(QString("The <span style='font-weight: bold;'>%1</span> display server is currently not supported.").arg(server));
+        messageLabel->setText(QString("The <span style='font-weight: bold;'>%1</span> display server is currently not supported.").arg(QString::fromStdString(server)));
         messageLabel->setAlignment(Qt::AlignCenter);
 
         layout->addWidget(titleLabel);
@@ -207,7 +207,7 @@ QWidget* Displays::page(QWidget* parent) {
         layout->setAlignment(Qt::AlignCenter);
     }
 
-    Logger::print(QString("Generated page for display server: %1").arg(server));
+    Logger::print(QString("Generated page for display server: %1").arg(QString::fromStdString(server)));
     page->setLayout(layout);
     return page;
 }

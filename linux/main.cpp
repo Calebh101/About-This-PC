@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
             throw std::filesystem::filesystem_error(QString("Unable to create file").toStdString(), fs::path(path.toStdString()), std::make_error_code(std::errc::io_error));
         }
     } catch (std::filesystem::filesystem_error e) {
-        Logger::warn(QString("Unable to verify and/or copy application icon! (%1, %2): %3 (code %4)").arg(e.path1().generic_string(), e.path2().generic_string(), e.what(), e.code().message()));
+        Logger::warn(QString("Unable to verify and/or copy application icon! (%1, %2): %3 (code %4)").arg(QString::fromStdString(e.path1().generic_string())).arg(QString::fromStdString(e.path2().generic_string())).arg(QString::fromStdString(e.what())).arg(QString::fromStdString(e.code().message())));
     } catch (...) {
         Logger::warn(QString("Unable to verify and/or copy application icon! %1").arg("Unknown error."));
     }

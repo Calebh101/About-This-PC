@@ -48,7 +48,7 @@ public:
         bool isDefault = false;
         json output = loaded[keys.toStdString()];
         if (output.is_null()) output = defaults()[keys.toStdString()]; isDefault = true;
-        Logger::print(QString("Found setting %1: %2 (default: %3) (settings: %4)").arg(keys).arg(loaded[keys.toStdString()].get<T>()).arg(isDefault ? "true" : "false").arg(this->loaded.dump()));
+        Logger::print(QString("Found setting %1: %2 (default: %3) (settings: %4)").arg(keys).arg(loaded[keys.toStdString()].is_string() ? QString::fromStdString(loaded[keys.toStdString()].get<std::string>()) : QString::number(loaded[keys.toStdString()].get<double>())).arg(isDefault ? "true" : "false").arg(QString::fromStdString(this->loaded.dump())));
 
         if (output.is_null()) {
             Logger::warn(QString("Error with settings: Unable to load set nor default: %1 (got is_null())").arg(keys));
@@ -76,7 +76,7 @@ public:
 
         stream << loaded.dump() << std::endl;
         stream.close();
-        Logger::print(QString("Found new setting %1: %2 (current: %3)").arg(keys).arg(loaded[keys.toStdString()].get<T>()).arg(loaded.dump()));
+        Logger::print(QString("Found new setting %1: %2 (current: %3)").arg(keys).arg(loaded[keys.toStdString()].is_string() ? QString::fromStdString(loaded[keys.toStdString()].get<std::string>()) : QString::number(loaded[keys.toStdString()].get<double>())).arg(QString::fromStdString(loaded.dump())));
         return true;
     }
 

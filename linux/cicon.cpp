@@ -9,7 +9,7 @@ bool isDark() {
 }
 
 std::string getPath(std::string path) {
-    QString file = QString(":/icons/%1-%2").arg(path).arg(isDark() ? "light" : "dark");
+    QString file = QString(":/icons/%1-%2").arg(QString::fromStdString(path)).arg(isDark() ? "light" : "dark");
     return file.toStdString();
 }
 

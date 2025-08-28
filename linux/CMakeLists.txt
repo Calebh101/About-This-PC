@@ -25,13 +25,38 @@ include_directories(${X11_INCLUDE_DIR} ${XRANDR_INCLUDE_DIR} ${WAYLAND_CLIENT_IN
 
 set(PROJECT_SOURCES
 
-        mainwindow.cpp
-        mainwindow.h
-        logger.cpp
-        logger.h
-        tabpage.cpp
-        tabpage.h
-        json.hpp
+    cicon.cpp
+    cicon.h
+    classicpage.cpp
+    classicpage.h
+    computers.qrc
+    data.cpp
+    data.h
+    displays.cpp
+    displays.h
+    global.cpp
+    global.h
+    json.hpp
+    logger.cpp
+    logger.h
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    settings.cpp
+    settings.hpp
+    storage.cpp
+    storage.h
+    supportpage.cpp
+    supportpage.h
+    tabpage.cpp
+    tabpage.h
+    themelistener.cpp
+    themelistener.h
+    toolbar.png
+    updatemanager.cpp
+    updatemanager.h
+    waylandmanager.cpp
+    waylandmanager.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

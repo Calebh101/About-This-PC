@@ -9,6 +9,7 @@
 #include "logger.h"
 #include <QGraphicsOpacityEffect>
 #include "tabpage.h"
+#include <QUrl>
 
 SupportPage::SupportPage() {}
 
@@ -40,7 +41,7 @@ QWidget* SupportPage::page(QWidget* parent, ordered_json urls) {
 
         QObject::connect(button, &QPushButton::clicked, [=]() {
             QUrl url = QUrl(QString::fromStdString(value.get<std::string>()));
-            Logger::print(QString("Opening URL %2: %1").arg(url.toDisplayString(), key));
+            Logger::print(QString("Opening URL %1: %2").arg(url.toDisplayString()).arg(QString::fromStdString(key)));
             QDesktopServices::openUrl(url);
         });
 
@@ -49,7 +50,7 @@ QWidget* SupportPage::page(QWidget* parent, ordered_json urls) {
         } else if (column == 1) {
             column2->addWidget(button);
         } else {
-            Logger::warn(QString("Error: support button %1 did not qualify for a column.").arg(key));
+            Logger::warn(QString("Support button %1 did not qualify for a column.").arg(QString::fromStdString(key)));
         }
 
         i++;

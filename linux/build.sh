@@ -21,13 +21,13 @@ if [ -z "$VERSION" ]; then
 fi
 
 echo "Building AboutThisPC $VERSION by $AUTHOR..."
-cd "$SCRIPT_DIR"
+cd "$HELPER_DIR"
 
-cmake -S "$HELPER_DIR" -B "$HELPER_BUILD" -DCMAKE_BUILD_TYPE=Release
 cmake --build $HELPER_BUILD --target all
 cp $HELPER_BUILD/linux-helper $SCRIPT_DIR/binaries/linux-helper
 
-cmake -S "$SCRIPT_DIR" -B "$APP_BUILD" -DCMAKE_BUILD_TYPE=Release
+cd "$SCRIPT_DIR"
+cmake -S $SCRIPT_DIR -B $APP_BUILD
 cmake --build $APP_BUILD --target all
 
 cd $PARENT_DIR

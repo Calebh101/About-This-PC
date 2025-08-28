@@ -75,7 +75,7 @@ json getMemory() {
         double gb = static_cast<double>(info.totalram) * info.mem_unit / (factor * factor * 1024);
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(1) << gb;
-        results["totalString"] = QString("%1 GiB").arg(oss.str()).toStdString();
+        results["totalString"] = QString("%1 GiB").arg(QString::fromStdString(oss.str())).toStdString();
         results["total"] = gb;
     }
 

@@ -134,7 +134,7 @@ public:
                 result["length"] = mm;
             }
 
-            Logger::verbose(QString("Pushing display %1...").arg(result["name"].get<std::string>()));
+            Logger::verbose(QString("Pushing display %1...").arg(QString::fromStdString(result["name"].get<std::string>())));
             results["displays"].push_back(result);
             delete out;
         }
