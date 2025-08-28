@@ -16,8 +16,8 @@ if [ "$(uname -s)" != "Linux" ]; then
 fi
 
 if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version>"
-    exit 1
+  echo "Usage: $0 <version>"
+  exit 1
 fi
 
 echo "Building AboutThisPC $VERSION by $AUTHOR..."
@@ -25,10 +25,10 @@ cd "$SCRIPT_DIR"
 
 cmake -S "$HELPER_DIR" -B "$HELPER_BUILD" -DCMAKE_BUILD_TYPE=Release
 cmake --build $HELPER_BUILD --target all
-cp $HELPER_BUILD $SCRIPT_DIR/binaries/linux-helper
+cp $HELPER_BUILD/linux-helper $SCRIPT_DIR/binaries/linux-helper
 
 cmake -S "$SCRIPT_DIR" -B "$APP_BUILD" -DCMAKE_BUILD_TYPE=Release
-cmake --build  --target all
+cmake --build $APP_BUILD --target all
 
 cd $PARENT_DIR
 mkdir -p Output
@@ -39,7 +39,7 @@ mkdir -p $OUTPUT_DIR/linux
 cd $OUTPUT_DIR/linux
 
 mkdir -p x64
-cp $SCRIPT_BUILD/AboutThisPC x64/AboutThisPC
+cp $APP_BUILD/AboutThisPC x64/AboutThisPC
 cp $PARENT_DIR/README.md x64/README.md
 cp $PARENT_DIR/LICENSE.md x64/LICENSE.md
 cp $PARENT_DIR/SECURITY.md x64/SECURITY.md

@@ -14,7 +14,7 @@ class Global
 public:
     Global();
 
-    static const std::string version;
+    static std::string version;
     static const float fontSize;
     static const int fontWeight;
 
