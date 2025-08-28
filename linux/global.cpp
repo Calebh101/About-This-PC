@@ -23,7 +23,7 @@
 
 Global::Global() {}
 
-const std::string Global::version = "0.0.0A-R3";
+const std::string Global::version = "0.0.0A-R5";
 const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
 
