@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Build Linux App",
+            "name": "Run Linux App",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
@@ -14,7 +14,7 @@
             "preLaunchTask": "CMake: build"
         },
         {
-            "name": "Build Linux Helper App",
+            "name": "Run Linux Helper App",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
