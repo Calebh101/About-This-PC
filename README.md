@@ -81,6 +81,7 @@ In About This PC for Linux, I had to use APIs specific to certain display server
 
 Supported display servers:
 - X11
+- Wayland
 
 ## Notes
 
@@ -133,6 +134,11 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 <details>
     <summary>Why does the Displays tab say my display server is not supported?</summary><br>
     If your display server is unsupported, that means About This PC doesn't have an implementation for your display server. I'm only interested in supporting mainstream ones (like X11), so if you really want to see your displays (that's all this affects) then you'll need to use a supported display server. Please see above (in the Linux notes) for supported servers.
+</details>
+
+<details>
+    <summary>Why does my display show up as external, when it's really internal?</summary><br>
+    Due to several reasons (Windows is limited in the displays API, Wayland is also a bit limited, and X11 uses an arbitrary check), all displays are shown as external only. If you know how I can get around these, you can [make a pull request](https://github.com/Calebh101/About-This-PC/blob/master/CONTRIBUTING.md#pull-requests). (If you figure out a fix, pleae implement it preferably on all platforms, but just one is fine as long as all display servers on said platform are fixed.)
 </details>
 
 # Extra Notes

@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 #ifdef QT_DEBUG
     Logger::setLogging(true);
-    Logger::setVerbose(false);
+    Logger::setVerbose(true);
 #endif
 
     if (args.contains("--version")) { // Print version and exit

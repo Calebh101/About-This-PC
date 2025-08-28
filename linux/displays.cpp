@@ -13,6 +13,7 @@
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
 
+bool allowInternalDisplays = false;
 Displays::Displays() {}
 
 std::string getDisplayServer() {
@@ -55,15 +56,13 @@ json getAllX11Displays() {
         result["name"] = name;
         result["refresh"] = mode.dotClock > 0 && mode.hTotal > 0 && mode.vTotal > 0 ? (double)mode.dotClock / ((double)mode.hTotal * mode.vTotal) : 0.0;
         result["crtc"] = false;
-        result["internal"] = name.find("eDP") != std::string::npos || name.find("LVDS") != std::string::npos || name.find("DSI") != std::string::npos;
+        result["refresh"] = (mode.dotClock > 0 && mode.hTotal > 0 && mode.vTotal > 0) ? (double)mode.dotClock * 1000.0 / ((double)mode.hTotal * mode.vTotal) : 0.0;
 
         if (outputInfo->crtc) {
             XRRCrtcInfo* crtcInfo = XRRGetCrtcInfo(display, resources, outputInfo->crtc);
 
             result["width"] = crtcInfo->width;
             result["height"] = crtcInfo->height;
-            result["x"] = crtcInfo->x;
-            result["y"] = crtcInfo->y;
             result["crtc"] = true;
 
             if (outputInfo->mm_width > 0 && outputInfo->mm_height > 0) {
@@ -133,7 +132,7 @@ QWidget* Displays::page(QWidget* parent) {
                     QVBoxLayout* layout = new QVBoxLayout(container);
                     json display = displays[i];
                     std::string name = display["name"];
-                    bool internal = display["internal"];
+                    bool internal = allowInternalDisplays ? display["internal"].get<bool>() : false;
                     bool crtc = display["crtc"];
 
                     std::string iconPath = Global::getComputerIconPath(internal ? "laptop" : "monitor");
