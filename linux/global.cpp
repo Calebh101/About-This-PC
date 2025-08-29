@@ -46,9 +46,9 @@ void Global::setHelperData(std::string data) {
     try {
         helperData = json::parse(data);
     } catch (const std::exception& e) {
-        Logger::warn(QString("Unable to parse helper data: %1 (%2)").arg(data).arg(e.what()));
+        Logger::warn(QString("Unable to parse helper data: %1 (%2)").arg(QString::fromStdString(data)).arg(e.what()));
     } catch (...) {
-        Logger::warn(QString("Unable to parse helper data: %1").arg(data));
+        Logger::warn(QString("Unable to parse helper data: %1").arg(QString::fromStdString(data)));
     }
 }
 
@@ -57,10 +57,10 @@ json Global::getHelperData(std::string key) {
         Logger::print("Getting helper data at no key...");
         return helperData;
     } else if (helperData.contains(key)) {
-        Logger::print(QString("Getting helper data at key %1...").arg(key));
+        Logger::print(QString("Getting helper data at key %1...").arg(QString::fromStdString(key)));
         return helperData[key];
     } else {
-        Logger::print(QString("Getting helper data at (invalid) key %1...").arg(key));
+        Logger::print(QString("Getting helper data at (invalid) key %1...").arg(QString::fromStdString(key)));
         json j;
         return j;
     }
@@ -194,7 +194,7 @@ json Global::getOS() {
                 std::string value = line.substr(pos + 1);
                 if (value[0] == '"') value = value.substr(1);
                 if (value.back() == '"') value.pop_back();
-                Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
+                Logger::verbose(QString("Found key: %1 (value: %2)").arg(QString::fromStdString(key)).arg(QString::fromStdString(value)));
                 result[key] = value;
                 keys.push_back(key);
             }
@@ -238,7 +238,7 @@ json Global::getCPU() {
                 }
 
                 if (!result.contains(key)) {
-                    Logger::verbose(QString("Found key: %1 (value: %2)").arg(key).arg(value));
+                    Logger::verbose(QString("Found key: %1 (value: %2)").arg(QString::fromStdString(key)).arg(QString::fromStdString(value)));
                     result[key] = value;
                     results.push_back(result);
                 }
@@ -284,7 +284,7 @@ ordered_json Global::getSupportUrls(json osInfo) {
     urls["SUPPORT_URL"] = "Support";
     urls["BUG_REPORT_URL"] = "Report Bugs";
     urls["PRIVACY_POLICY_URL"] = "Privacy Policy";
-    if (osInfo.contains("VENDOR_NAME")) urls["VENDOR_URL"] = QString("%1 Info").arg(osInfo["VENDOR_NAME"]).toStdString();
+    if (osInfo.contains("VENDOR_NAME")) urls["VENDOR_URL"] = QString("%1 Info").arg(QString::fromStdString(osInfo["VENDOR_NAME"].get<std::string>())).toStdString();
     urls["EXPERIMENT_URL"] = "Experiment Info";
 
     for (auto& [key, value] : urls.items()) {
@@ -308,7 +308,7 @@ std::string Global::trim(const std::string& str) {
 }
 
 std::string Global::getComputerIconPath(std::string path) {
-    return QString(":computers/images/computers/%1.png").arg(path).toStdString();
+    return QString(":computers/images/computers/%1.png").arg(QString::fromStdString(path)).toStdString();
 }
 
 std::string Global::getAppIconPath() {
@@ -419,7 +419,7 @@ json Global::getAllDisks() {
     struct dirent* entry;
 
     if (!dir) {
-        Logger::warn(QString("Unable to open directory: %1").arg(path));
+        Logger::warn(QString("Unable to open directory: %1").arg(QString::fromStdString(path)));
         return result;
     }
 
@@ -448,8 +448,8 @@ json Global::getDisk(std::string path) {
     result["status"] = false;
 
     try {
-        QString command = QString("lsblk -b -n -o SIZE,HOTPLUG -d %1").arg(path);
-        Logger::print(QString("Running getDisk command of %1 for device %2").arg(command).arg(path));
+        QString command = QString("lsblk -b -n -o SIZE,HOTPLUG -d %1").arg(QString::fromStdString(path));
+        Logger::print(QString("Running getDisk command of %1 for device %2").arg(command).arg(QString::fromStdString(path)));
         std::string processResult = run(command.toStdString());
         std::istringstream iss1(processResult);
         if (processResult.empty()) throw std::runtime_error("processResult was empty");
@@ -459,18 +459,18 @@ json Global::getDisk(std::string path) {
         result["bytes"] = size;
         result["external"] = (hotplug > 0 ? true : false);
 
-        QString usedCommand = QString("df -B1 --output=source,used | grep %1").arg(path);
+        QString usedCommand = QString("df -B1 --output=source,used | grep %1").arg(QString::fromStdString(path));
         std::string usedOutput = run(usedCommand.toStdString());
         if (usedOutput.empty()) throw std::runtime_error("usedOutput was empty");
         std::istringstream iss2(usedOutput);
         std::string device;
         std::string usedString;
         iss2 >> device >> usedString;
-        Logger::print(QString("Used output for %1: %2 (command: %3)").arg(path).arg(QString::fromStdString(usedString)).arg(usedCommand));
+        Logger::print(QString("Used output for %1: %2 (command: %3)").arg(QString::fromStdString(path)).arg(QString::fromStdString(usedString)).arg(usedCommand));
         long long used = std::stoll(usedString);
         result["used"] = used;
     } catch (const std::exception& e) {
-        Logger::warn(QString("getDisk(%1): %2").arg(path).arg(e.what()));
+        Logger::warn(QString("getDisk(%1): %2").arg(QString::fromStdString(path)).arg(QString::fromStdString(e.what())));
         return result;
     }
 
