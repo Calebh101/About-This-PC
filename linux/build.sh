@@ -1,5 +1,6 @@
 #!/bin/bash
 VERSION=$1
+QT_VERSION=6.9.1
 AUTHOR=Calebh101
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,7 +9,7 @@ HELPER_DIR=$PARENT_DIR/linux-helper
 OUTPUT_DIR=$PARENT_DIR/Output
 
 APP_BUILD=$SCRIPT_DIR/build/Desktop_Qt_6_9_1-Release
-HELPER_BUILD=$HELPER_DIR/build/Desktop_Qt6_6_9_1-Release
+HELPER_BUILD=$HELPER_DIR/build/Desktop_Qt_6_9_1-Release
 
 if [ "$(uname -s)" != "Linux" ]; then
   echo "This script must be run on Linux."
@@ -23,11 +24,12 @@ fi
 echo "Building AboutThisPC $VERSION by $AUTHOR..."
 cd "$HELPER_DIR"
 
+cmake -S $HELPER_DIR -B $HELPER_BUILD -DCMAKE_PREFIX_PATH=$HOME/Qt/$QT_VERSION/gcc_64
 cmake --build $HELPER_BUILD --target all
 cp $HELPER_BUILD/linux-helper $SCRIPT_DIR/binaries/linux-helper
 
 cd "$SCRIPT_DIR"
-cmake -S $SCRIPT_DIR -B $APP_BUILD
+cmake -S $SCRIPT_DIR -B $APP_BUILD -DCMAKE_PREFIX_PATH=$HOME/Qt/$QT_VERSION/gcc_64
 cmake --build $APP_BUILD --target all
 
 cd $PARENT_DIR

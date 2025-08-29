@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     Global::setVersion("0.0.0A-R6"); // Set the application version
     QString id = "AboutThisPCLinuxApplication";
     QString gnomeStyle = "None"; // Set to None to not try to apply GNOME styles
+
     bool classic = false;
     bool noWindow = false;
     qputenv("QT_FONT_DPI", "96"); // Fixed size
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 
 #ifdef QT_DEBUG
     Logger::setLogging(true);
-    Logger::setVerbose(true);
+    Logger::setVerbose(false);
 #endif
 
     if (args.contains("--version")) { // Print version and exit
@@ -272,7 +273,7 @@ int main(int argc, char *argv[])
     trayEntry->setContextMenu(trayMenu);
     trayEntry->show();
 
-    if (Global::settings()->get<bool>({"checkForUpdatesAtStart"})) {
+    if (Global::settings()->get<bool>("checkForUpdatesAtStart")) {
         Logger::print("Starting automated update check...");
         QTimer::singleShot(0, [&updater]() {
             updater.check(true, false);

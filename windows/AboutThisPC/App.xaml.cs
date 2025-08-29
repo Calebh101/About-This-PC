@@ -50,6 +50,16 @@ namespace AboutThisPC
             eleven = 11,
         }
 
+        public static Visibility GetVisibility(bool show)
+        {
+            if (ReverseEyeButtons)
+            {
+                return show ? Visibility.Visible : Visibility.Collapsed;
+            } else {
+                return show ? Visibility.Collapsed : Visibility.Visible;
+            }
+        }
+
         public static string GetDriveLetter()
         {
             return Environment.GetFolderPath(Environment.SpecialFolder.System)[..1].Replace(":", "").Replace("\\", "");

@@ -85,12 +85,12 @@ namespace AboutThisPC
 
         private void EyeButtonClick(object sender, RoutedEventArgs e)
         {
-            bool isEye = EyeIconLine.Visibility == Visibility.Collapsed;
-            EyeIconLine.Visibility = isEye ? Visibility.Visible : Visibility.Collapsed;
+            bool isEye = EyeIconLine.Visibility == App.GetVisibility(true); // Is to show
+            EyeIconLine.Visibility = isEye ? App.GetVisibility(false) : App.GetVisibility(true);
             TextBlock? serialBlock = widgets["Results(serial)"];
-            serialBlock.Text = isEye ? (widgetValues.Find((x) => x.Id == "serial")!.Value) : "";
+            serialBlock.Text = isEye ? widgetValues.Find((x) => x.Id == "serial")!.Value : "";
             TextBlock? ipBlock = widgets["Results(local_ip)"];
-            ipBlock.Text = isEye ? (widgetValues.Find((x) => x.Id == "local_ip")!.Value) : "";
+            ipBlock.Text = isEye ? widgetValues.Find((x) => x.Id == "local_ip")!.Value : "";
         }
 
         private async void MoreInfoButtonClick(object sender, RoutedEventArgs e)

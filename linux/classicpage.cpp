@@ -102,7 +102,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     QStringList bottomText = LocalTabPage::bottomText();
     QHBoxLayout* buttonLayout = new QHBoxLayout;
 
-    eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+    eyeButton->setIcon(Global::getEyeIcon(showPrivate));
     eyeButton->setIconSize(QSize(16, 16));
     eyeButton->setFixedSize(eyeButton->sizeHint());
     buttonLayout->addWidget(moreInfoButton);
@@ -130,7 +130,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     });
 
     QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
-        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        eyeButton->setIcon(Global::getEyeIcon(showPrivate));
     });
 
     QObject::connect(eyeButton, &QPushButton::clicked, parent, [=]() mutable {
@@ -147,7 +147,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
             localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::number(Global::fontSize)).arg(QString::number(Global::fontWeight * 1.5)));
         }
 
-        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        eyeButton->setIcon(Global::getEyeIcon(showPrivate));
         central->update();
     });
 

@@ -20,15 +20,25 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include "settings.hpp"
+#include "cicon.h"
 
 Global::Global() {}
 
+const bool Global::reverseEyeButtons = true;
 const float Global::fontSize = 9;
 const int Global::fontWeight = 400;
 
 std::string Global::version;
 json helperData;
 Settings* settingsData;
+
+QIcon Global::getEyeIcon(bool show) {
+    if (show) {
+        return reverseEyeButtons ? *CIcon::eye()->build() : *CIcon::eyeClosed()->build();
+    } else {
+        return reverseEyeButtons ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build();
+    }
+}
 
 void Global::setVersion(QString v) {
     version = v.toStdString();
