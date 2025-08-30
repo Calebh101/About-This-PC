@@ -1,4 +1,5 @@
 <!-- This is a personal file. -->
 
-Linux:
-- Fix wrong refresh rate in X11
+Windows:
+    - Fix Access Denied prompt when working with pipes
+    - Make 1 executable, not 2

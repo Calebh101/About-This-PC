@@ -23,8 +23,8 @@ Follow the instructions in [INSTALLING.md](https://github.com/Calebh101/About-Th
 
 | Platform | Supported | Version | Requirements | Notes
 | -------- | --------- | ------- | ------------ | -----
-| Linux | ✅ | 0.0.0A+ | `dmidecode`, and other libraries depending on your system. | Linux is supported, with the X11 and Wayland display servers.
-| Windows | ✅ | 0.0.0A+ | WMI |
+| Linux | ✅ | 0.0.0A+ | `dmidecode`, and other GUI libraries depending on your system. | Linux is supported, with the X11 and Wayland display servers.
+| Windows | ✅ | 0.0.0A+ | Windows App SDK (Windows will prompt for this). |
 | macOS | 🟥 | | | Maybe in the future?
 
 # Linux
