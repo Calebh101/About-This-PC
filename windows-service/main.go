@@ -9,16 +9,18 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/Microsoft/go-winio"
 	"github.com/gen2brain/dlgs"
 	"github.com/getlantern/systray"
-	"github.com/nightlyone/lockfile"
+	"github.com/gofrs/flock"
 )
 
 //go:embed build/archive.zip
@@ -35,6 +37,7 @@ var verbose = Contains(args, "--debug") // Not used for now
 var pipeName = `\\.\pipe\AboutThisPCWindowsService`
 var localAppData = os.Getenv("LOCALAPPDATA")
 var directory = filepath.Join(localAppData, "AboutThisPC")
+var lockpath = filepath.Join(os.TempDir(), "AboutThisPC.lck")
 
 var processes []*exec.Cmd
 var mu sync.Mutex
@@ -51,16 +54,27 @@ func main() {
 	}
 
 	Print("Starting...")
-	lock, e := lockfile.New(filepath.Join(directory, "AboutThisPC.lck"))
+	lock := flock.New(lockpath)
+	locked, e := lock.TryLock()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		Print("Exiting...")
+		lock.Unlock()
+		os.Exit(0)
+	}()
 
 	if e != nil {
 		Fatal("Cannot initialize lockfile: " + e.Error())
 		return
 	}
 
-	if e = lock.TryLock(); e != nil {
-		Print("Cannot lock lockfile: " + e.Error())
-		onIsLocked(lock)
+	if locked {
+		Print("Process is locked")
+		onIsLocked()
 		return
 	}
 
@@ -108,7 +122,7 @@ func listen() {
 	}
 }
 
-func onIsLocked(lock lockfile.Lockfile) {
+func onIsLocked() {
 	Print("Running onIsLocked with arguments '" + strings.Join(args, " ") + "'...")
 	classic := Contains(args, "--classic")
 	mode := 0
@@ -116,7 +130,7 @@ func onIsLocked(lock lockfile.Lockfile) {
 	connection, e := winio.DialPipe(pipeName, &deadline)
 
 	if e != nil {
-		Fatal(e)
+		Fatal(e.Error() + "\n\nIf the process is stopped but the lockfile is still active, this error may occur. Please check that '" + lockpath + "' doesn't exist, and remove it if necessary.")
 	}
 
 	if classic {

@@ -4,9 +4,9 @@ go 1.25.0
 
 require github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 
-require github.com/nightlyone/lockfile v1.0.0
-
 require github.com/Microsoft/go-winio v0.6.2
+
+require github.com/gofrs/flock v0.12.1
 
 require (
 	github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 // indirect
