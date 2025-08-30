@@ -222,14 +222,23 @@ namespace AboutThisPC
 
         private static (ulong Bytes, string Generation, string Speed, string FormFactor) GetMemory()
         {
-            ManagementObject? item = SearchFor("SELECT * FROM Win32_PhysicalMemory");
-            if (item == null) return (0, "Unknown", "Unknown", "Unknown");
-            string speed = item["Speed"]?.ToString() ?? "Unknown";
-
+            List<ManagementObject>? items = SearchForAll("SELECT * FROM Win32_PhysicalMemory");
+            if (items == null || items.Count <= 0) return (0, "Unknown", "Unknown", "Unknown");
+            string speed = items.First()["Speed"]?.ToString() ?? "Unknown";
             ulong capacity;
-            ToUlong(item["Capacity"], out capacity);
+            int i = 0;
 
-            string type = (uint)item["SMBIOSMemoryType"] switch
+            var itemCapacity = items.Select(item => {
+                i++;
+                string? capacity = item["Capacity"]?.ToString();
+                Logger.Verbose("Found item " + i + " capacity: " + capacity);
+                return long.TryParse(capacity, out long value) ? value : 0L;
+            }).Sum();
+
+            Logger.Print("Found total item capacity: " + itemCapacity);
+            ToUlong(itemCapacity, out capacity);
+
+            string type = (uint)items.First()["SMBIOSMemoryType"] switch
             {
                 20 => "DDR",
                 21 => "DDR2",
@@ -239,7 +248,7 @@ namespace AboutThisPC
                 _ => "Unknown",
             };
 
-            string form = (ushort)item["FormFactor"] switch
+            string form = (ushort)items.First()["FormFactor"] switch
             {
                 // 0 => "Unknown",
                 1 => "Other",
