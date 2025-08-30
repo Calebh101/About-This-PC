@@ -74,7 +74,7 @@ QWidget* Storage::page(QWidget* parent) {
         QLabel* subtitle = new QLabel(parent);
         QFont subtitleFont;
         subtitle->setAlignment(Qt::AlignCenter);
-        subtitle->setText(QString("%1 GiB / %2 GiB (%3%) - %4").arg(Global::trimDecimal(usedG)).arg(Global::trimDecimal(totalG)).arg(std::to_string(percentUsed)).arg(data["external"] ? "External" : "Internal"));
+        subtitle->setText(QString("%1 GiB / %2 GiB (%3%) - %4").arg(QString::fromStdString(Global::trimDecimal(usedG))).arg(QString::fromStdString(Global::trimDecimal(totalG))).arg(QString::number(percentUsed)).arg(data["external"] ? "External" : "Internal"));
         subtitleFont.setPointSize(9);
         subtitle->setFont(subtitleFont);
 

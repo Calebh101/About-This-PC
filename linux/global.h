@@ -14,10 +14,13 @@ class Global
 public:
     Global();
 
-    static const std::string version;
+    static std::string version;
     static const float fontSize;
     static const int fontWeight;
+    static const bool reverseEyeButtons;
 
+    static QIcon getEyeIcon(bool show);
+    static void setVersion(QString v);
     static std::string getModel();
     static std::string getFamily();
     static json getOS();

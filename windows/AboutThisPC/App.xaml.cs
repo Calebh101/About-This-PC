@@ -38,9 +38,9 @@ namespace AboutThisPC
     /// </summary>
     public partial class App : Application
     {
-        public static bool reverseEyeButtons = true; // TODO
+        static public string Version = "0.0.0A-R6";
+        public static bool ReverseEyeButtons = true;
         static public Dimensions? dimensions;
-        static public string Version = "0.0.0A-R5";
         static public Settings? settings;
         private Window? _window;
 
@@ -48,6 +48,16 @@ namespace AboutThisPC
         {
             ten = 10,
             eleven = 11,
+        }
+
+        public static Visibility GetVisibility(bool show)
+        {
+            if (ReverseEyeButtons)
+            {
+                return show ? Visibility.Visible : Visibility.Collapsed;
+            } else {
+                return show ? Visibility.Collapsed : Visibility.Visible;
+            }
         }
 
         public static string GetDriveLetter()

@@ -43,13 +43,13 @@ std::optional<fs::path> _getIconPath(std::string id) {
 
 std::optional<fs::path> LocalTabPage::getIconPath(std::string id) {
     std::optional<fs::path> result = _getIconPath(id);
-    Logger::print(QString("Found icon file: %1").arg((!result ? std::string("none") : result->string())));
+    Logger::print(QString("Found icon file: %1").arg(QString::fromStdString(result ? std::string("none") : result->string())));
     return result;
 }
 
 QStringList LocalTabPage::bottomText() {
     QStringList results;
-    results.append(QString("About This PC %1").arg(Global::version));
+    results.append(QString("About This PC %1").arg(QString::fromStdString(Global::version)));
     return results;
 }
 
@@ -95,7 +95,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
 
     for (int i = 0; i < localIPs.size(); i++) {
         json item = localIPs[i];
-        QString text = QString("%1:%2").arg(item["interface"].get<std::string>()).arg(item["ip"].get<std::string>());
+        QString text = QString("%1:%2").arg(QString::fromStdString(item["interface"].get<std::string>())).arg(QString::fromStdString(item["ip"].get<std::string>()));
         localIPString.push_back(text);
     }
 
@@ -104,7 +104,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
     oss << std::defaultfloat << std::setprecision(2) << speed;
     std::string speedString = oss.str();
     std::string processorString = QString::fromStdString(cpuInfo["processors"].front().get<std::string>()).toStdString();
-    results["Processor"] = QString("%3 %1GHz %2").arg(speedString).arg(processorString).arg(cpuInfo["arch"].get<std::string>()).toStdString();
+    results["Processor"] = QString("%3 %1GHz %2").arg(QString::fromStdString(speedString)).arg(QString::fromStdString(processorString)).arg(QString::fromStdString(cpuInfo["arch"].get<std::string>())).toStdString();
 
     std::vector<std::string> ramAttributes;
     std::string productFamily = Global::getFamily();
@@ -122,7 +122,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
         int vram = gpu["vram"].get<int>();
         std::ostringstream oss;
         oss << std::defaultfloat << std::setprecision(2) << (vram / 1000.0);
-        QString text = QString("%1 %2GB").arg(gpu["name"].get<std::string>()).arg(oss.str());
+        QString text = QString("%1 %2GB").arg(QString::fromStdString(gpu["name"].get<std::string>())).arg(QString::fromStdString(oss.str()));
         results["Graphics"] = text.toStdString();
     }
 
@@ -144,7 +144,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
         for (int i = 0; i < wifis.size(); i++) {
             json wifi = wifis[i];
             if (!wifi.contains("product") || !wifi.contains("bus info")) continue;
-            string.push_back(QString("%1 (%2)").arg(wifi["product"].get<std::string>()).arg(wifi["bus info"].get<std::string>()));
+            string.push_back(QString("%1 (%2)").arg(QString::fromStdString(wifi["product"].get<std::string>())).arg(QString::fromStdString(wifi["bus info"].get<std::string>())));
         }
 
         if (!string.empty()) {
@@ -160,7 +160,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
     if (startupDiskInfo["status"] == true) {
         long long bytes = startupDiskInfo["bytes"].get<long long>();
         int size = bytes / 1000.0 / 1000.0 / 1000.0;
-        results["Startup Disk"] = QString("%1 %2 GB").arg(startupDiskPath).arg(std::to_string(size)).toStdString();
+        results["Startup Disk"] = QString("%1 %2 GB").arg(QString::fromStdString(startupDiskPath)).arg(QString::fromStdString(std::to_string(size))).toStdString();
     } else {
         results["Startup Disk"] = startupDiskPath;
     }
@@ -201,7 +201,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     json osInfo = Global::getOS();
     std::optional<std::string> iconId = Global::atKeyOrNull<std::string>(osInfo, "LOGO");
     std::optional<fs::path> iconPath = !iconId ? std::nullopt : getIconPath(*iconId);
-    Logger::print(QString("Found icon path: %1").arg(iconPath ? iconPath->string() : "none"));
+    Logger::print(QString("Found icon path: %1").arg(iconPath ? QString::fromStdString(iconPath->string()) : "none"));
 
     QLabel* title = new QLabel(parent);
     title->setText(QString::fromStdString(osInfo["PRETTY_NAME"].get<std::string>()));
@@ -209,7 +209,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
     QLabel* modelLabel = new QLabel(parent);
     modelLabel->setTextFormat(Qt::RichText);
-    modelLabel->setText(QString("<span style='font-weight: %3; font-size: %2pt;'>%1</span>").arg(Global::getModel()).arg(std::to_string(fontSize)).arg(std::to_string(fontWeight * 1.5)));
+    modelLabel->setText(QString("<span style='font-weight: %3; font-size: %2pt;'>%1</span>").arg(QString::fromStdString(Global::getModel())).arg(QString::fromStdString(std::to_string(fontSize))).arg(QString::fromStdString(std::to_string(fontWeight * 1.5))));
 
     font.setPointSize(fontSize * 2);
     font.setWeight(static_cast<QFont::Weight>(fontWeight * 1.5));
@@ -222,7 +222,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
     std::string releaseType = osInfo.contains("RELEASE_TYPE") ? osInfo["RELEASE_TYPE"] : "stable";
     std::string releaseTypeString = releaseType;
-    Logger::print(QString("Found release type of %1").arg(releaseType));
+    Logger::print(QString("Found release type of %1").arg(QString::fromStdString(releaseType)));
 
     if (releaseType == "stable") releaseTypeString = "Stable";
     if (releaseType == "lts") releaseTypeString = "LTS";
@@ -231,7 +231,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
     if (osInfo.contains("VERSION_ID")) subtitleItems.push_back(QString::fromStdString(osInfo["VERSION_ID"]));
     if (osInfo.contains("VERSION_CODENAME")) subtitleItems.push_back(QString::fromStdString(Global::toSentenceCase(osInfo["VERSION_CODENAME"])));
-    if (osInfo.contains("BUILD_ID")) subtitleItems.push_back(QString("(%1)").arg(osInfo["BUILD_ID"]));
+    if (osInfo.contains("BUILD_ID")) subtitleItems.push_back(QString("(%1)").arg(QString::fromStdString(osInfo["BUILD_ID"].get<std::string>())));
     if (releaseType != "stable") subtitleItems.push_back(QString::fromStdString(releaseTypeString)); // Sometimes OSes just don't include this even if it is LTS or Experimental, so we shouldn't force a default; so instead we omit the property.
 
     for (auto& [key, value] : results.items()) {
@@ -249,8 +249,8 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         label1->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         label2->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-        label1->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3s;'>%1</span></div>").arg(QString::fromStdString(key)).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight)));
-        label2->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+        label1->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3s;'>%1</span></div>").arg(QString::fromStdString(key)).arg(QString::fromStdString(std::to_string(Global::fontSize))).arg(QString::fromStdString(std::to_string(Global::fontWeight))));
+        label2->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::fromStdString(std::to_string(Global::fontSize))).arg(QString::fromStdString(std::to_string(Global::fontWeight * 1.5))));
 
         layout->addWidget(label1);
         layout->addWidget(label2);
@@ -262,7 +262,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     QPushButton* settingsButton = new QPushButton();
     QStringList bottomText = LocalTabPage::bottomText();
 
-    eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+    eyeButton->setIcon(Global::getEyeIcon(showPrivate));
     eyeButton->setIconSize(QSize(16, 16));
     eyeButton->setFixedSize(eyeButton->sizeHint());
 
@@ -272,7 +272,7 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     if (isElevated) settingsButton->setEnabled(false);
 
     QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
-        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        eyeButton->setIcon(Global::getEyeIcon(showPrivate));
         settingsButton->setIcon(*CIcon::settings()->build());
     });
 
@@ -282,15 +282,15 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
 
         if (serialValueLabel != nullptr) {
             QString text = showPrivate ? QString::fromStdString(results["Serial"].get<std::string>()) : "";
-            serialValueLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+            serialValueLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::fromStdString(std::to_string(Global::fontSize))).arg(QString::fromStdString(std::to_string(Global::fontWeight * 1.5))));
         }
 
         if (localIPLabel != nullptr) {
             QString text = showPrivate ? QString::fromStdString(results[localIPName].get<std::string>()) : "";
-            localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+            localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::fromStdString(std::to_string(Global::fontSize))).arg(QString::fromStdString(std::to_string(Global::fontWeight * 1.5))));
         }
 
-        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        eyeButton->setIcon(Global::getEyeIcon(showPrivate));
         page->update();
     });
 

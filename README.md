@@ -2,6 +2,13 @@
 
 This is a cool little app of mine that is supposed to be like the `About This Mac` Apple utility, but for Linux and Windows, using native and OS-specific implementations and features.
 
+About This PC uses several programming languages:
+- C++: For the entire Linux stack.
+- C#: For the Windows application.
+- Go: For the Windows service.
+- Bash: For scripting Linux building.
+- PowerShell: For scripting Windows building and running.
+
 ## Downloading, Running, and Installing
 
 First go to the [Releases](https://github.com/Calebh101/About-This-PC/releases) page. Download the latest stable (or prerelease/beta if you want) release compatible with your computer. Then open and extract the ZIP archive.
@@ -70,6 +77,14 @@ About This PC for Linux comes with built-in system tray support, that starts whe
 - `--verbose`: Load the program in verbose. This gives you a *ton* of extra logging in the terminal.
 - `--no-window`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup. The program won't request `pkexec` when run with this argument, and if the helper fails then it will act like `pkexec` was rejected.
 
+## Supported Display Servers
+
+In About This PC for Linux, I had to use APIs specific to certain display servers. A display server is what renders your display and handles inputs. You may not know which one you are using, or that this existed; I sure didn't. However, different distros use different display servers.
+
+Supported display servers:
+- X11
+- Wayland
+
 ## Notes
 
 - About This PC for Linux includes a bundled helper binary (from `linux-helper`) that uses elevated permissions to get advanced info. If you don't allow this to run, then the program will be fine, but it won't be able to load memory and serial information. Run this executable specifically (if you can catch it) with `--version` to see the version.
@@ -109,13 +124,23 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 # FAQ
 
 <details>
-    <summary>What is `AboutThisPC-Debug.exe`?</summary><br>
+    <summary>What is 'AboutThisPC-Debug.exe'?</summary><br>
     About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
 </details>
 
 <details>
     <summary>Where are the buttons in the Linux version Overview page?</summary><br>
     There are some other buttons on Apple's About This Mac apps, like Software Update and System Report, but since there's no standard for Linux distros for these, I can't include them in the Linux version.
+</details>
+
+<details>
+    <summary>Why does the Displays tab say my display server is not supported?</summary><br>
+    If your display server is unsupported, that means About This PC doesn't have an implementation for your display server. I'm only interested in supporting mainstream ones (like X11), so if you really want to see your displays (that's all this affects) then you'll need to use a supported display server. Please see above (in the Linux notes) for supported servers.
+</details>
+
+<details>
+    <summary>Why does my display show up as external, when it's really internal?</summary><br>
+    Due to several reasons (Windows is limited in the displays API, Wayland is also a bit limited, and X11 uses an arbitrary check), all displays are shown as external only. If you know how I can get around these, you can [make a pull request](https://github.com/Calebh101/About-This-PC/blob/master/CONTRIBUTING.md#pull-requests). (If you figure out a fix, pleae implement it preferably on all platforms, but just one is fine as long as all display servers on said platform are fixed.)
 </details>
 
 # Extra Notes

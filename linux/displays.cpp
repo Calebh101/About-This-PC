@@ -8,10 +8,12 @@
 #include <X11/extensions/Xrandr.h>
 #include "global.h"
 #include "tabpage.h"
+#include "waylandmanager.h"
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
 
+bool allowInternalDisplays = false;
 Displays::Displays() {}
 
 std::string getDisplayServer() {
@@ -54,15 +56,13 @@ json getAllX11Displays() {
         result["name"] = name;
         result["refresh"] = mode.dotClock > 0 && mode.hTotal > 0 && mode.vTotal > 0 ? (double)mode.dotClock / ((double)mode.hTotal * mode.vTotal) : 0.0;
         result["crtc"] = false;
-        result["internal"] = name.find("eDP") != std::string::npos || name.find("LVDS") != std::string::npos || name.find("DSI") != std::string::npos;
+        result["refresh"] = (mode.dotClock > 0 && mode.hTotal > 0 && mode.vTotal > 0) ? (double)mode.dotClock * 1000.0 / ((double)mode.hTotal * mode.vTotal) : 0.0;
 
         if (outputInfo->crtc) {
             XRRCrtcInfo* crtcInfo = XRRGetCrtcInfo(display, resources, outputInfo->crtc);
 
             result["width"] = crtcInfo->width;
             result["height"] = crtcInfo->height;
-            result["x"] = crtcInfo->x;
-            result["y"] = crtcInfo->y;
             result["crtc"] = true;
 
             if (outputInfo->mm_width > 0 && outputInfo->mm_height > 0) {
@@ -83,14 +83,26 @@ json getAllX11Displays() {
     return results;
 }
 
+json getDisplays(std::string server) {
+    Logger::print(QString("Getting displays for server %1...").arg(QString::fromStdString(server)));
+
+    if (server == "x11") {
+        return getAllX11Displays();
+    } else if (server == "wayland") {
+        WaylandManager manager = WaylandManager();
+        return manager.getAllWaylandDisplays();
+    } else {
+        return json();
+    }
+}
+
 QWidget* Displays::page(QWidget* parent) {
     QWidget *page = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(page);
     std::string server = getDisplayServer();
+    json data = getDisplays(server);
 
-    if (server == "x11") {
-        json data = getAllX11Displays();
-
+    if (!data.empty()) {
         if (data["status"] == true) {
             std::vector<json> displays = data["displays"];
             int length = displays.size();
@@ -120,7 +132,7 @@ QWidget* Displays::page(QWidget* parent) {
                     QVBoxLayout* layout = new QVBoxLayout(container);
                     json display = displays[i];
                     std::string name = display["name"];
-                    bool internal = display["internal"];
+                    bool internal = allowInternalDisplays ? display["internal"].get<bool>() : false;
                     bool crtc = display["crtc"];
 
                     std::string iconPath = Global::getComputerIconPath(internal ? "laptop" : "monitor");
@@ -130,7 +142,7 @@ QWidget* Displays::page(QWidget* parent) {
 
                     QLabel* titleLabel = new QLabel(parent);
                     QFont titleFont;
-                    titleLabel->setText(QString("%1").arg(name));
+                    titleLabel->setText(QString("%1").arg(QString::fromStdString(name)));
                     titleFont.setPointSize(12);
                     titleLabel->setFont(titleFont);
                     titleLabel->setAlignment(Qt::AlignCenter);
@@ -139,7 +151,7 @@ QWidget* Displays::page(QWidget* parent) {
                     if (crtc) {
                         QLabel* label = new QLabel(parent);
                         QFont font;
-                        label->setText(QString("%1x%2").arg(display["width"]).arg(display["height"]));
+                        label->setText(QString("%1x%2").arg(QString::number(display["width"].get<int>())).arg(QString::number(display["height"].get<int>())));
                         font.setPointSize(8);
                         label->setFont(font);
                         label->setAlignment(Qt::AlignCenter);
@@ -148,7 +160,7 @@ QWidget* Displays::page(QWidget* parent) {
 
                     QLabel* message1 = new QLabel(parent);
                     QFont font1;
-                    message1->setText(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"])).arg(display["refresh"]) : QString("%1Hz").arg(display["refresh"]));
+                    message1->setText(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"].get<double>())).arg(QString::number(display["refresh"].get<int>())) : QString("%1Hz").arg(QString::number(display["refresh"].get<int>())));
                     font1.setPointSize(8);
                     message1->setFont(font1);
                     message1->setAlignment(Qt::AlignCenter);
@@ -170,7 +182,7 @@ QWidget* Displays::page(QWidget* parent) {
 
             QLabel* messageLabel = new QLabel(parent);
             messageLabel->setTextFormat(Qt::RichText);
-            messageLabel->setText(QString("We encountered an issue loading your displays.").arg(server));
+            messageLabel->setText(QString("We encountered an issue loading your displays."));
             messageLabel->setAlignment(Qt::AlignCenter);
 
             layout->addWidget(titleLabel);
@@ -187,7 +199,7 @@ QWidget* Displays::page(QWidget* parent) {
 
         QLabel* messageLabel = new QLabel(parent);
         messageLabel->setTextFormat(Qt::RichText);
-        messageLabel->setText(QString("The <span style='font-weight: bold;'>%1</span> display server is currently not supported.").arg(server));
+        messageLabel->setText(QString("The <span style='font-weight: bold;'>%1</span> display server is currently not supported.").arg(QString::fromStdString(server)));
         messageLabel->setAlignment(Qt::AlignCenter);
 
         layout->addWidget(titleLabel);
@@ -195,7 +207,7 @@ QWidget* Displays::page(QWidget* parent) {
         layout->setAlignment(Qt::AlignCenter);
     }
 
-    Logger::print(QString("Generated page for display server: %1").arg(server));
+    Logger::print(QString("Generated page for display server: %1").arg(QString::fromStdString(server)));
     page->setLayout(layout);
     return page;
 }

@@ -102,7 +102,7 @@ void UpdateManager::check(bool gui, bool implicit) {
                         status = 0;
                     }
                 } else {
-                    Logger::warn(QString("Update error: Document is not an object: %1").arg(response));
+                    Logger::warn(QString("Update error: Document is not an object: %1").arg(QString::fromStdString(response.toStdString())));
                 }
             } else {
                 Logger::warn(QString("Update error: %1").arg(reply->errorString()));

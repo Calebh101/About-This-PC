@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg Network)
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
@@ -21,17 +21,42 @@ if (NOT XRANDR_INCLUDE_DIR OR NOT XRANDR_LIBRARY)
     message(FATAL_ERROR "XRandR not found")
 endif()
 
-include_directories(${X11_INCLUDE_DIR} ${XRANDR_INCLUDE_DIR})
+include_directories(${X11_INCLUDE_DIR} ${XRANDR_INCLUDE_DIR} ${WAYLAND_CLIENT_INCLUDE_DIRS})
 
 set(PROJECT_SOURCES
 
-        mainwindow.cpp
-        mainwindow.h
-        logger.cpp
-        logger.h
-        tabpage.cpp
-        tabpage.h
-        json.hpp
+    cicon.cpp
+    cicon.h
+    classicpage.cpp
+    classicpage.h
+    computers.qrc
+    data.cpp
+    data.h
+    displays.cpp
+    displays.h
+    global.cpp
+    global.h
+    json.hpp
+    logger.cpp
+    logger.h
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    settings.cpp
+    settings.hpp
+    storage.cpp
+    storage.h
+    supportpage.cpp
+    supportpage.h
+    tabpage.cpp
+    tabpage.h
+    themelistener.cpp
+    themelistener.h
+    toolbar.png
+    updatemanager.cpp
+    updatemanager.h
+    waylandmanager.cpp
+    waylandmanager.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -57,6 +82,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         data.h data.cpp
         settings.hpp settings.cpp
         updatemanager.h updatemanager.cpp
+        waylandmanager.h waylandmanager.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET AboutThisPC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -76,7 +102,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Vulkan::Vulkan ${X11_LIBRARIES} ${XRANDR_LIBRARY})
+pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
+target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Vulkan::Vulkan ${X11_LIBRARIES} ${XRANDR_LIBRARY} ${WAYLAND_CLIENT_LIBRARIES})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

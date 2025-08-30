@@ -82,8 +82,8 @@ QWidget* ClassicPage::page(MainWindow* parent) {
         label1->setTextFormat(Qt::RichText);
         label2->setTextFormat(Qt::RichText);
 
-        label1->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3s;'>%1</span></div>").arg(QString::fromStdString(key)).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight)));
-        label2->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+        label1->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(QString::fromStdString(key)).arg(QString::number(Global::fontSize)).arg(QString::number(Global::fontWeight)));
+        label2->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::number(Global::fontSize)).arg(QString::number(Global::fontWeight * 1.5)));
 
         leftLayout->addWidget(label1);
         rightLayout->addWidget(label2);
@@ -102,7 +102,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     QStringList bottomText = LocalTabPage::bottomText();
     QHBoxLayout* buttonLayout = new QHBoxLayout;
 
-    eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+    eyeButton->setIcon(Global::getEyeIcon(showPrivate));
     eyeButton->setIconSize(QSize(16, 16));
     eyeButton->setFixedSize(eyeButton->sizeHint());
     buttonLayout->addWidget(moreInfoButton);
@@ -130,7 +130,7 @@ QWidget* ClassicPage::page(MainWindow* parent) {
     });
 
     QObject::connect(ThemeListener::instance(), &ThemeListener::themeChanged, parent, [=]() {
-        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        eyeButton->setIcon(Global::getEyeIcon(showPrivate));
     });
 
     QObject::connect(eyeButton, &QPushButton::clicked, parent, [=]() mutable {
@@ -139,15 +139,15 @@ QWidget* ClassicPage::page(MainWindow* parent) {
 
         if (serialValueLabel != nullptr) {
             QString text = showPrivate ? QString::fromStdString(results["Serial"].get<std::string>()) : "";
-            serialValueLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+            serialValueLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::number(Global::fontSize)).arg(QString::number(Global::fontWeight * 1.5)));
         }
 
         if (localIPLabel != nullptr) {
             QString text = showPrivate ? QString::fromStdString(results[localIPName].get<std::string>()) : "";
-            localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(std::to_string(Global::fontSize)).arg(std::to_string(Global::fontWeight * 1.5)));
+            localIPLabel->setText(QString("<div style='font-size: %2pt;'><span style='font-weight: %3;'>%1</span></div>").arg(text).arg(QString::number(Global::fontSize)).arg(QString::number(Global::fontWeight * 1.5)));
         }
 
-        eyeButton->setIcon(showPrivate ? *CIcon::eyeClosed()->build() : *CIcon::eye()->build());
+        eyeButton->setIcon(Global::getEyeIcon(showPrivate));
         central->update();
     });
 

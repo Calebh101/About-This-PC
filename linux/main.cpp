@@ -17,6 +17,7 @@
 #include <fstream>
 #include "settings.hpp"
 #include "updatemanager.h"
+#include <QStyleFactory>
 
 #ifdef Unsorted
 #undef Unsorted
@@ -25,9 +26,20 @@
 
 namespace fs = std::filesystem;
 
+bool isGnome() {
+    const char* desktop = std::getenv("XDG_CURRENT_DESKTOP");
+    if (desktop && std::string(desktop).find("GNOME") != std::string::npos) return true;
+    desktop = std::getenv("DESKTOP_SESSION");
+    if (desktop && std::string(desktop).find("gnome") != std::string::npos) return true;
+    return false;
+}
+
 int main(int argc, char *argv[])
 {
+    Global::setVersion("0.0.0A-R6"); // Set the application version
     QString id = "AboutThisPCLinuxApplication";
+    QString gnomeStyle = "None"; // Set to None to not try to apply GNOME styles
+
     bool classic = false;
     bool noWindow = false;
     qputenv("QT_FONT_DPI", "96"); // Fixed size
@@ -44,7 +56,7 @@ int main(int argc, char *argv[])
 
 #ifdef QT_DEBUG
     Logger::setLogging(true);
-    Logger::setVerbose(true);
+    Logger::setVerbose(false);
 #endif
 
     if (args.contains("--version")) { // Print version and exit
@@ -59,6 +71,20 @@ int main(int argc, char *argv[])
 
     if (args.contains("--classic")) classic = true;
     if (args.contains("--no-window")) noWindow = true;
+
+    if (isGnome() && gnomeStyle != "None") {
+        Logger::print("Using GNOME theme...");
+        qputenv("QT_QPA_PLATFORMTHEME", QByteArray("gnome"));
+        QIcon::setThemeName(gnomeStyle);
+
+        if (QStyleFactory::keys().contains(gnomeStyle)) {
+            a.setStyle(QStyleFactory::create(gnomeStyle));
+        } else {
+            Logger::warn(QString("Unable to use GNOME theme: keys() did not contain the required value (%1): %2").arg(gnomeStyle).arg(QStyleFactory::keys().join(", ")));
+        }
+    } else {
+        Logger::print("Not using GNOME theme...");
+    }
 
     if (!lock.tryLock()) {
         Logger::print("Process is already running.", true);
@@ -183,7 +209,7 @@ int main(int argc, char *argv[])
             throw std::filesystem::filesystem_error(QString("Unable to create file").toStdString(), fs::path(path.toStdString()), std::make_error_code(std::errc::io_error));
         }
     } catch (std::filesystem::filesystem_error e) {
-        Logger::warn(QString("Unable to verify and/or copy application icon! (%1, %2): %3 (code %4)").arg(e.path1().generic_string(), e.path2().generic_string(), e.what(), e.code().message()));
+        Logger::warn(QString("Unable to verify and/or copy application icon! (%1, %2): %3 (code %4)").arg(QString::fromStdString(e.path1().generic_string())).arg(QString::fromStdString(e.path2().generic_string())).arg(QString::fromStdString(e.what())).arg(QString::fromStdString(e.code().message())));
     } catch (...) {
         Logger::warn(QString("Unable to verify and/or copy application icon! %1").arg("Unknown error."));
     }
@@ -247,7 +273,7 @@ int main(int argc, char *argv[])
     trayEntry->setContextMenu(trayMenu);
     trayEntry->show();
 
-    if (Global::settings()->get<bool>({"checkForUpdatesAtStart"})) {
+    if (Global::settings()->get<bool>("checkForUpdatesAtStart")) {
         Logger::print("Starting automated update check...");
         QTimer::singleShot(0, [&updater]() {
             updater.check(true, false);
