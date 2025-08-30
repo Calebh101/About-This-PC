@@ -21,11 +21,11 @@ Follow the instructions in [INSTALLING.md](https://github.com/Calebh101/About-Th
 
 # Supported Platforms
 
-| Platform | Supported | Version | Notes
-| -------- | --------- | ------- | -----
-| Linux | ✅ | 0.0.0A+ | Linux is supported, with the X11 and Wayland display servers.
-| Windows | ✅ | 0.0.0A+ |
-| macOS | 🟥 | | Maybe in the future?
+| Platform | Supported | Version | Requirements | Notes
+| -------- | --------- | ------- | ------------ | -----
+| Linux | ✅ | 0.0.0A+ | `dmidecode`, and other libraries depending on your system. | Linux is supported, with the X11 and Wayland display servers.
+| Windows | ✅ | 0.0.0A+ | WMI |
+| macOS | 🟥 | | | Maybe in the future?
 
 # Linux
 
