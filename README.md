@@ -19,6 +19,14 @@ Next, simply double-click the executable (`AboutThisPC` for Linux, `AboutThisPC.
 
 Follow the instructions in [INSTALLING.md](https://github.com/Calebh101/About-This-PC/blob/master/INSTALLING.md) (either in the extracted archive or in GitHub) to install as an actual application in your OS.
 
+# Supported Platforms
+
+| Platform | Supported | Version | Notes
+| -------- | --------- | ------- | -----
+| Linux | ✅ | 0.0.0A+ | Linux is supported, with the X11 and Wayland display servers.
+| Windows | ✅ | 0.0.0A+ |
+| macOS | 🟥 | | Maybe in the future?
+
 # Linux
 
 About This PC for Linux uses a *lot* of hoping, due to the vast amount of Linux distros (compared to Windows, which modern Windows only has 10 and 11), so bear with me while I improve it over time. I've hopefully prepared enough for this though.
