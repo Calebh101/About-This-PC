@@ -9,7 +9,7 @@ About This PC uses several programming languages:
 - Bash: For scripting Linux building.
 - PowerShell: For scripting Windows building and running.
 
-## Downloading, Running, and Installing
+# Downloading, Running, and Installing
 
 First go to the [Releases](https://github.com/Calebh101/About-This-PC/releases) page. Download the latest stable (or prerelease/beta if you want) release compatible with your computer. Then open and extract the ZIP archive.
 
