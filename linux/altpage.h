@@ -1,15 +1,15 @@
-#ifndef CLASSICPAGE_H
-#define CLASSICPAGE_H
+#ifndef ALTPAGE_H
+#define ALTPAGE_H
 
 #include <QWidget>
 #include "mainwindow.h"
 
-class ClassicPage
+class AlternatePage
 {
 public:
-    ClassicPage();
+    AlternatePage();
     static QWidget* page(MainWindow* parent);
     static QWidget* hspacer();
 };
 
-#endif // CLASSICPAGE_H
+#endif // ALTPAGE_H

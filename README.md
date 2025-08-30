@@ -55,7 +55,7 @@ The last page is the Support page, which, like macOS, will show you several link
 
 ![Support Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page4.png)
 
-This next page is not in a tab bar like the others, but is instead different from the other section. This is the "classic" page, that resembles the *newer* Ventura+ About This Mac app. Its window is vertical, and instead of an OS icon, it displays a computer image (laptop, monitor, etcetera) like Apple's version. It shows the exact same info as the Overview tab on the other section, with an eye button again, but it also has a "More Info" button. This button opens up the Overview page.
+This next page is not in a tab bar like the others, but is instead different from the other section. This is the "classic" page, that resembles the *newer* Ventura+ About This Mac app. (**Yes, I know that I have it backwards**; if you have a better name for this page, please [make a pull request](https://github.com/Calebh101/About-This-PC/tree/master?tab=contributing-ov-file#pull-requests)) Its window is vertical, and instead of an OS icon, it displays a computer image (laptop, monitor, etcetera) like Apple's version. It shows the exact same info as the Overview tab on the other section, with an eye button again, but it also has a "More Info" button. This button opens up the Overview page.
 
 ![Classic Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-classic.png)
 

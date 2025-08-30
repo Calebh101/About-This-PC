@@ -22,7 +22,7 @@ using Windows.UI.Text;
 
 namespace AboutThisPC
 {
-    // A *lot* of this code was copied from [ClassicPage.xaml.cs]
+    // A *lot* of this code was copied from [altpage.xaml.cs]
     public sealed partial class OverviewPage : Page
     {
         private Dictionary<string, TextBlock> widgets = [];

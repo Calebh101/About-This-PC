@@ -109,7 +109,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="ClassicPage.xaml">
+    <Page Update="altpage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

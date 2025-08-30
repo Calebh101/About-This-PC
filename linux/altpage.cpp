@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "classicpage.h"
+#include "altpage.h"
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -21,15 +21,15 @@ QSpacerItem* vspacer() {
     return new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 }
 
-QWidget* ClassicPage::hspacer() {
+QWidget* AlternatePage::hspacer() {
     QWidget *widget = new QWidget;
     widget->setFixedWidth(10);
     return widget;
 }
 
-ClassicPage::ClassicPage() {}
+AlternatePage::AlternatePage() {}
 
-QWidget* ClassicPage::page(MainWindow* parent) {
+QWidget* AlternatePage::page(MainWindow* parent) {
     bool showPrivate = true;
     QWidget *central = new QWidget(parent);
     QVBoxLayout *mainLayout = new QVBoxLayout(central);

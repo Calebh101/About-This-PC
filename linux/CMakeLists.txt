@@ -27,8 +27,8 @@ set(PROJECT_SOURCES
 
     cicon.cpp
     cicon.h
-    classicpage.cpp
-    classicpage.h
+    altpage.cpp
+    altpage.h
     computers.qrc
     data.cpp
     data.h
@@ -70,7 +70,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         application-icon.qrc
         main.cpp
         displays.h displays.cpp
-        classicpage.h classicpage.cpp
+        altpage.h altpage.cpp
         global.h global.cpp
         computers.qrc
         supportpage.h supportpage.cpp

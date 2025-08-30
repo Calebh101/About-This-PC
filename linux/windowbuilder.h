@@ -6,7 +6,7 @@
 #include <qwidget.h>
 #include "mainwindow.h"
 #include "logger.h"
-#include "classicpage.h"
+#include "altpage.h"
 #include "tabpage.h"
 #include "displays.h"
 #include "storage.h"
@@ -19,7 +19,7 @@ public:
         if (classic) {
             Logger::print("Loading in classic mode...");
             MainWindow::processParent(parent);
-            return ClassicPage::page(parent);
+            return AlternatePage::page(parent);
         } else {
             QWidget *central = new QWidget(parent);
             QVBoxLayout *mainLayout = new QVBoxLayout(central);
