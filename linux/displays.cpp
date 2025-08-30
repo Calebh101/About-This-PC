@@ -54,12 +54,22 @@ json getAllX11Displays() {
 
         std::string name = outputInfo->name;
         result["name"] = name;
-        result["refresh"] = mode.dotClock > 0 && mode.hTotal > 0 && mode.vTotal > 0 ? (double)mode.dotClock / ((double)mode.hTotal * mode.vTotal) : 0.0;
         result["crtc"] = false;
-        result["refresh"] = (mode.dotClock > 0 && mode.hTotal > 0 && mode.vTotal > 0) ? (double)mode.dotClock * 1000.0 / ((double)mode.hTotal * mode.vTotal) : 0.0;
 
         if (outputInfo->crtc) {
             XRRCrtcInfo* crtcInfo = XRRGetCrtcInfo(display, resources, outputInfo->crtc);
+            XRRModeInfo* activeMode = nullptr;
+
+            for (int j = 0; j < resources->nmode; ++j) {
+                if (resources->modes[j].id == crtcInfo->mode) {
+                    activeMode = &resources->modes[j];
+                    break;
+                }
+            }
+
+            if (activeMode) {
+                result["refresh"] = (activeMode->dotClock > 0 && activeMode->hTotal > 0 && activeMode->vTotal > 0) ? (double)activeMode->dotClock / ((double)activeMode->hTotal * activeMode->vTotal) : 0.0;
+            }
 
             result["width"] = crtcInfo->width;
             result["height"] = crtcInfo->height;
@@ -158,13 +168,19 @@ QWidget* Displays::page(QWidget* parent) {
                         layout->addWidget(label);
                     }
 
-                    QLabel* message1 = new QLabel(parent);
-                    QFont font1;
-                    message1->setText(display.contains("length") ? QString("%1 %2Hz").arg(Global::mmToString(display["length"].get<double>())).arg(QString::number(display["refresh"].get<int>())) : QString("%1Hz").arg(QString::number(display["refresh"].get<int>())));
-                    font1.setPointSize(8);
-                    message1->setFont(font1);
-                    message1->setAlignment(Qt::AlignCenter);
-                    layout->addWidget(message1);
+                    QStringList* message1Text = new QStringList();
+                    if (display.contains("length")) message1Text->append(QString("%1").arg(Global::mmToString(display["length"].get<double>())));
+                    if (display.contains("refresh")) message1Text->append(QString("%1Hz").arg(QString::number(display["refresh"].get<int>())));
+
+                    if (!message1Text->empty()) {
+                        QLabel* message1 = new QLabel(parent);
+                        QFont font1;
+                        message1->setText(message1Text->join(" "));
+                        font1.setPointSize(8);
+                        message1->setFont(font1);
+                        message1->setAlignment(Qt::AlignCenter);
+                        layout->addWidget(message1);
+                    }
 
                     displayLayout->addWidget(container, 1);
                 }
