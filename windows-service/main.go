@@ -7,14 +7,15 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/Microsoft/go-winio"
 	"github.com/gen2brain/dlgs"
 	"github.com/getlantern/systray"
 	"github.com/nightlyone/lockfile"
@@ -31,8 +32,7 @@ var IsConsole = "0"
 var isDebugExecutable = false
 var args = os.Args[1:]
 var verbose = Contains(args, "--debug") // Not used for now
-
-var socketport = 9525
+var pipeName = `\\.\pipe\AboutThisPCWindowsService`
 var localAppData = os.Getenv("LOCALAPPDATA")
 var directory = filepath.Join(localAppData, "AboutThisPC")
 
@@ -70,14 +70,14 @@ func main() {
 }
 
 func listen() {
-	ln, e := net.Listen("tcp", "127.0.0.1:"+strconv.Itoa(socketport))
+	ln, e := winio.ListenPipe(pipeName, nil)
 
 	if e != nil {
 		Fatal(e)
 	}
 
 	defer ln.Close()
-	Print("Listening on localhost:" + strconv.Itoa(socketport) + "...")
+	Print("Listening on localhost:" + pipeName + "...")
 
 	for {
 		connection, e := ln.Accept()
@@ -112,7 +112,8 @@ func onIsLocked(lock lockfile.Lockfile) {
 	Print("Running onIsLocked with arguments '" + strings.Join(args, " ") + "'...")
 	classic := Contains(args, "--classic")
 	mode := 0
-	connection, e := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(socketport))
+	deadline := 5 * time.Second
+	connection, e := winio.DialPipe(pipeName, &deadline)
 
 	if e != nil {
 		Fatal(e)
@@ -236,9 +237,6 @@ func start() {
 		return
 	}
 
-	foundService := false
-	foundClassic := false
-
 	for _, arg := range args {
 		if strings.Contains(arg, "--uninstall") {
 			Print("Found uninstall argument")
@@ -275,14 +273,12 @@ func start() {
 
 			return
 		} else if strings.Contains(arg, "--reinstall") {
+			Print("Found reinstall argument")
 			if extract() {
 				os.Exit(0)
 			}
-		} else if strings.Contains(arg, "--service") {
-			foundService = true
-		} else if strings.Contains(arg, "--classic") {
-			foundClassic = true
 		} else {
+			Print("Found custom argument: " + arg)
 			foundArgs = append(foundArgs, arg)
 			args = foundArgs
 		}
@@ -294,10 +290,10 @@ func start() {
 		extract()
 	}
 
-	if !foundService {
+	if !Contains(args, "--service") {
 		mode := 0
 
-		if foundClassic {
+		if Contains(args, "--classic") {
 			mode = 1
 		}
 
@@ -398,7 +394,7 @@ func extract() bool {
 	}
 
 	for _, file := range zr.File {
-		Print("Found file: " + file.Name)
+		Print("Copying file " + file.Name + "... (archive)")
 		extractPath := filepath.Join(directory, file.Name)
 
 		if file.FileInfo().IsDir() {
@@ -468,7 +464,7 @@ func extract() bool {
 
 func copySelf() bool {
 	file, e := os.Executable()
-	Print("Copying self-path " + file + "...")
+	Print("Copying file " + file + "... (self)")
 	extractPath := filepath.Join(directory, "AboutThisPC-Service.exe")
 
 	if file == extractPath {
