@@ -9,12 +9,10 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/Microsoft/go-winio"
@@ -57,22 +55,12 @@ func main() {
 	lock := flock.New(lockpath)
 	locked, e := lock.TryLock()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-c
-		Print("Exiting...")
-		lock.Unlock()
-		os.Exit(0)
-	}()
-
 	if e != nil {
 		Fatal("Cannot initialize lockfile: " + e.Error())
 		return
 	}
 
-	if locked {
+	if !locked {
 		Print("Process is locked")
 		onIsLocked()
 		return
