@@ -156,3 +156,5 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 - Some images (specifically the `computers` images) originated from (rawpixel.com / Freepik)[https://freepik.com] and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
 
 - Big thanks to [Wikimedia Commons](https://commons.wikimedia.org/) for existing!
+
+- Also I'm using this cool library to get system info on Linux, I recommend it: [lazybios](https://github.com/LazySeldi/lazybios)

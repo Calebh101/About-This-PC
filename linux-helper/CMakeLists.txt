@@ -16,7 +16,9 @@ add_executable(linux-helper
   main.cpp
   json.hpp
 )
-target_link_libraries(linux-helper Qt${QT_VERSION_MAJOR}::Core)
+
+target_link_directories(linux-helper PRIVATE ${CMAKE_SOURCE_DIR}/lib)
+target_link_libraries(linux-helper Qt${QT_VERSION_MAJOR}::Core lazybios)
 
 include(GNUInstallDirs)
 install(TARGETS linux-helper
