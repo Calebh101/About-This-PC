@@ -1,0 +1,17 @@
+name: Build for Windows
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Build version
+        required: false
+        default: actions-build
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: No-op
+        run: echo "Running on Windows (x64), doing nothing."
