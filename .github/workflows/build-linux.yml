@@ -6,8 +6,7 @@ on:
     inputs:
       version:
         description: Build version
-        required: false
-        default: actions-build
+        required: true
 
 env:
   QT_VERSION: 6.9.1
@@ -46,7 +45,9 @@ jobs:
 
       - name: Build application
         run: |
-          ./linux/build.sh "${{ inputs.version }}"
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then VERSION="actions-build"; fi
+          ./linux/build.sh "$VERSION"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
