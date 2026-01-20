@@ -1,0 +1,50 @@
+name: Build for Linux
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  QT_VERSION: 6.9.1
+
+jobs:
+  build:
+    name: Build for Linux ${{ matrix.arch }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            qt_arch: gcc_64
+          - arch: arm64
+            qt_arch: gcc_arm64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build zip libgl1-mesa-dev libxkbcommon-x11-0
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: linux_${{ matrix.qt_arch }}
+          cache: true
+
+      - name: Make build script executable
+        run: chmod +x build.sh
+
+      - name: Build application
+        run: |
+          ./linux/build.sh actions-build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: AboutThisPC-linux-${{ matrix.arch }}
+          path: Output/AboutThisPC-*linux-${{ matrix.arch }}.zip
