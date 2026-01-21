@@ -12,19 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg Network)
 find_package(Vulkan REQUIRED)
-find_package(X11 REQUIRED)
-
-find_path(XRANDR_INCLUDE_DIR X11/extensions/Xrandr.h)
-find_library(XRANDR_LIBRARY Xrandr)
-
-if (NOT XRANDR_INCLUDE_DIR OR NOT XRANDR_LIBRARY)
-    message(FATAL_ERROR "XRandR not found")
-endif()
-
-include_directories(${X11_INCLUDE_DIR} ${XRANDR_INCLUDE_DIR} ${WAYLAND_CLIENT_INCLUDE_DIRS})
+find_package(X11 REQUIRED COMPONENTS Xrandr)
 
 set(PROJECT_SOURCES
-
     cicon.cpp
     cicon.h
     altpage.cpp
@@ -103,8 +93,15 @@ else()
     endif()
 endif()
 
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
-target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Vulkan::Vulkan ${X11_LIBRARIES} ${XRANDR_LIBRARY} ${WAYLAND_CLIENT_LIBRARIES})
+
+target_include_directories(AboutThisPC PRIVATE
+    ${X11_INCLUDE_DIR}
+    ${WAYLAND_CLIENT_INCLUDE_DIRS}
+)
+
+target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Vulkan::Vulkan ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${WAYLAND_CLIENT_LIBRARIES})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
