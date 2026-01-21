@@ -6,8 +6,7 @@ on:
     inputs:
       version:
         description: Build version
-        required: false
-        default: actions-build
+        required: true
 
 jobs:
   build:
@@ -33,5 +32,10 @@ jobs:
         shell: pwsh
         run: |
           $Version = "${{ github.event.inputs.version }}"
+
+          if ([string]::IsNullOrWhiteSpace($Version)) {
+            $Version = "actions-build"
+          }
+
           Write-Host "Running build script for version $Version"
           & "$env:GITHUB_WORKSPACE\windows\build.ps1" -Version $Version

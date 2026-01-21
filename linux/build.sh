@@ -70,7 +70,7 @@ if [ "$BUILD_APPIMAGE" = true ]; then
 
   if [ ! -f "$LINUXDEPLOYQT" ]; then
     echo "Downloading $LINUXDEPLOYQT..."
-    wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -exclude-plugins=sqldrivers/libqsqlmimer.so
+    wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
     chmod +x "$LINUXDEPLOYQT"
   fi
 
