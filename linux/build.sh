@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 VERSION=$1
 QT_VERSION=6.9.1
 AUTHOR=Calebh101
