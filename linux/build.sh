@@ -15,8 +15,10 @@ OUTPUT_DIR=$PARENT_DIR/Output
 APP_BUILD=$SCRIPT_DIR/build/Desktop_Qt_6_9_1-Release
 HELPER_BUILD=$HELPER_DIR/build/Desktop_Qt_6_9_1-Release
 APPIMAGE=$PARENT_DIR/Output/linux-AppImage
-LINUXDEPLOYQT=linuxdeployqt-continuous-x86_64.AppImage
 x64zip=$OUTPUT_DIR/AboutThisPC-$VERSION-linux-x64.zip
+
+LINUXDEPLOY=linuxdeploy-x86_64.AppImage
+LINUXDEPLOYQT=linuxdeploy-plugin-qt-x86_64.AppImage
 
 if [ "$(uname -s)" != "Linux" ]; then
   echo "This script must be run on Linux."
@@ -68,24 +70,31 @@ if [ "$BUILD_APPIMAGE" = true ]; then
 
   chmod +x $APPIMAGE/AppRun
 
+  if [ ! -f "$LINUXDEPLOY" ]; then
+    echo "Downloading $LINUXDEPLOY..."
+    wget https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
+    chmod +x "$LINUXDEPLOY"
+  fi
+
   if [ ! -f "$LINUXDEPLOYQT" ]; then
     echo "Downloading $LINUXDEPLOYQT..."
-    wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+    wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage
     chmod +x "$LINUXDEPLOYQT"
   fi
 
   rm -rf $PARENT_DIR/About*This*PC-*.AppImage
-  ./linuxdeployqt-continuous-x86_64.AppImage $APPIMAGE/usr/bin/AboutThisPC -appimage -unsupported-allow-new-glibc -bundle-non-qt-libs -qmake=$HOME/Qt/$QT_VERSION/gcc_64/bin/qmake
+  export QMAKE=$HOME/Qt/$QT_VERSION/gcc_64/bin/qmake
+  "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage --extra-plugins platforms
 fi
 
 mkdir -p $OUTPUT_DIR/linux/x64
 cd $OUTPUT_DIR/linux
 
-if [ "$BUILD_APPIMAGE" = true ] && [ -f "$PARENT_DIR/About*This*PC-*.AppImage" ]; then
-  APPIMAGE_FILE=$(ls $PARENT_DIR/About*This*PC-*.AppImage 2>/dev/null || true)
-  if [ -n "$APPIMAGE_FILE" ]; then cp "$APPIMAGE_FILE" x64/AboutThisPC.AppImage; fi
+if [ "$BUILD_APPIMAGE" = true ] && ls $PARENT_DIR/About*This*PC-*.AppImage >/dev/null 2>&1; then
+  APPIMAGE_FILE=$(ls $PARENT_DIR/About*This*PC-*.AppImage | head -n1)
+  cp "$APPIMAGE_FILE" x64/AboutThisPC.AppImage
 else
-  cp $APP_BUILD/AboutThisPC x64/AboutThisPC
+  cp "$APP_BUILD/AboutThisPC" x64/AboutThisPC
 fi
 
 cp $PARENT_DIR/README.md x64/README.md
