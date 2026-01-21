@@ -1,8 +1,8 @@
-<!-- This file is included in the About This PC releases. -->
+<!-- This file is included only in the About This PC releases. -->
 
 # Linux
 
-To install (make a registered application) About This PC on Linux, you need to use the included `AboutThisPC.desktop` file. First you need to open it with any text editor, and edit the properties as needed. (There are comments explaining it in the file.) Second, you need to place the `.desktop` file in a system/user directory specific to your Linux distro.
+An `.AppImage` is included.
 
 # Windows
 

@@ -13,5 +13,25 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: No-op
-        run: echo "Running on Windows (x64), doing nothing."
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install rsrc
+        run: go install github.com/akavel/rsrc@latest
+
+      - name: Run Build Script
+        shell: pwsh
+        run: |
+          $Version = "${{ github.event.inputs.version }}"
+          Write-Host "Running build script for version $Version"
+          & "$env:GITHUB_WORKSPACE\windows\build.ps1" -Version $Version
