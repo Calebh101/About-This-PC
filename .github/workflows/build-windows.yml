@@ -28,7 +28,7 @@ jobs:
       - name: Install rsrc
         run: go install github.com/akavel/rsrc@latest
 
-      - name: Run Build Script
+      - name: Build
         shell: pwsh
         run: |
           $Version = "${{ github.event.inputs.version }}"
@@ -39,3 +39,9 @@ jobs:
 
           Write-Host "Running build script for version $Version"
           & "$env:GITHUB_WORKSPACE\windows\build.ps1" -Version $Version -SkipSigning
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: AboutThisPC-Windows
+          path: Output/**/*.zip

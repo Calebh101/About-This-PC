@@ -43,7 +43,7 @@ jobs:
       - name: Make build script executable
         run: chmod +x linux/build.sh
 
-      - name: Build application
+      - name: Build
         run: |
           VERSION="${{ inputs.version }}"
           if [ -z "$VERSION" ]; then VERSION="actions-build"; fi
