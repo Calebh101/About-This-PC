@@ -38,4 +38,4 @@ jobs:
           }
 
           Write-Host "Running build script for version $Version"
-          & "$env:GITHUB_WORKSPACE\windows\build.ps1" -Version $Version
+          & "$env:GITHUB_WORKSPACE\windows\build.ps1" -Version $Version -SkipSigning

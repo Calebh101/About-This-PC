@@ -1,6 +1,7 @@
 param (
     [Parameter(Mandatory=$true)]
-    [string]$Version
+    [string]$Version,
+    [switch]$SkipSigning
 )
 
 # A small script to build and package About This PC for Windows.
@@ -30,6 +31,11 @@ function Sign {
         [Parameter(Mandatory=$true)]
         [string]$Path
     )
+
+    if ($SkipSigning) {
+        Write-Host "Skipping code signing"
+        return
+    }
 
     $Cert = Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert | Select-Object -First 1
     Write-Output $Cert
