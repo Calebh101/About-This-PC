@@ -21,8 +21,8 @@ jobs:
         include:
           - arch: x64
             qt_arch: gcc_64
-          - arch: arm64
-            qt_arch: gcc_arm64
+          #- arch: arm64
+          #  qt_arch: gcc_arm64
 
     steps:
       - name: Checkout repository
@@ -31,7 +31,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build zip pkg-config libgl1-mesa-dev libxkbcommon-x11-0 libx11-dev libxrandr-dev libwayland-client-dev libvulkan-dev vulkan-validationlayers-dev patchelf
+          sudo apt-get install -y build-essential cmake ninja-build zip pkg-config libgl1-mesa-dev libxkbcommon-x11-0 libx11-dev libxrandr-dev libwayland-dev libvulkan-dev vulkan-validationlayers-dev patchelf
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
