@@ -38,6 +38,7 @@ jobs:
         with:
           version: ${{ env.QT_VERSION }}
           arch: linux_${{ matrix.qt_arch }}
+          dir: ${{ env.HOME }}
           cache: true
 
       - name: Make build script executable
