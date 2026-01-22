@@ -31,7 +31,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build zip pkg-config libgl1-mesa-dev libxkbcommon-x11-0 libx11-dev libxrandr-dev libwayland-dev libvulkan-dev vulkan-validationlayers-dev patchelf
+          sudo apt-get install -y build-essential cmake ninja-build zip pkg-config libgl1-mesa-dev libxkbcommon-x11-0 libx11-dev libxrandr-dev libwayland-dev libvulkan-dev vulkan-validationlayers-dev patchelf tree
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -41,11 +41,13 @@ jobs:
           dir: ${{ env.HOME }}
           cache: true
 
-      - name: Make build script executable
-        run: chmod +x linux/build.sh
+      - name: Log home directory
+        run: |
+          tree $HOME
 
       - name: Build
         run: |
+          chmod +x linux/build.sh
           VERSION="${{ inputs.version }}"
           if [ -z "$VERSION" ]; then VERSION="actions-build"; fi
           ./linux/build.sh "$VERSION" --appimage
