@@ -1,11 +1,45 @@
 #!/bin/bash
 set -euo pipefail
 
+usage() {
+  echo "Usage: $0 <version> [qt dir] [--appimage]"
+  exit 1
+}
+
 QT_VERSION=6.9.1
 AUTHOR=Calebh101
 
-VERSION=$1
+VERSION=""
 BUILD_APPIMAGE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --appimage)
+      BUILD_APPIMAGE=true
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      usage
+      ;;
+    *)
+      if [[ -z "$VERSION" ]]; then
+        VERSION="$1"
+      elif [[ -z "$QTPATH" ]]; then
+        QTPATH="$1"
+      else
+        echo "Too many arguments"
+        usage
+      fi
+
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$VERSION" ]]; then
+  usage
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"

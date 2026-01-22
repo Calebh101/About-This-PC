@@ -41,6 +41,11 @@ jobs:
           dir: ${{ env.HOME }}
           cache: true
 
+      - name: Log
+        run: |
+          echo "Qt: ${{ env.GITHUB_WORKSPACE }}/Qt/${{ env.QT_VERSION }}"
+          ls "${{ env.GITHUB_WORKSPACE }}/Qt/${{ env.QT_VERSION }}"
+
       - name: Build
         run: |
           chmod +x linux/build.sh
