@@ -1,5 +1,5 @@
 #!/bin/bash
-# Set QT_ROOT_DIR to change where Qt is installed. It defaults to $HOME/Qt/$QT_VERSION.
+# Set QT_ROOT_DIR to change where Qt is installed. It defaults to $HOME/Qt/$QT_VERSION/gcc_64.
 
 set -euo pipefail
 
@@ -56,11 +56,11 @@ HELPER_BUILD=$HELPER_DIR/build/Desktop_Qt_6_9_1-Release
 APPIMAGE=$PARENT_DIR/Output/linux-AppImage
 x64zip=$OUTPUT_DIR/AboutThisPC-$VERSION-linux-x64.zip
 
-QTPATH="${QT_ROOT_DIR:-$HOME/Qt/$QT_VERSION}"
+QTPATH="${QT_ROOT_DIR:-$HOME/Qt/$QT_VERSION/gcc_64}"
 LINUXDEPLOY=linuxdeploy-x86_64.AppImage
 LINUXDEPLOYQT=linuxdeploy-plugin-qt-x86_64.AppImage
 
-if [[ ! -x "$QTPATH/gcc_64/bin/qmake" ]]; then
+if [[ ! -x "$QTPATH/bin/qmake" ]]; then
   echo "ERROR: Qt not found at $QTPATH"
   exit 1
 fi
@@ -78,15 +78,15 @@ done
 echo "Building AboutThisPC $VERSION by $AUTHOR..."
 cd "$HELPER_DIR"
 
-export PATH=$QTPATH/gcc_64/bin:$PATH
-export LD_LIBRARY_PATH=$QTPATH/gcc_64/lib:${LD_LIBRARY_PATH:-}
+export PATH=$QTPATH/bin:$PATH
+export LD_LIBRARY_PATH=$QTPATH/lib:${LD_LIBRARY_PATH:-}
 
-cmake -S $HELPER_DIR -B $HELPER_BUILD -DCMAKE_PREFIX_PATH=$QTPATH/gcc_64
+cmake -S $HELPER_DIR -B $HELPER_BUILD -DCMAKE_PREFIX_PATH=$QTPATH
 cmake --build $HELPER_BUILD --target all
 cp $HELPER_BUILD/linux-helper $SCRIPT_DIR/binaries/linux-helper
 
 cd "$SCRIPT_DIR"
-cmake -S $SCRIPT_DIR -B $APP_BUILD -DCMAKE_PREFIX_PATH=$QTPATH/gcc_64
+cmake -S $SCRIPT_DIR -B $APP_BUILD -DCMAKE_PREFIX_PATH=$QTPATH
 cmake --build $APP_BUILD --target all
 
 cd $PARENT_DIR
@@ -127,7 +127,7 @@ if [ "$BUILD_APPIMAGE" = true ]; then
   chmod +x "$LINUXDEPLOYQT"
 
   rm -rf $PARENT_DIR/About*This*PC-*.AppImage
-  QMAKE=$QTPATH/gcc_64/bin/qmake "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
+  QMAKE=$QTPATH/bin/qmake "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
 fi
 
 mkdir -p $OUTPUT_DIR/linux/x64
