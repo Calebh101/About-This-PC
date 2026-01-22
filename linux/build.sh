@@ -1,4 +1,6 @@
 #!/bin/bash
+# Set QT_ROOT_DIR to change where Qt is installed. It defaults to $HOME/Qt/$QT_VERSION.
+
 set -euo pipefail
 
 if [ "$(uname -s)" != "Linux" ]; then
