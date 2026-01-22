@@ -43,7 +43,11 @@ jobs:
 
       - name: Log home directory
         run: |
-          tree $HOME
+          tree $HOME/Qt
+          ls $HOME/Qt/${{ env.QT_VERSION }}
+          ls $HOME/Qt/${{ env.QT_VERSION }}/gcc_64
+          ls $HOME/Qt/${{ env.QT_VERSION }}/gcc_64/bin
+          ls $HOME/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake
 
       - name: Build
         run: |
