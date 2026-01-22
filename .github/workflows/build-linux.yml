@@ -43,15 +43,15 @@ jobs:
 
       - name: Log
         run: |
-          echo "Qt: ${{ env.GITHUB_WORKSPACE }}/Qt/${{ env.QT_VERSION }}"
-          ls "${{ env.GITHUB_WORKSPACE }}/Qt/${{ env.QT_VERSION }}"
+          echo "Qt: $QT_ROOT_DIR"
+          ls "$QT_ROOT_DIR"
 
       - name: Build
         run: |
           chmod +x linux/build.sh
           VERSION="${{ inputs.version }}"
           if [ -z "$VERSION" ]; then VERSION="actions-build"; fi
-          ./linux/build.sh "$VERSION" "${{ env.GITHUB_WORKSPACE }}/Qt/${{ env.QT_VERSION }}" --appimage
+          ./linux/build.sh "$VERSION" "$QT_ROOT_DIR" --appimage
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
