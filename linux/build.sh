@@ -87,8 +87,7 @@ if [ "$BUILD_APPIMAGE" = true ]; then
   fi
 
   rm -rf $PARENT_DIR/About*This*PC-*.AppImage
-  export QMAKE=$HOME/Qt/$QT_VERSION/gcc_64/bin/qmake
-  "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
+  QMAKE=$HOME/Qt/$QT_VERSION/gcc_64/bin/qmake "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
 fi
 
 mkdir -p $OUTPUT_DIR/linux/x64
