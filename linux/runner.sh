@@ -1,9 +1,28 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # This is not to be run by itself.
 
-HERE="$(dirname "$(readlink -f "${0}")")"
-export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
-export QT_PLUGIN_PATH="$HERE/usr/plugins"
-export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/usr/plugins/platforms"
-export PATH="$HERE/usr/bin:$PATH"
-exec "$HERE/usr/bin/AboutThisPC" "$@"
+set -e
+this_dir="$(readlink -f "$(dirname "$0")")"
+
+export XDG_DATA_DIRS="$this_dir/usr/share:$XDG_DATA_DIRS"
+export XDG_CONFIG_DIRS="$this_dir/usr/etc/xdg:$XDG_CONFIG_DIRS"
+
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
+export QT_ENABLE_HIGHDPI_SCALING=1
+export QT_STYLE_OVERRIDE=
+
+DE="${XDG_CURRENT_DESKTOP:-}"
+
+case "$DE" in
+    GNOME*|Unity|Cinnamon|MATE|XFCE)
+        export QT_QPA_PLATFORMTHEME=gtk3
+        ;;
+    KDE*|PLASMA*)
+        export QT_QPA_PLATFORMTHEME=kde
+        ;;
+    *)
+        export QT_QPA_PLATFORMTHEME=xdgdesktopportal
+        ;;
+esac
+
+exec "$this_dir"/usr/bin/AboutThisPC "$@"

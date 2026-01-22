@@ -132,7 +132,7 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 # FAQ
 
 <details>
-    <summary>What is 'AboutThisPC-Debug.exe'?</summary><br>
+    <summary>What is AboutThisPC-Debug.exe?</summary><br>
     About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
 </details>
 
@@ -153,8 +153,6 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 # Extra Notes
 
-- Some images (specifically the `computers` images) originated from (rawpixel.com / Freepik)[https://freepik.com] and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
+- Some images (specifically the `computers` images) originated from [rawpixel.com / Freepik](https://freepik.com) and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
 
 - Big thanks to [Wikimedia Commons](https://commons.wikimedia.org/) for existing!
-
-- Also I'm using this cool library to get system info on Linux, I recommend it: [lazybios](https://github.com/LazySeldi/lazybios)

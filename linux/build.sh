@@ -60,14 +60,18 @@ mkdir -p x64
 
 if [ "$BUILD_APPIMAGE" = true ]; then
   echo "Packaging AppImage..."
+  rm -rf $APPIMAGE
   mkdir -p $APPIMAGE
-  sed -e "s/\[\[APPVERSION\]\]/$VERSION/g" -e "s/\[\[AUTHOR\]\]/$AUTHOR/g" "$SCRIPT_DIR/Sample.desktop" > $APPIMAGE/AboutThisPC.desktop
+
   mkdir -p $APPIMAGE/usr/bin
+  mkdir -p $APPIMAGE/usr/share/applications
+  mkdir -p $APPIMAGE/usr/share/icons/hicolor/256x256/apps
 
   cp $APP_BUILD/AboutThisPC $APPIMAGE/usr/bin/AboutThisPC
-  cp $SCRIPT_DIR/runner.sh $APPIMAGE/AppRun
-  cp $SCRIPT_DIR/appicon.png $APPIMAGE/AboutThisPC.png
+  cp $SCRIPT_DIR/appicon.png $APPIMAGE/usr/share/icons/hicolor/256x256/apps/AboutThisPC.png
+  sed -e "s/\[\[APPVERSION\]\]/$VERSION/g" -e "s/\[\[AUTHOR\]\]/$AUTHOR/g" "$SCRIPT_DIR/Sample.desktop" > $APPIMAGE/usr/share/applications/AboutThisPC.desktop
 
+  cp $SCRIPT_DIR/runner.sh $APPIMAGE/AppRun
   chmod +x $APPIMAGE/AppRun
 
   if [ ! -f "$LINUXDEPLOY" ]; then
@@ -84,7 +88,7 @@ if [ "$BUILD_APPIMAGE" = true ]; then
 
   rm -rf $PARENT_DIR/About*This*PC-*.AppImage
   export QMAKE=$HOME/Qt/$QT_VERSION/gcc_64/bin/qmake
-  "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage --extra-plugins platforms
+  "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
 fi
 
 mkdir -p $OUTPUT_DIR/linux/x64
