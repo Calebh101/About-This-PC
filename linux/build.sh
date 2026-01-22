@@ -1,8 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ "$(uname -s)" != "Linux" ]; then
+  echo "This script must be run on Linux."
+  exit 1
+fi
+
 usage() {
-  echo "Usage: $0 <version> [qt dir] [--appimage]"
+  echo "Usage: $0 <version> [--appimage]"
   exit 1
 }
 
@@ -25,8 +30,6 @@ while [[ $# -gt 0 ]]; do
     *)
       if [[ -z "$VERSION" ]]; then
         VERSION="$1"
-      elif [[ -z "$QTPATH" ]]; then
-        QTPATH="$1"
       else
         echo "Too many arguments"
         usage
@@ -51,18 +54,17 @@ HELPER_BUILD=$HELPER_DIR/build/Desktop_Qt_6_9_1-Release
 APPIMAGE=$PARENT_DIR/Output/linux-AppImage
 x64zip=$OUTPUT_DIR/AboutThisPC-$VERSION-linux-x64.zip
 
-QTPATH=${2:-$HOME/Qt/$QT_VERSION}
+QTPATH="${QT_ROOT_DIR:-$HOME/Qt/$QT_VERSION}"
 LINUXDEPLOY=linuxdeploy-x86_64.AppImage
 LINUXDEPLOYQT=linuxdeploy-plugin-qt-x86_64.AppImage
 
-if [ "$(uname -s)" != "Linux" ]; then
-  echo "This script must be run on Linux."
+if [[ ! -x "$QTPATH/gcc_64/bin/qmake" ]]; then
+  echo "ERROR: Qt not found at $QTPATH"
   exit 1
 fi
 
 if [ -z "$VERSION" ]; then
-  echo "Usage: $0 <version> <qt dir> [--appimage]"
-  exit 1
+  usage
 fi
 
 for arg in "$@"; do
