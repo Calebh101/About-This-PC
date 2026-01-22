@@ -41,20 +41,12 @@ jobs:
           dir: ${{ env.HOME }}
           cache: true
 
-      - name: Log home directory
-        run: |
-          tree $HOME/Qt
-          ls $HOME/Qt/${{ env.QT_VERSION }}
-          ls $HOME/Qt/${{ env.QT_VERSION }}/gcc_64
-          ls $HOME/Qt/${{ env.QT_VERSION }}/gcc_64/bin
-          ls $HOME/Qt/${{ env.QT_VERSION }}/gcc_64/bin/qmake
-
       - name: Build
         run: |
           chmod +x linux/build.sh
           VERSION="${{ inputs.version }}"
           if [ -z "$VERSION" ]; then VERSION="actions-build"; fi
-          ./linux/build.sh "$VERSION" --appimage
+          ./linux/build.sh "$VERSION" "${{ env.GITHUB_WORKSPACE }}/Qt/${{ env.QT_VERSION }}" --appimage
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

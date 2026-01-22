@@ -17,6 +17,7 @@ HELPER_BUILD=$HELPER_DIR/build/Desktop_Qt_6_9_1-Release
 APPIMAGE=$PARENT_DIR/Output/linux-AppImage
 x64zip=$OUTPUT_DIR/AboutThisPC-$VERSION-linux-x64.zip
 
+QTPATH=${2:-$HOME/Qt/$QT_VERSION}
 LINUXDEPLOY=linuxdeploy-x86_64.AppImage
 LINUXDEPLOYQT=linuxdeploy-plugin-qt-x86_64.AppImage
 
@@ -26,7 +27,7 @@ if [ "$(uname -s)" != "Linux" ]; then
 fi
 
 if [ -z "$VERSION" ]; then
-  echo "Usage: $0 <version>"
+  echo "Usage: $0 <version> <qt dir> [--appimage]"
   exit 1
 fi
 
@@ -39,15 +40,15 @@ done
 echo "Building AboutThisPC $VERSION by $AUTHOR..."
 cd "$HELPER_DIR"
 
-export PATH=$HOME/Qt/$QT_VERSION/gcc_64:$PATH
-export LD_LIBRARY_PATH=$HOME/Qt/$QT_VERSION/gcc_64/lib:${LD_LIBRARY_PATH:-}
+export PATH=$QTPATH/gcc_64/bin:$PATH
+export LD_LIBRARY_PATH=$QTPATH/gcc_64/lib:${LD_LIBRARY_PATH:-}
 
-cmake -S $HELPER_DIR -B $HELPER_BUILD -DCMAKE_PREFIX_PATH=$HOME/Qt/$QT_VERSION/gcc_64
+cmake -S $HELPER_DIR -B $HELPER_BUILD -DCMAKE_PREFIX_PATH=$QTPATH/gcc_64
 cmake --build $HELPER_BUILD --target all
 cp $HELPER_BUILD/linux-helper $SCRIPT_DIR/binaries/linux-helper
 
 cd "$SCRIPT_DIR"
-cmake -S $SCRIPT_DIR -B $APP_BUILD -DCMAKE_PREFIX_PATH=$HOME/Qt/$QT_VERSION/gcc_64
+cmake -S $SCRIPT_DIR -B $APP_BUILD -DCMAKE_PREFIX_PATH=$QTPATH/gcc_64
 cmake --build $APP_BUILD --target all
 
 cd $PARENT_DIR
@@ -77,17 +78,18 @@ if [ "$BUILD_APPIMAGE" = true ]; then
   if [ ! -f "$LINUXDEPLOY" ]; then
     echo "Downloading $LINUXDEPLOY..."
     wget https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
-    chmod +x "$LINUXDEPLOY"
   fi
 
   if [ ! -f "$LINUXDEPLOYQT" ]; then
     echo "Downloading $LINUXDEPLOYQT..."
     wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage
-    chmod +x "$LINUXDEPLOYQT"
   fi
 
+  chmod +x "$LINUXDEPLOY"
+  chmod +x "$LINUXDEPLOYQT"
+
   rm -rf $PARENT_DIR/About*This*PC-*.AppImage
-  QMAKE=$HOME/Qt/$QT_VERSION/gcc_64/bin/qmake "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
+  QMAKE=$QTPATH/gcc_64/bin/qmake "./$LINUXDEPLOY" --appdir $APPIMAGE --executable $APPIMAGE/usr/bin/AboutThisPC --plugin qt --output appimage
 fi
 
 mkdir -p $OUTPUT_DIR/linux/x64
