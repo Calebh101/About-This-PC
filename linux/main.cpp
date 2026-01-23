@@ -72,20 +72,6 @@ int main(int argc, char *argv[])
     if (args.contains("--classic")) classic = true;
     if (args.contains("--no-window")) noWindow = true;
 
-    if (isGnome() && gnomeStyle != "None") {
-        Logger::print("Using GNOME theme...");
-        qputenv("QT_QPA_PLATFORMTHEME", QByteArray("gnome"));
-        QIcon::setThemeName(gnomeStyle);
-
-        if (QStyleFactory::keys().contains(gnomeStyle)) {
-            a.setStyle(QStyleFactory::create(gnomeStyle));
-        } else {
-            Logger::warn(QString("Unable to use GNOME theme: keys() did not contain the required value (%1): %2").arg(gnomeStyle).arg(QStyleFactory::keys().join(", ")));
-        }
-    } else {
-        Logger::print("Not using GNOME theme...");
-    }
-
     if (!lock.tryLock()) {
         Logger::print("Process is already running.", true);
         QLocalSocket socket;
@@ -107,6 +93,8 @@ int main(int argc, char *argv[])
     }
 
     a.setQuitOnLastWindowClosed(false);
+    a.setStyle(QStyleFactory::create("Fusion"));
+
     QLocalServer server;
     bool listening = false;
 
