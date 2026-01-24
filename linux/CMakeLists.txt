@@ -101,7 +101,7 @@ target_include_directories(AboutThisPC PRIVATE
     ${WAYLAND_CLIENT_INCLUDE_DIRS}
 )
 
-target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Vulkan::Vulkan ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${WAYLAND_CLIENT_LIBRARIES})
+target_link_libraries(AboutThisPC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Svg Vulkan::Vulkan ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${WAYLAND_CLIENT_LIBRARIES})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

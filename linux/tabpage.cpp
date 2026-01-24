@@ -18,6 +18,7 @@
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QStyle>
+#include <QSvgRenderer>
 
 namespace fs = std::filesystem;
 using json = nlohmann::json;
@@ -26,7 +27,7 @@ std::optional<fs::path> _getIconPath(std::string id) {
     std::vector<std::string> icon_dirs = {
         "/usr/share/icons/hicolor/48x48/apps/",
         "/usr/share/icons/hicolor/scalable/apps/",
-        "/usr/share/pixmaps/"
+        "/usr/share/pixmaps/",
     };
 
     std::vector<std::string> extensions = {".png", ".svg"};
@@ -43,7 +44,7 @@ std::optional<fs::path> _getIconPath(std::string id) {
 
 std::optional<fs::path> LocalTabPage::getIconPath(std::string id) {
     std::optional<fs::path> result = _getIconPath(id);
-    Logger::print(QString("Found icon file: %1").arg(QString::fromStdString(result ? std::string("none") : result->string())));
+    Logger::print(QString("Found icon file: %1").arg(QString::fromStdString(result ? result->string() : std::string("none"))));
     return result;
 }
 
@@ -54,26 +55,49 @@ QStringList LocalTabPage::bottomText() {
 }
 
 QWidget* LocalTabPage::processImage(std::optional<fs::path> path, QWidget* parent, int size, int radius) {
-    QWidget* container = new QWidget();
+    QWidget* container = new QWidget(parent);
     QString iconPath = path ? QString::fromStdString(path->string()) : ":default-linux-icon/images/default-linux-icon.png";
     Logger::print(QString("Processing image of path %1").arg(iconPath));
-    QIcon icon(iconPath);
-    QLabel* label = new QLabel(parent);
-    QPixmap pixmap = icon.pixmap(size, size);
 
-    QPixmap rounded(pixmap.size());
-    rounded.fill(Qt::transparent);
-    QPainter painter(&rounded);
+    QLabel* label = new QLabel(container);
+    qreal dpr = parent->devicePixelRatioF();
+    QSize logicalSize(size, size);
+    QSize pixelSize = logicalSize * dpr;
+
+    QPixmap pixmap(pixelSize);
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
-    QPainterPath paintPath;
-    paintPath.addRoundedRect(pixmap.rect(), radius, radius);
-    painter.setClipPath(paintPath);
-    painter.drawPixmap(0, 0, pixmap);
+
+    if (iconPath.endsWith(".svg")) {
+        QSvgRenderer svg(iconPath);
+        svg.render(&painter, QRectF(0, 0, pixelSize.width(), pixelSize.height()));
+    } else {
+        QImage image(iconPath);
+        if (!image.isNull()) {
+            QImage scaled = image.scaled(pixelSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            painter.drawImage(0, 0, scaled);
+        }
+    }
+
+    QPixmap rounded(pixelSize);
+    rounded.fill(Qt::transparent);
+    QPainter p(&rounded);
+    p.setRenderHint(QPainter::Antialiasing);
+    QPainterPath pathMask;
+    pathMask.addRoundedRect(QRectF(0, 0, pixelSize.width(), pixelSize.height()), radius * dpr, radius * dpr);
+    p.setClipPath(pathMask);
+    p.drawPixmap(0, 0, pixmap);
+    rounded.setDevicePixelRatio(dpr);
 
     label->setPixmap(rounded);
+    label->setFixedSize(logicalSize);
+    label->setAlignment(Qt::AlignCenter);
+
     QVBoxLayout* layout = new QVBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(label, 0, Qt::AlignCenter);
-    container->setLayout(layout);
     return container;
 }
 
@@ -186,9 +210,9 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
     int fontWeight = Global::fontWeight;
 
     QWidget *page = new QWidget();
-    QVBoxLayout *vlayout = new QVBoxLayout();
-    QVBoxLayout *infoWidget = new QVBoxLayout();
-    QHBoxLayout *layout = new QHBoxLayout();
+    QVBoxLayout* vlayout = new QVBoxLayout();
+    QVBoxLayout* infoWidget = new QVBoxLayout();
+    QHBoxLayout* layout = new QHBoxLayout();
     QHBoxLayout* bottomLayout = new QHBoxLayout();
     QVBoxLayout* bottomTextLayout = new QVBoxLayout();
     QLabel* serialValueLabel = nullptr;
@@ -299,8 +323,15 @@ QWidget* LocalTabPage::overview(QWidget* parent) {
         Settings::window(parent);
     });
 
-    layout->addWidget(processImage(iconPath, parent, 148, 10), 5);
-    layout->addLayout(infoWidget, 9);
+    QWidget *imageWidget = processImage(iconPath, parent, 148, 10);
+    //imageWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QWidget *infoContainer = new QWidget();
+    infoContainer->setLayout(infoWidget);
+    //infoContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    layout->addWidget(imageWidget, 5);
+    layout->addWidget(infoContainer, 9);
     vlayout->addLayout(layout, 1);
 
     for (int i = 0; i < bottomText.length(); i++) {

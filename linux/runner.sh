@@ -11,17 +11,6 @@ export XDG_CONFIG_DIRS="$this_dir/usr/etc/xdg:$XDG_CONFIG_DIRS"
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export QT_ENABLE_HIGHDPI_SCALING=1
 export QT_STYLE_OVERRIDE=
-
-case "$DE" in
-    GNOME*|Unity|Cinnamon|MATE|XFCE)
-        export QT_QPA_PLATFORMTHEME=gtk3
-        ;;
-    KDE*|PLASMA*)
-        export QT_QPA_PLATFORMTHEME=kde
-        ;;
-    *)
-        export QT_QPA_PLATFORMTHEME=xdgdesktopportal
-        ;;
-esac
+export QT_QPA_PLATFORMTHEME=xdgdesktopportal
 
 exec "$this_dir"/usr/bin/AboutThisPC "$@"

@@ -49,6 +49,9 @@ int main(int argc, char *argv[])
         fs::create_directory(Settings::directory().absolutePath().toStdString());
     }
 
+    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    //QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
     QApplication a(argc, argv);
     QStringList args = QCoreApplication::arguments();
     QLockFile lock(Settings::directory().absoluteFilePath("AboutThisPC.lock"));
