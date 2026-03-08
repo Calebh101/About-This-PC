@@ -269,6 +269,7 @@ namespace AboutThisPC
                 _ => "Unknown"
             };
 
+            Logger.Print("Found memory type " + items.First()["SMBIOSMemoryType"] + " and form factor " + items.First()["FormFactor"]);
             return (capacity, type, speed, form);
         }
 
@@ -300,7 +301,8 @@ namespace AboutThisPC
 
         public static string GetIconPath(string path)
         {
-            return $"ms-appx:///Assets/{path}";
+            string dir = AppContext.BaseDirectory;
+            return Path.Combine(dir, "Assets", path);
         }
 
         public static (List<string> Names, List<int> Numbers, string Icon) GetChassisDetails(List<int> input)

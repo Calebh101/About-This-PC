@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -11,7 +12,9 @@ namespace AboutThisPC
 {
     internal class Logger
     {
-        private static List<string> logs = [];
+        public static int MaxLogSize = 500;
+
+        private static Queue<string> logs = new();
         private static Subject<string> stream = new();
 
         private static bool isAttached = false;
@@ -55,7 +58,8 @@ namespace AboutThisPC
         private static void OutputRaw(string input, bool pass)
         {
             string raw = Regex.Replace(input, @"\u001b\[\d+m", "");
-            logs.Add(raw);
+            logs.Enqueue(raw);
+            if (logs.Count > MaxLogSize) logs.Dequeue();
             if (!pass) return;
 
             if (Debugger.IsAttached)
@@ -116,7 +120,7 @@ namespace AboutThisPC
 
         public static List<string> GetCurrent()
         {
-            return logs;
+            return logs.ToList();
         }
 
         public static Subject<string> GetStream()

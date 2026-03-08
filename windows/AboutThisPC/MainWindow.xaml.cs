@@ -3,6 +3,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Graphics;
 using Windows.Storage;
@@ -81,24 +82,22 @@ namespace AboutThisPC
                 return;
             }
 
-            string icon = Generator.GetIconPath("appicon.ico");
-            StorageFile? storageFile = null;
+            string path = Generator.GetIconPath("appicon.ico");
+            Logger.Print("Found icon path: " + path);
+
+            if (!File.Exists(path))
+            {
+                Logger.Warn("Unable to set icon! Icon file does not exist: " + path);
+            }
 
             try
             {
-                storageFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(icon));
-            }
-            catch (Exception e)
-            {
-                Logger.Warn("Unable to set icon! Unable to set storage file: " + e.Message);
-            }
-
-            if (storageFile != null)
-            {
-                string path = storageFile.Path;
                 window.SetIcon(path);
                 window.SetTaskbarIcon(path);
                 window.SetTitleBarIcon(path);
+            } catch (Exception e)
+            {
+                Logger.Warn("Unable to set icon! Unknown error: " + e);
             }
         }
 

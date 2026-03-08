@@ -1,7 +1,7 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]$Version,
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     [string]$Architecture,
     [Parameter(ValueFromRemainingArguments=$true)]
     [string[]]$RemainingArgs

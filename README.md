@@ -17,7 +17,7 @@ Next, simply double-click the executable (`AboutThisPC` for Linux, `AboutThisPC.
 
 - Note: The Windows version may trigger a popup telling you that the app is untrusted. Click `More Info` then `Run Anyway` if you want to continue. (If you want to inspect the code first or just not go through with it, then it won't hurt my feelings)
 
-Follow the instructions in [INSTALLING.md](https://github.com/Calebh101/About-This-PC/blob/master/INSTALLING.md) (either in the extracted archive or in GitHub) to install as an actual application in your OS.
+Follow the instructions in [INSTALLING.md](INSTALLING.md) (either in the extracted archive or in GitHub) to install as an actual application in your OS.
 
 # Supported Platforms
 
@@ -41,29 +41,29 @@ The icon on the side uses a name taken from the `os-release` standard again, and
 
 The eye button in the bottom right corner allows you to show/hide your serial and local IP(s) for screenshots. The settings button (also in the bottom right corner) opens the Settings window.
 
-![Overview Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page1.png)
+![Overview Page](Assets/screenshots/linux-page1.png)
 
 The next page is the Displays page, which, well, shows you your displays. It lists the name, resolution, size, and refresh rate. Then, depending if the display is detected as internal, will show either a laptop icon or a monitor depending on what it finds.
 
-![Displays Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page2.png)
+![Displays Page](Assets/screenshots/linux-page2.png)
 
 The next page will show you connected storage devices, their sized, how much of that is used, and a progress bar showing how much is used. It'll also tell you if it's a startup disk, internal, or recognized as external. (This is based on if the drive is hot-pluggable.)
 
-![Storage Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page3.png)
+![Storage Page](Assets/screenshots/linux-page3.png)
 
 The last page is the Support page, which, like macOS, will show you several links that you can open. My implementation again uses the `os-release` standard, which uses what your distro provides to show some links. I also added on some links to About This PC resources, like the GitHub repo and the GitHub Issues page. (All of mine come *after* your distro's links, so "Homepage" and "Report Bugs" are for your *distro*, not for About This PC.)
 
-![Support Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-page4.png)
+![Support Page](Assets/screenshots/linux-page4.png)
 
 This next page is not in a tab bar like the others, but is instead different from the other section. This is the "classic" page, that resembles the *newer* Ventura+ About This Mac app. (**Yes, I know that I have it backwards**; if you have a better name for this page, please [make a pull request](https://github.com/Calebh101/About-This-PC/tree/master?tab=contributing-ov-file#pull-requests)) Its window is vertical, and instead of an OS icon, it displays a computer image (laptop, monitor, etcetera) like Apple's version. It shows the exact same info as the Overview tab on the other section, with an eye button again, but it also has a "More Info" button. This button opens up the Overview page.
 
-![Classic Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-classic.png)
+![Classic Page](Assets/screenshots/linux-classic.png)
 
 This page is the Settings page, which is opened by the Settings button in the Overview page. Each setting explains itself.
 
 The Settings window is resizable (me making a resizable window? never) but you can't make it smaller than its original dimensions.
 
-![Settings Page](https://raw.githubusercontent.com/Calebh101/About-This-PC/master/Assets/screenshots/linux-settings.png)
+![Settings Page](Assets/screenshots/linux-settings.png)
 
 ## The System Tray
 
@@ -120,10 +120,9 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
     - `--uninstall`: Prompt to uninstall About This PC, then exit.
     - `--reinstall`: Prompt to reinstall About This PC, then exit.
 - Application Executable (these can be used for debug or automation)
-    - `--version`: Print the version of the app and exit. This pulls from the application itself instead of just the service around it.
+    - `--info`: Print the version of the app and exit. This pulls from the application itself instead of just the service around it.
     - `--classic`: Launch the "classic" page. This is used by the service.
     - `--settings`: Launch the settings page. This is used by the service.
-    - `--debug`: Attach the running terminal and enable verbose to show logs.
 
 ## Notes
 
@@ -148,7 +147,7 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 <details>
     <summary>Why does my display show up as external, when it's really internal?</summary><br>
-    Due to several reasons (Windows is limited in the displays API, Wayland is also a bit limited, and X11 uses an arbitrary check), all displays are shown as external only. If you know how I can get around these, you can [make a pull request](https://github.com/Calebh101/About-This-PC/blob/master/CONTRIBUTING.md#pull-requests). (If you figure out a fix, pleae implement it preferably on all platforms, but just one is fine as long as all display servers on said platform are fixed.)
+    Due to several reasons (Windows is limited in the displays API, Wayland is also a bit limited, and X11 uses an arbitrary check), all displays are shown as external only. If you know how I can get around these, you can [make a pull request](CONTRIBUTING.md#pull-requests). (If you figure out a fix, pleae implement it preferably on all platforms, but just one is fine as long as all display servers on said platform are fixed.)
 </details>
 
 # Extra Notes

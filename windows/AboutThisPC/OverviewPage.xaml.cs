@@ -69,6 +69,7 @@ namespace AboutThisPC
                     Text = value,
                     FontSize = fontSize,
                     IsTextSelectionEnabled = true,
+                    TextWrapping = TextWrapping.WrapWholeWords,
                 };
 
                 if (boldWeight != null) blockB.FontWeight = (FontWeight)boldWeight;

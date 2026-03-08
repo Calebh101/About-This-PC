@@ -1,7 +1,8 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]$Version,
-    [switch]$SkipSigning
+    [switch]$SkipSigning,
+    [switch]$BuildDebug
 )
 
 # A small script to build and package About This PC for Windows.
@@ -87,10 +88,10 @@ function Build {
     # `-H=windowsgui` needs to be present in the flags to prevent the console from showing up, but it also prevents logging.
     & rsrc -arch $Arch -ico build/icon.ico -o rsrc.syso
     & go build -ldflags "-X 'main.Version=$Version' -H=windowsgui" -o build\app.exe
-    & go build -ldflags "-X 'main.Version=$Version' -X 'main.IsConsole=1'" -o build\app-cli.exe
+    if ($BuildDebug) {& go build -ldflags "-X 'main.Version=$Version' -X 'main.IsConsole=1'" -o build\app-cli.exe}
 
     Sign -Path "$ServicePath\app.exe"
-    Sign -Path "$ServicePath\app-cli.exe"
+    if ($BuildDebug) {Sign -Path "$ServicePath\app-cli.exe"}
 
     $directory="$OutputDir\$Target-Results"
     $ArchivePath="$ParentDir\Output\AboutThisPC-$Version-$Target.zip"
@@ -103,7 +104,7 @@ function Build {
     }
 
     Copy-Item -Path "$ServicePath\app.exe" -Destination "$directory\AboutThisPC.exe"
-    Copy-Item -Path "$ServicePath\app-cli.exe" -Destination "$directory\AboutThisPC-Debug.exe"
+    if ($BuildDebug) {Copy-Item -Path "$ServicePath\app-cli.exe" -Destination "$directory\AboutThisPC-Debug.exe"}
     Copy-Item -Path "$OutputDir\shortcut.lnk" -Destination "$directory\About This PC.lnk"
     Copy-Item -Path "$ParentDir\README.md" -Destination "$directory\README.md"
     Copy-Item -Path "$ParentDir\LICENSE.md" -Destination "$directory\LICENSE.md"

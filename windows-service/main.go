@@ -19,6 +19,7 @@ import (
 	"github.com/gen2brain/dlgs"
 	"github.com/getlantern/systray"
 	"github.com/gofrs/flock"
+	"github.com/ncruces/zenity"
 )
 
 //go:embed build/archive.zip
@@ -45,8 +46,8 @@ func main() {
 		isDebugExecutable = true
 	}
 
-	if Contains(args, "--version") {
-		os.Stdout.Write([]byte(Version))
+	if Contains(args, "--info") {
+		dlgs.Info("About This PC", "About This PC\n\nVersion: " + Version + "\nAuthor: Calebh101\n\nFor more information, head to:\nhttps://github.com/Calebh101/About-This-PC")
 		os.Exit(0)
 		return
 	}
@@ -66,7 +67,9 @@ func main() {
 		return
 	}
 
+	defer lock.Unlock()
 	go listen()
+
 	start()
 	systray.Run(onReady, onExit)
 }
@@ -276,6 +279,7 @@ func start() {
 			return
 		} else if strings.Contains(arg, "--reinstall") {
 			Print("Found reinstall argument")
+
 			if extract() {
 				os.Exit(0)
 			}
@@ -322,7 +326,8 @@ func run(mode int) {
 	}
 
 	finalArgs := append(extraArg, args...)
-	cmd := exec.Command(directory+"\\AboutThisPC.exe", finalArgs...)
+	cmd := exec.Command(directory + "\\AboutThisPC.exe", finalArgs...)
+
 	mu.Lock()
 	processes = append(processes, cmd)
 	mu.Unlock()
@@ -395,15 +400,26 @@ func extract() bool {
 		}
 	}
 
+	progress, _ := zenity.Progress(
+        zenity.Title("Installing About This PC"),
+        zenity.MaxValue(len(zr.File)+1),
+    )
+
+    defer progress.Close()
+
 	for _, file := range zr.File {
 		Print("Copying file " + file.Name + "... (archive)")
 		extractPath := filepath.Join(directory, file.Name)
+
+		progress.Text("Extracting: " + file.Name)
+		progress.Value(count)
 
 		if file.FileInfo().IsDir() {
 			if e := os.MkdirAll(extractPath, os.ModePerm); e != nil {
 				Fatal(e)
 				return false
 			}
+
 			continue
 		}
 
@@ -439,12 +455,16 @@ func extract() bool {
 		count++
 	}
 
+	progress.Value(count)
+	progress.Text("Copying: self")
+
 	if copySelf() {
 		count++
 	} else {
 		return false
 	}
 
+	progress.Value(count)
 	Print("Copied " + strconv.Itoa(len(zr.File)) + " files!")
 	data := []byte(Version)
 	e = os.WriteFile(directory+"\\VERSION-IDENTIFIER", data, 0644)
@@ -454,7 +474,7 @@ func extract() bool {
 		return false
 	}
 
-	_, e = dlgs.Info("All Done", "About This PC has been installed.")
+	_, e = dlgs.Info("All Done", "About This PC has been installed. It will now be started and opened.")
 
 	if e != nil {
 		Fatal(e)
