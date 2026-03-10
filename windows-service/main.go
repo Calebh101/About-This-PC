@@ -119,6 +119,7 @@ func onIsLocked() {
 	mode := 0
 	deadline := 5 * time.Second
 	connection, e := winio.DialPipe(pipeName, &deadline)
+	defer connection.Close()
 	hasArgs := false
 
 	for _, arg := range []string{"--uninstall", "--reinstall"} {
@@ -148,7 +149,6 @@ func onIsLocked() {
 		mode = 1
 	}
 
-	defer connection.Close()
 	Print("Sending message to server... (mode: " + strconv.Itoa(mode) + ")")
 	fmt.Fprint(connection, strconv.Itoa(mode) + "|")
 }

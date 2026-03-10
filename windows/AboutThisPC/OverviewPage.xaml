@@ -56,7 +56,7 @@
                 <Button Click="EyeButtonClick" x:Name="EyeButton" Padding="9.25">
                     <Grid Width="16" Height="16">
                         <FontIcon x:Name="EyeIconGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7B3;" FontSize="16" />
-                        <Line X1="0" Y2="0" Y1="16" X2="16" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" StrokeThickness="2" x:Name="EyeIconLine" />
+                        <Line X1="0" Y2="0" Y1="16" X2="16" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}" StrokeThickness="2" x:Name="EyeIconLine" Visibility="Collapsed" />
                     </Grid>
                 </Button>
             </StackPanel>

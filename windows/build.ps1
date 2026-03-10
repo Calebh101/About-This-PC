@@ -22,6 +22,37 @@ if (Test-Path $OutputDir) {
     Remove-Item $OutputDir -Recurse -Force
 }
 
+function CheckCert {
+    if ($SkipSigning) {
+        Write-Host "Skipping certificate checks"
+        return
+    }
+
+    $Cert = Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert | Select-Object -First 1
+
+    if ($null -eq $Cert) {
+        Write-Error "No code signing certificate found."
+        exit 1
+    }
+
+    try {
+        $RootStore = [System.Security.Cryptography.X509Certificates.X509Store]::new("Root", "LocalMachine")
+        $RootStore.Open("ReadWrite")
+        $existing = $RootStore.Certificates | Where-Object { $_.Thumbprint -eq $Cert.Thumbprint }
+
+        if (-not $existing) {
+            Write-Output "Adding certificate to trusted root store..."
+            $RootStore.Add($Cert)
+        }
+
+        $RootStore.Close()
+    } catch {
+        Write-Error "Failed to update certificate store: $_"
+        exit 1
+    }
+}
+
+CheckCert
 New-Item -Path $OutputDir -ItemType Directory
 Write-Output "Creating About This PC version $Version..."
 Set-Location -Path "$WindowsDir\AboutThisPC"
