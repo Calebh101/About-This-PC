@@ -23,7 +23,7 @@ Follow the instructions in [INSTALLING.md](INSTALLING.md) (either in the extract
 
 | Platform | Supported | Version | Requirements | Notes
 | -------- | --------- | ------- | ------------ | -----
-| Linux | ✅ | 0.0.0A+ | `dmidecode`, and other GUI libraries depending on your system. | Linux is supported, with the X11 and Wayland display servers.
+| Linux | ✅ | 0.0.0A+ | `dmidecode`, and other GUI libraries depending on your system.<br><br>Display servers: X11 or Wayland |
 | Windows | ✅ | 0.0.0A+ | Windows App SDK (Windows will prompt for this). |
 | macOS | 🟥 | | | Maybe in the future?
 
@@ -39,7 +39,7 @@ You can also see details like your laptop model, processor, graphics, etcetera. 
 
 The icon on the side uses a name taken from the `os-release` standard again, and (if found) will search in some directories to try to find the icon file. If none are found, it'll default to an image of Tux.
 
-The eye button in the bottom right corner allows you to show/hide your serial and local IP(s) for screenshots. The settings button (also in the bottom right corner) opens the Settings window.
+The eye button in the bottom right corner allows you to show/hide your serial for screenshots. The settings button (also in the bottom right corner) opens the Settings window.
 
 ![Overview Page](Assets/screenshots/linux-page1.png)
 
@@ -111,36 +111,59 @@ However, to package all the files that .NET generates, and since it's just gener
 
 The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!), so you don't have to worry about that.
 
+The overview page shows information about your computer and Windows (like you'd expect). It shows your Windows version, edition, and build number. It also shows your computer's model, hardware, serial, and startup disk. There are also a few buttons:
+
+- More Info: Opens the About page in Windows Settings.
+- Software Update: Opens the Check for Updates page in Windows Settings.
+- Settings: Just opens Windows Settings. (This is not the About This PC settings! That's on the Support page.)
+- The eye button toggles showing the serial and local IP.
+
 ![Overview Page](Assets/screenshots/windows-page1.png)
+
+The displays page shows, well, your displays. It shows the resolution, and if it's the primary display. There's not much to it. (Windows doesn't have a great API for display info.)
 
 ![Displays Page](Assets/screenshots/windows-page2.png)
 
+This is the storage page. It shows all your connected drives. It includes the identifier, drive name, size, amount used, and some other things. You can also click any drive to open it in File Explorer.
+
 ![Storage Page](Assets/screenshots/windows-page3.png)
 
+The support page has links related to both Windows and About This PC. It also displays the About This PC version. The settings button opens the About This PC settings.
+
 ![Support Page](Assets/screenshots/windows-page4.png)
+
+The settings page shows several options:
+
+- Check for Updates: Check for updates for About This PC. This fetches GitHub for new releases.
+- Use Beta Versions: Include prerelease versions when checking for updates.
+- Check For Updates Automatically: Check for updates for About This PC at launch and periodically.
+- Reset All Settings: Reset all About This PC settings to default.
+- Open Debug Logs: Open a new (unstyled) window viewing the current debug logs About This PC has produced. This is useful for debugging why errors happen (as they're typically logged). To see how logs look, see [Logger.cs](windows/AboutThisPC/Logger.cs).
+
+!!!! Settings Screenshot Needed !!!!
 
 ## Boot Arguments
 
 - Application Service (what you actually run)
-    - `--version`: Print the version of the app and exit.
+    - `--info`: Show a dialog showing application info.
     - `--classic`: Load the "classic" page as the default to show instead of the normal page.
     - `--service`: Load the program so that it doesn't show a window at start. This is useful to run the program at startup.
     - `--uninstall`: Prompt to uninstall About This PC, then exit.
     - `--reinstall`: Prompt to reinstall About This PC, then exit.
 - Application Executable (these can be used for debug or automation)
-    - `--info`: Print the version of the app and exit. This pulls from the application itself instead of just the service around it.
+    - `--version`: Print the version of the app and exit. This pulls from the application itself instead of just the service around it.
     - `--classic`: Launch the "classic" page. This is used by the service.
     - `--settings`: Launch the settings page. This is used by the service.
 
 ## Notes
 
-- The "service" executable doesn't actually install anything to your desktop or Start menu. This has to be done manually.
+- The "service" executable doesn't actually install anything to your desktop or Start menu. This has to be done manually. It installs to AppData.
 
 # FAQ
 
 <details>
     <summary>What is AboutThisPC-Debug.exe?</summary><br>
-    About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version.
+    About This PC for Windows includes two executables: `AboutThisPC.exe` and `AboutThisPC-Debug.exe`. They have absolutely no difference, except that `AboutThisPC.exe` is registered as a Windows GUI app, so no terminal will pop up when running it; but consequently, it won't log to an existing terminal. If you want to see what's actually happening, use `AboutThisPC-Debug.exe`, but do note that it does pop up a console, and using it to install will mean that a console will pop up until you install with the GUI version. **As of version 0.0.0A-R7, this is no longer included in release builds.**
 </details>
 
 <details>
@@ -150,12 +173,12 @@ The Windows version of About This PC doesn't need *any* elevated permissions to 
 
 <details>
     <summary>Why does the Displays tab say my display server is not supported?</summary><br>
-    If your display server is unsupported, that means About This PC doesn't have an implementation for your display server. I'm only interested in supporting mainstream ones (like X11), so if you really want to see your displays (that's all this affects) then you'll need to use a supported display server. Please see above (in the Linux notes) for supported servers.
+    If your display server is unsupported, that means About This PC doesn't have an implementation for your display server. I'm only interested in supporting mainstream ones (like X11 and Wayland), so if you really want to see your displays (that's all this should affect, if the app doesn't crash) then you'll need to use a supported display server. Please see above (in the Linux notes) for supported servers.
 </details>
 
 <details>
     <summary>Why does my display show up as external, when it's really internal?</summary><br>
-    Due to several reasons (Windows is limited in the displays API, Wayland is also a bit limited, and X11 uses an arbitrary check), all displays are shown as external only. If you know how I can get around these, you can [make a pull request](CONTRIBUTING.md#pull-requests). (If you figure out a fix, pleae implement it preferably on all platforms, but just one is fine as long as all display servers on said platform are fixed.)
+    Due to several reasons (Windows is limited in the displays API, Wayland is also a bit limited, and X11 uses an arbitrary check), all displays are shown as external only. If you know how I can get around these, you can [make a pull request](CONTRIBUTING.md#pull-requests). (If you figure out a fix, please implement it preferably on all platforms, but just one is fine as long as all display servers on said platform are fixed.)
 </details>
 
 # Extra Notes

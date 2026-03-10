@@ -11,7 +11,7 @@ Pull requests are bug fixes or feature implementations that are submitted by the
 When you [make a pull request](https://github.com/Calebh101/About-This-PC/compare), make sure that:
 
 - If it's not platform-specific, it'd be nice to have it implemented for all platforms
-- That it's properly tested (I'll also do some testing)
+- That it's properly tested (I'll also do some testing, but most if it is on you)
 - And that it's implemented properly. I don't want some weird hacky fix to something that could be done much simpler, or a feature that doesn't respect the user. (This is why automatic update checking is *off* by default.)
 
 ## Donating

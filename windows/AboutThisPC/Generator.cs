@@ -34,7 +34,7 @@ namespace AboutThisPC
             results.Add(new App.Result("memory", "Memory", Math.Round(memory.Bytes / (1024.0 * 1024.0 * 1024.0), 0).ToString() + "GiB " + memory.Generation + " " + memory.FormFactor + " " + memory.Speed + " MT/s"));
             if (serial != null) results.Add(new App.Result("serial", "Serial", serial));
             results.Add(new App.Result("startup_disk", "Startup Disk", startupDisk.Name + " (" + startupDisk.Letter + ":) " + Math.Round(startupDisk.Bytes / (1000.0 * 1000.0 * 1000.0), 0).ToString() + "GB"));
-            results.Add(new App.Result("local_ip", "Local IP" + (localIp.Count > 1 ? "s" : ""), string.Join(", ", localIp)));
+            //results.Add(new App.Result("local_ip", "Local IP" + (localIp.Count > 1 ? "s" : ""), string.Join(", ", localIp)));
             if (!overview) results.Add(new App.Result("windows", "Windows", GetWindowsString()));
             return results;
         }
@@ -147,7 +147,7 @@ namespace AboutThisPC
         {
             List<DriveInfo> drives = [.. DriveInfo.GetDrives()];
             List<Drive> result = new();
-            
+
             foreach (DriveInfo drive in drives)
             {
                 result.Add(new Drive { Name = GetDiskName(drive), Letter = drive.Name.Replace(":", "").Replace("\\", ""), Bytes = drive.TotalSize, Used = drive.TotalSize - drive.TotalFreeSpace, Type = drive.DriveType, Ready = drive.IsReady });

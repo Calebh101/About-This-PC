@@ -111,7 +111,7 @@ namespace AboutThisPC
             System.IO.File.WriteAllText(File, JsonSerializer.Serialize(settings));
             return true;
         }
-        
+
         public bool Reset<T>(string key)
         {
             return Set<T>(key, default);

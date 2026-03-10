@@ -3,6 +3,7 @@
 !.vscode/launch.json
 rsrc.syso
 *.AppImage
+.DS_Store
 
 build
 Output

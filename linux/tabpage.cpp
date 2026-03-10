@@ -192,7 +192,7 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
     if (!localIPString.empty()) {
         bool multiple = localIPString.size() > 1;
         localIPName = QString("Local %1").arg(multiple ? "IPs" : "IP");
-        results[localIPName.toStdString()] = localIPString.join(", ").toStdString();
+        //results[localIPName.toStdString()] = localIPString.join(", ").toStdString();
     }
 
     results["Kernel"] = osInfo["kernel"];

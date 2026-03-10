@@ -38,7 +38,7 @@ namespace AboutThisPC
     /// </summary>
     public partial class App : Application
     {
-        static public string Version = "0.0.0A-R6";
+        static public string Version = "0.0.0A-R7";
         public static bool ReverseEyeButtons = true;
         static public Dimensions? dimensions;
         static public Settings? settings;
@@ -420,7 +420,7 @@ namespace AboutThisPC
                 _ = App.Error(root, "We were unable to fetch for updates.", "NO_RESULTS");
                 return null;
             }
-            
+
             foreach (Release release in releases)
             {
                 Version version = Version.Parse(release.TagName);
