@@ -153,6 +153,17 @@ func onIsLocked() {
 	fmt.Fprint(connection, strconv.Itoa(mode) + "|")
 }
 
+func closeAll() {
+	mu.Lock()
+	for i, cmd := range processes {
+		if cmd.Process != nil {
+			Print("Found process " + strconv.Itoa(i) + ": " + strconv.Itoa(cmd.Process.Pid))
+			CloseProcess(cmd)
+		}
+	}
+	mu.Unlock()
+}
+
 func onReady() {
 	systray.SetTitle("About This PC")
 	systray.SetTooltip("About This PC " + Version + " by Calebh101")
@@ -195,19 +206,12 @@ func onReady() {
 
 				mu.Unlock()
 			case <-actionCloseAll.ClickedCh:
-				mu.Lock()
-
-				for i, cmd := range processes {
-					if cmd.Process != nil {
-						Print("Found process " + strconv.Itoa(i) + ": " + strconv.Itoa(cmd.Process.Pid))
-						CloseProcess(cmd)
-					}
-				}
-
-				mu.Unlock()
+				closeAll()
 			case <-actionRestart.ClickedCh:
+				closeAll()
 				restart()
 			case <-actionQuit.ClickedCh:
+				closeAll()
 				systray.Quit()
 			}
 		}

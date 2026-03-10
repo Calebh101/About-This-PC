@@ -111,6 +111,14 @@ However, to package all the files that .NET generates, and since it's just gener
 
 The Windows version of About This PC doesn't need *any* elevated permissions to get all the data the program needs (even serial!), so you don't have to worry about that.
 
+![Overview Page](Assets/screenshots/windows-page1.png)
+
+![Displays Page](Assets/screenshots/windows-page2.png)
+
+![Storage Page](Assets/screenshots/windows-page3.png)
+
+![Support Page](Assets/screenshots/windows-page4.png)
+
 ## Boot Arguments
 
 - Application Service (what you actually run)

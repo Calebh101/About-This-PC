@@ -36,16 +36,23 @@ function CheckCert {
     }
 
     try {
-        $RootStore = [System.Security.Cryptography.X509Certificates.X509Store]::new("Root", "LocalMachine")
-        $RootStore.Open("ReadWrite")
-        $existing = $RootStore.Certificates | Where-Object { $_.Thumbprint -eq $Cert.Thumbprint }
+        $ReadStore = [System.Security.Cryptography.X509Certificates.X509Store]::new("Root", "CurrentUser")
+        $ReadStore.Open("ReadOnly")
+        $existing = $ReadStore.Certificates | Where-Object { $_.Thumbprint -eq $Cert.Thumbprint }
+        $ReadStore.Close()
 
         if (-not $existing) {
+            $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+            if (-not $isAdmin) {
+                Write-Error "Certificate is not trusted. Re-run this script as Administrator to trust it, or use -SkipSigning."
+                exit 1
+            }
+            $WriteStore = [System.Security.Cryptography.X509Certificates.X509Store]::new("Root", "LocalMachine")
+            $WriteStore.Open("ReadWrite")
             Write-Output "Adding certificate to trusted root store..."
-            $RootStore.Add($Cert)
+            $WriteStore.Add($Cert)
+            $WriteStore.Close()
         }
-
-        $RootStore.Close()
     } catch {
         Write-Error "Failed to update certificate store: $_"
         exit 1
