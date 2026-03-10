@@ -119,6 +119,26 @@ func onIsLocked() {
 	mode := 0
 	deadline := 5 * time.Second
 	connection, e := winio.DialPipe(pipeName, &deadline)
+	hasArgs := false
+
+	for _, arg := range []string{"--uninstall", "--reinstall"} {
+		if (Contains(args, arg)) {
+			hasArgs = true
+		}
+	}
+
+	if hasArgs {
+		yes, e := dlgs.Question("Warning", "You are trying to run an action while an instance of About This PC is already running. Please quit About This PC to run this action.\n\nContinue creating a new About This PC window?", false)
+
+		if e != nil {
+			Fatal(e)
+			return
+		}
+
+		if !yes {
+			return
+		}
+	}
 
 	if e != nil {
 		Fatal(e.Error() + "\n\nIf the process is stopped but the lockfile is still active, this error may occur. Please check that '" + lockpath + "' doesn't exist, and remove it if necessary.")
@@ -130,7 +150,7 @@ func onIsLocked() {
 
 	defer connection.Close()
 	Print("Sending message to server... (mode: " + strconv.Itoa(mode) + ")")
-	fmt.Fprint(connection, strconv.Itoa(mode)+"|")
+	fmt.Fprint(connection, strconv.Itoa(mode) + "|")
 }
 
 func onReady() {

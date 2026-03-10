@@ -27,6 +27,8 @@ Write-Output "Creating About This PC version $Version..."
 Set-Location -Path "$WindowsDir\AboutThisPC"
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
+# New-SelfSignedCertificate -Subject "CN=AboutThisPC Code Signing" -Type CodeSigningCert -CertStoreLocation "Cert:\CurrentUser\My" -KeyUsage DigitalSignature -NotAfter (Get-Date).AddYears(3)
+
 function Sign {
     param(
         [Parameter(Mandatory=$true)]
