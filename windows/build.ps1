@@ -100,6 +100,8 @@ function Build {
 
     $directory="$OutputDir\$Target-Raw"
     $ServicePath="$ParentDir\windows-service\build"
+    $CompanionPath="$ParentDir\companion\build\windows\x64\runner\Release"
+
     Write-Output "Building application for $Target..."
     & dotnet publish -c Release -r "$Target" --self-contained true -o "$directory"
     Sign -Path "$directory\AboutThisPC.exe"
@@ -117,10 +119,10 @@ function Build {
     Write-Output "Creating archive for $directory..."
     Compress-Archive -Path "$directory\*" -DestinationPath "$OutputDir\$Target-Raw-Archive"
 
-    Write-Output "Creating service application..."
     Copy-Item -Path "$OutputDir\$Target-Raw-Archive.zip" -Destination "$ServicePath\archive.zip"
     Copy-Item -Path "$WindowsDir\AboutThisPC\Assets\appicon.ico" -Destination "$ServicePath\icon.ico"
 
+    Write-Output "Creating service application..."
     Set-Location -Path "$ParentDir\windows-service"
     $env:GOOS = "windows"
     $env:GOARCH = $Arch
@@ -145,13 +147,16 @@ function Build {
 
     Copy-Item -Path "$ServicePath\app.exe" -Destination "$directory\AboutThisPC.exe"
     if ($BuildDebug) {Copy-Item -Path "$ServicePath\app-cli.exe" -Destination "$directory\AboutThisPC-Debug.exe"}
-    Copy-Item -Path "$OutputDir\shortcut.lnk" -Destination "$directory\About This PC.lnk"
+    Copy-Item -Path "$CompanionPath\*" -Destination "$directory\" -Recurse
+    Rename-Item -Path "$directory\companion.exe" -NewName "$directory\AboutThisPC-Launcher.exe"
+    #Copy-Item -Path "$OutputDir\shortcut.lnk" -Destination "$directory\About This PC.lnk"
     Copy-Item -Path "$ParentDir\README.md" -Destination "$directory\README.md"
     Copy-Item -Path "$ParentDir\LICENSE.md" -Destination "$directory\LICENSE.md"
     Copy-Item -Path "$ParentDir\SECURITY.md" -Destination "$directory\SECURITY.md"
     Copy-Item -Path "$ParentDir\CONTRIBUTING.md" -Destination "$directory\CONTRIBUTING.md"
     Copy-Item -Path "$ParentDir\CODE_OF_CONDUCT.md" -Destination "$directory\CODE_OF_CONDUCT.md"
     Copy-Item -Path "$ParentDir\INSTALLING.md" -Destination "$directory\INSTALLING.md"
+    Set-Content -Path "$directory\version" -Value "$Version"
 
     Write-Output "Creating archive at $ArchivePath..."
     Compress-Archive -Force -Path "$directory\*" -DestinationPath "$ArchivePath"
@@ -170,7 +175,13 @@ function Shortcut() {
     $shortcut.Save()
 }
 
-Shortcut
+#Shortcut
+Write-Output "Building companion app..."
+Set-Location -Path "$ParentDir\companion"
+& flutter build windows
+Set-Location -Path "$ParentDir"
+Set-Location -Path "$WindowsDir\AboutThisPC"
+
 Build -Arch "amd64" -Target "win-x64"
 Build -Arch "arm64" -Target "win-arm64"
 

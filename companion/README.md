@@ -1,0 +1,1 @@
+A launcher for About This PC. This app replicates what the Go service does with FFI, and can also run/read executables/files.

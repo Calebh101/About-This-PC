@@ -47,7 +47,7 @@ func main() {
 	}
 
 	if Contains(args, "--info") {
-		dlgs.Info("About This PC", "About This PC\n\nVersion: " + Version + "\nAuthor: Calebh101\n\nFor more information, head to:\nhttps://github.com/Calebh101/About-This-PC")
+		dlgs.Info("About This PC", "About This PC\n\nVersion: "+Version+"\nAuthor: Calebh101\n\nFor more information, head to:\nhttps://github.com/Calebh101/About-This-PC")
 		os.Exit(0)
 		return
 	}
@@ -97,17 +97,25 @@ func listen() {
 		message = strings.TrimSuffix(message, "|")
 
 		if e != nil {
-			Fatal(e)
+			Warn(e)
 			continue
 		} else {
 			Print("Received message: " + message)
-			mode, e := strconv.Atoi(message)
 
-			if e != nil {
-				Print("Unable to parse mode '" + message + "': " + e.Error())
-				continue
+			if message == "stop" {
+				closeAll()
+				systray.Quit()
+			} else if message == "closeAll" {
+				closeAll()
 			} else {
-				run(mode)
+				mode, e := strconv.Atoi(message)
+
+				if e != nil {
+					Print("Unable to parse mode '" + message + "': " + e.Error())
+					continue
+				} else {
+					run(mode)
+				}
 			}
 		}
 	}
@@ -119,11 +127,12 @@ func onIsLocked() {
 	mode := 0
 	deadline := 5 * time.Second
 	connection, e := winio.DialPipe(pipeName, &deadline)
-	defer connection.Close()
 	hasArgs := false
 
+	defer connection.Close()
+
 	for _, arg := range []string{"--uninstall", "--reinstall"} {
-		if (Contains(args, arg)) {
+		if Contains(args, arg) {
 			hasArgs = true
 		}
 	}
@@ -150,17 +159,19 @@ func onIsLocked() {
 	}
 
 	Print("Sending message to server... (mode: " + strconv.Itoa(mode) + ")")
-	fmt.Fprint(connection, strconv.Itoa(mode) + "|")
+	fmt.Fprint(connection, strconv.Itoa(mode)+"|")
 }
 
 func closeAll() {
 	mu.Lock()
+
 	for i, cmd := range processes {
 		if cmd.Process != nil {
 			Print("Found process " + strconv.Itoa(i) + ": " + strconv.Itoa(cmd.Process.Pid))
 			CloseProcess(cmd)
 		}
 	}
+
 	mu.Unlock()
 }
 
@@ -293,19 +304,18 @@ func start() {
 					Fatal(e)
 					return
 				}
-
-				os.Exit(0)
-				return
 			} else {
 				Print("Aborting")
 			}
 
+			os.Exit(0)
 			return
 		} else if strings.Contains(arg, "--reinstall") {
 			Print("Found reinstall argument")
 
-			if extract() {
-				os.Exit(0)
+			if !extract() {
+				os.Exit(1)
+				return
 			}
 		} else {
 			Print("Found custom argument: " + arg)
@@ -317,7 +327,10 @@ func start() {
 	var currentVersion = GetDetectedVersion(directory)
 
 	if currentVersion == "" || currentVersion != Version {
-		extract()
+		if !extract() {
+			os.Exit(1)
+			return
+		}
 	}
 
 	if !Contains(args, "--service") {
@@ -350,7 +363,7 @@ func run(mode int) {
 	}
 
 	finalArgs := append(extraArg, args...)
-	cmd := exec.Command(directory + "\\AboutThisPC.exe", finalArgs...)
+	cmd := exec.Command(directory+"\\AboutThisPC.exe", finalArgs...)
 
 	mu.Lock()
 	processes = append(processes, cmd)
@@ -425,11 +438,12 @@ func extract() bool {
 	}
 
 	progress, _ := zenity.Progress(
-        zenity.Title("Installing About This PC"),
-        zenity.MaxValue(len(zr.File)+1),
-    )
+		zenity.Title("Installing About This PC"),
+		zenity.MaxValue(len(zr.File)+1),
+		zenity.NoCancel(),
+	)
 
-    defer progress.Close()
+	defer progress.Close()
 
 	for _, file := range zr.File {
 		Print("Copying file " + file.Name + "... (archive)")

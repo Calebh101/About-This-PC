@@ -140,7 +140,38 @@ The settings page shows several options:
 - Reset All Settings: Reset all About This PC settings to default.
 - Open Debug Logs: Open a new (unstyled) window viewing the current debug logs About This PC has produced. This is useful for debugging why errors happen (as they're typically logged). To see how logs look, see [Logger.cs](windows/AboutThisPC/Logger.cs).
 
-!!!! Settings Screenshot Needed !!!!
+![Settings Page](Assets/screenshots/windows-settings.png)
+
+There's also an included launcher program, written in Flutter. This uses Dart's FFI to communicate with the Windows pipe, like the Go service; but as a GUI app.
+
+Stats:
+
+- Launcher Version: The version of the launcher app (just the launcher; not About This PC).
+- Installed Version: The version currently installed About This PC.
+- Version In Directory: The version of the AboutThisPC.exe that's in the same directory as the launcher. (This won't show if you move the launcher app.)
+
+There are also several buttons.
+
+- Stop: Stop the About This PC service.
+- Run: Run the About This PC service. This will try to run the local AboutThisPC.exe, and if it doesn't exist it'll run the installed version.
+- Uninstall: Uninstall About This PC. This will try to run the local AboutThisPC.exe, and if it doesn't exist it'll run the installed version. Either way, they both remove the same directory.
+- Reinstall: Reinstall About This PC. This will try to run the local AboutThisPC.exe, and if it doesn't exist it'll run the installed version. Either way, they both remove the same directory. But whichever executable is ran, will determine the version that is installed. (If the installed version is outdated, then your reinstalled version will be outdated.)
+
+- Open: Open a new About This PC window.
+- Open (Classic): Open a new About This PC classic window.
+- Settings: Open the About This PC settings.
+- Close All: Close all About This PC windows, without stopping the service.
+
+If you're going to move this out of the folder (which is fully supported, but you'll have to do it manually), you'll need to move a few other files and folders:
+
+- `AboutThisPC-Launcher.exe` (the app itself; it can be renamed to whatever you want)
+- `data` (folder)
+- `flutter_windows.dll`
+- `screen_retriever_windows_plugin.dll`
+- `url_launcher_windows_plugin.dll`
+- `window_manager_plugin.dll`
+
+![Launcher App](Assets/screenshots/windows-launcher.png)
 
 ## Boot Arguments
 
