@@ -411,7 +411,7 @@ func extract() bool {
 	}
 
 	Print("Extracting files to " + directory + "...")
-	ok, e := dlgs.Question("Confirm", "Are you sure you want to install About This PC? This will overwrite your current installation, if present. Settings will not be overwritten.\n\nThis will install About This PC to "+directory+".", true)
+	ok, e := dlgs.Question("Confirm", "Are you sure you want to install About This PC? This will overwrite your current installation, if present. Settings will not be overwritten.\n\nThis will install About This PC to "+directory+".\n\nIf About This PC is already installed, then you're either running a newer executable than what is installed, or you manually triggered a reinstall.", true)
 
 	if e != nil {
 		Fatal(e)
