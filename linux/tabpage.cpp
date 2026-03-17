@@ -136,10 +136,14 @@ ordered_json LocalTabPage::getDetails(QWidget* parent) {
     std::string startupDiskPath = Global::getStartupDisk();
     json startupDiskInfo = Global::getDisk(startupDiskPath);
 
-    if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
-    if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
-    if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
-    if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
+    if (ramInfo.empty()) {
+        ramAttributes.push_back(Global::getMemoryBasic())
+    } else {
+        if (ramInfo.contains("totalString")) ramAttributes.push_back(ramInfo["totalString"]);
+        if (ramInfo.contains("type")) ramAttributes.push_back(ramInfo["type"]);
+        if (ramInfo.contains("form")) ramAttributes.push_back(ramInfo["form"]);
+        if (ramInfo.contains("speed")) ramAttributes.push_back(ramInfo["speed"]);
+    }
 
     if (gpuInfo["status"] == true) {
         json gpu = gpuInfo["gpus"].front();

@@ -76,6 +76,26 @@ json Global::getHelperData(std::string key) {
     }
 }
 
+std::string Global::getBasicMemory() {
+    QFile file("/proc/meminfo");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return "error";
+    QTextStream in(&file);
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith("MemTotal:")) {
+            QStringList parts = line.split(QRegularExpression("\\s+"));
+            double kb = parts[1].toDouble();
+            double gib = kb / (1024.0 * 1024.0);
+
+            QString result = QString::number(gib, 'f', 2) + " GiB";
+            return result.toStdString();
+        }
+    }
+
+    return "Unknown";
+}
+
 bool Global::checkHelperData(std::string key) {
     if (helperData.empty()) return false;
     if (!key.empty() && !helperData.contains(key)) return false;

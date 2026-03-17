@@ -26,6 +26,7 @@ public:
     static json getOS();
     static json getCPU();
     static json getGPU();
+    static std::string getBasicMemory();
     static json getHelperData(std::string key = "");
     static void setHelperData(std::string data);
     static bool checkHelperData(std::string key = "");
