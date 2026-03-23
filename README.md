@@ -217,3 +217,7 @@ If you're going to move this out of the folder (which is fully supported, but yo
 - Some images (specifically the `computers` images) originated from [rawpixel.com / Freepik](https://freepik.com) and have been edited by me, due to me not having any drawing skills. (I hope to make my own images in the future!)
 
 - Big thanks to [Wikimedia Commons](https://commons.wikimedia.org/) for existing!
+
+# Support
+
+Discord: https://discord.gg/gbZyPuqZ6n

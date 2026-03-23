@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include "settings.hpp"
 #include "cicon.h"
+#include <QRegularExpression>
 
 Global::Global() {}
 
